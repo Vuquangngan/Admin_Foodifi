@@ -1,0 +1,9 @@
+{
+  "name": "shopfood-web-admin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Web admin for ShopFood backend",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
