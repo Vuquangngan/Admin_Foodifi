@@ -1,0 +1,187 @@
+      <section class="panel hidden" id="recipesPanel">
+        <div class="panel-head recipes-head">
+          <div>
+            <p class="eyebrow">Ẩm thực</p>
+            <h2 id="recipesPanelTitle">Quản lý công thức nấu ăn</h2>
+            <p class="section-copy" id="recipesPanelDescription">Tạo và quản lý công thức món ăn, nguyên liệu và hướng dẫn chế biến cho Garden Fresh.</p>
+          </div>
+          <button class="primary-button recipes-create-button" id="openRecipeModalButton" type="button">+ Thêm công thức mới</button>
+        </div>
+
+        <div id="recipeCategorySummary" class="recipe-category-summary hidden"></div>
+
+        <article class="surface recipes-filter-card">
+          <label class="recipes-search">
+            <span class="recipes-search-icon">⌕</span>
+            <input id="recipeSearchInput" placeholder="Tìm tên món, nguyên liệu...">
+          </label>
+          <select id="recipeCategoryFilter"></select>
+        </article>
+
+        <article class="surface recipes-table-card">
+          <div class="section-head">
+            <h3 id="recipesListTitle">Danh sách công thức</h3>
+            <p id="recipesMeta" class="section-copy"></p>
+          </div>
+          <div id="recipesContent"></div>
+        </article>
+
+        <div class="modal-backdrop hidden" id="recipeModal">
+          <div class="modal-card recipe-modal-card">
+            <div class="recipe-modal-header">
+              <div>
+                <p class="eyebrow">Công thức</p>
+                <h2 id="recipeModalTitle">Thêm công thức mới</h2>
+              </div>
+              <button class="ghost-button" id="closeRecipeModalButton" type="button">Đóng</button>
+            </div>
+
+            <form id="recipeForm" class="recipe-form">
+              <input type="hidden" name="id">
+              <section class="recipe-form-section">
+                <div class="recipe-section-copy">
+                  <h3>Thông tin cơ bản</h3>
+                  <p>Xác định tên món, phân loại, thời gian chuẩn bị và trạng thái hiển thị.</p>
+                </div>
+                <div class="surface recipe-form-card">
+                  <label class="span-2">
+                    <span>Tên công thức</span>
+                    <input name="title" placeholder="Ví dụ: Phở bò truyền thống" required>
+                  </label>
+                  <label>
+                    <span>Danh mục</span>
+                    <select name="category"></select>
+                  </label>
+                  <label>
+                    <span>Thời gian chuẩn bị</span>
+                    <input name="prep_time" type="number" min="1" step="1" value="30">
+                  </label>
+                  <label class="span-2">
+                    <span>Mô tả ngắn</span>
+                    <textarea name="description" rows="3" placeholder="Mô tả điểm nổi bật của món ăn này..."></textarea>
+                  </label>
+                  <label>
+                    <span>Độ khó</span>
+                    <select name="difficulty">
+                      <option value="easy">Dễ</option>
+                      <option value="medium">Trung bình</option>
+                      <option value="hard">Khó</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Trạng thái</span>
+                    <select name="status">
+                      <option value="published">Đã xuất bản</option>
+                      <option value="draft">Bản nháp</option>
+                    </select>
+                  </label>
+                </div>
+              </section>
+
+              <section class="recipe-form-section">
+                <div class="recipe-section-copy">
+                  <h3>Hình ảnh</h3>
+                  <p>Chọn ảnh trực tiếp hoặc dán link ảnh bìa cho công thức.</p>
+                </div>
+                <div class="surface recipe-upload-card">
+                  <label class="recipe-upload-zone">
+                    <input id="recipeImageFile" type="file" accept="image/*" hidden>
+                    <img id="recipeImagePreview" alt="">
+                    <span>+ Chọn ảnh bìa</span>
+                  </label>
+                  <label>
+                    <span>Hoặc dán link ảnh</span>
+                    <input id="recipeImageUrl" name="image_url" placeholder="https://...">
+                  </label>
+                </div>
+              </section>
+
+              <section class="recipe-form-section">
+                <div class="recipe-section-copy">
+                  <h3>Nguyên liệu</h3>
+                  <p>Liên kết nguyên liệu trực tiếp với sản phẩm trong kho để dễ mua sắm.</p>
+                </div>
+                <div class="surface recipe-repeat-card">
+                  <div id="recipeIngredients" class="recipe-repeat-list"></div>
+                  <button class="recipe-dashed-button" type="button" data-recipe-action="add-ingredient">+ Thêm nguyên liệu khác</button>
+                </div>
+              </section>
+
+              <section class="recipe-form-section">
+                <div class="recipe-section-copy">
+                  <h3>Hướng dẫn thực hiện</h3>
+                  <p>Chia nhỏ quy trình nấu ăn thành từng bước dễ hiểu.</p>
+                </div>
+                <div class="surface recipe-repeat-card">
+                  <div id="recipeSteps" class="recipe-repeat-list"></div>
+                  <button class="recipe-dashed-button" type="button" data-recipe-action="add-step">+ Thêm bước chuẩn bị</button>
+                </div>
+              </section>
+
+              <div class="recipe-form-actions">
+                <button class="ghost-button" id="cancelRecipeButton" type="button">Hủy</button>
+                <button class="primary-button" type="submit">Lưu công thức</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="modal-backdrop hidden" id="recipeCategoryModal">
+          <div class="modal-card recipe-category-modal-card">
+            <div class="recipe-modal-header">
+              <div>
+                <p class="eyebrow">Danh mục</p>
+                <h2 id="recipeCategoryModalTitle">Thêm danh mục công thức</h2>
+                <p class="section-copy">Tạo nhóm phân loại để quản lý công thức nấu ăn gọn hơn.</p>
+              </div>
+              <button class="ghost-button" id="closeRecipeCategoryModalButton" type="button">Đóng</button>
+            </div>
+
+            <form id="recipeCategoryForm" class="recipe-category-form">
+              <input type="hidden" name="id">
+              <section class="recipe-category-form-grid">
+                <div class="recipe-category-form-main">
+                  <label>
+                    <span>Tên danh mục</span>
+                    <input name="name" placeholder="Ví dụ: Rau củ vùng cao, Món chay..." required>
+                  </label>
+                  <label>
+                    <span>Mô tả chi tiết</span>
+                    <textarea name="description" rows="5" placeholder="Ghi chú về nguồn gốc, đặc điểm hoặc tiêu chuẩn của danh mục này..."></textarea>
+                  </label>
+                  <label>
+                    <span>Màu nhận diện</span>
+                    <input name="icon" placeholder="#0d8d48">
+                  </label>
+                  <label class="recipe-category-toggle">
+                    <div>
+                      <strong>Trạng thái hoạt động</strong>
+                      <span>Cho phép hiển thị danh mục này khi chọn công thức.</span>
+                    </div>
+                    <input name="is_active" type="checkbox" checked>
+                  </label>
+                </div>
+
+                <div class="recipe-category-form-media">
+                  <label class="recipe-category-upload">
+                    <input id="recipeCategoryImageFile" type="file" accept="image/*" hidden>
+                    <span>+ Chọn ảnh đại diện</span>
+                  </label>
+                  <label>
+                    <span>Hoặc dán link ảnh</span>
+                    <input id="recipeCategoryImageUrl" name="image_url" placeholder="https://...">
+                  </label>
+                  <div class="recipe-category-preview">
+                    <img id="recipeCategoryImagePreview" alt="">
+                    <strong>Cảm hứng từ thiên nhiên</strong>
+                  </div>
+                </div>
+              </section>
+              <div class="recipe-form-actions">
+                <button class="ghost-button" id="cancelRecipeCategoryButton" type="button">Hủy</button>
+                <button class="primary-button" type="submit">Lưu danh mục</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>

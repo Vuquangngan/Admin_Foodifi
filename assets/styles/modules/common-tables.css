@@ -1,0 +1,182 @@
+﻿.surface-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 18px;
+}
+
+.list-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.list-table th,
+.list-table td {
+  text-align: left;
+  padding: 14px 12px;
+  border-bottom: 1px solid rgba(17, 95, 54, 0.16);
+  border-right: 1px solid rgba(17, 95, 54, 0.14);
+  vertical-align: top;
+}
+
+.list-table th:last-child,
+.list-table td:last-child {
+  border-right: none;
+}
+
+.list-table th {
+  color: #214434;
+  font-size: 0.92rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+  background: linear-gradient(180deg, #f1f7ed 0%, #e8f2e4 100%);
+  border-bottom-color: rgba(17, 95, 54, 0.24);
+  border-right-color: rgba(17, 95, 54, 0.18);
+  white-space: nowrap;
+}
+
+.list-table tbody tr:nth-child(even) {
+  background: rgba(241, 247, 237, 0.28);
+}
+
+.list-table tbody tr:hover {
+  background: rgba(219, 238, 211, 0.28);
+}
+
+.table-wrap {
+  overflow: auto;
+  border-radius: 20px;
+}
+
+.stack-list {
+  display: grid;
+  gap: 14px;
+}
+
+.stack-card {
+  border: 1px solid rgba(79, 57, 40, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 252, 248, 0.82);
+  padding: 18px;
+}
+
+.feature-list,
+.metric-list {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.8;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: rgba(46, 32, 20, 0.08);
+}
+
+.status-pill.active,
+.status-pill.completed,
+.status-pill.paid {
+  background: rgba(40, 122, 79, 0.14);
+  color: var(--success);
+}
+
+.status-pill.pending,
+.status-pill.preparing,
+.status-pill.shipping {
+  background: rgba(184, 92, 56, 0.12);
+  color: var(--accent-strong);
+}
+
+.status-pill.draft,
+.status-pill.unpaid,
+.status-pill.out_of_stock {
+  background: rgba(31, 109, 104, 0.12);
+  color: var(--teal);
+}
+
+.status-pill.cancelled,
+.status-pill.archived,
+.status-pill.failed {
+  background: rgba(180, 55, 55, 0.14);
+  color: var(--danger);
+}
+
+.status-bars {
+  display: grid;
+  gap: 12px;
+}
+
+.status-bar {
+  display: grid;
+  gap: 8px;
+}
+
+.status-bar span {
+  display: flex;
+  justify-content: space-between;
+}
+
+.status-bar-track {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(46, 32, 20, 0.08);
+  overflow: hidden;
+}
+
+.status-bar-track i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal), var(--accent));
+}
+
+.product-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.product-thumb {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  object-fit: cover;
+  background: rgba(46, 32, 20, 0.08);
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip-button[data-tone="danger"] {
+  color: var(--danger);
+}
+
+.chip-button[data-tone="accent"] {
+  color: var(--accent-strong);
+}
+
+.chip-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.meta-item {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(46, 32, 20, 0.05);
+}
+

@@ -1,0 +1,349 @@
+﻿      <section class="panel hidden" id="vouchersPanel">
+        <article id="promotionBuilderView" class="promotion-workspace">
+          <div class="promotion-list-shell">
+            <div class="promotion-list-head">
+              <div>
+                <h2>Danh sách chiến dịch khuyến mãi</h2>
+                <p>Quản lý và theo dõi các chương trình ưu đãi, quà tặng tự động.</p>
+              </div>
+              <button class="primary-button" type="button" data-promotion-action="open-form">+ Thêm chiến dịch</button>
+            </div>
+
+            <div class="promotion-filter-row">
+              <select id="promotionStatusFilter">
+                <option value="">Tất cả trạng thái</option>
+                <option value="active">Đang chạy</option>
+                <option value="ending">Sắp hết hạn</option>
+                <option value="paused">Tạm dừng</option>
+                <option value="ended">Đã kết thúc</option>
+              </select>
+              <select id="promotionTypeFilter">
+                <option value="">Tất cả loại</option>
+                <option value="buy_x_get_y">Mua X tặng Y</option>
+                <option value="golden_hour">Giảm giá theo giờ</option>
+              </select>
+              <input id="promotionDateFilter" type="text" value="01/06/2024 - 30/06/2024" aria-label="Thời gian lọc khuyến mãi">
+              <label class="promotion-search">
+                <span class="material-symbols-rounded">search</span>
+                <input id="promotionSearchInput" placeholder="Tìm theo tên chiến dịch...">
+              </label>
+            </div>
+
+            <div id="promotionCampaignList" class="promotion-campaign-list"></div>
+          </div>
+          <div id="promotionFormView" class="promotion-form-modal hidden" role="dialog" aria-modal="true" aria-labelledby="promotionFormTitle">
+            <article class="promotion-form-dialog">
+              <header class="promotion-topbar">
+                <div>
+                  <p class="eyebrow">Khuyến mãi</p>
+                  <h2 id="promotionFormTitle">Thiết lập khuyến mãi</h2>
+                  <p>Tạo và quản lý các chương trình ưu đãi cho cửa hàng.</p>
+                </div>
+                <div class="promotion-topbar-actions">
+                  <button class="ghost-button" type="button" data-promotion-action="close-form">Hủy</button>
+                  <button class="primary-button" form="promotionForm" type="submit">Lưu chiến dịch</button>
+                </div>
+              </header>
+
+              <div class="promotion-content-grid">
+                <form id="promotionForm" class="promotion-form-column">
+                  <article class="surface promotion-card">
+                    <div class="promotion-section-title">
+                      <span class="info-dot">i</span>
+                      <h3>Thông tin cơ bản</h3>
+                    </div>
+                    <label>
+                      <span>Tên chiến dịch</span>
+                      <input name="name" placeholder="Ví dụ: Combo rau củ mùa hè" required>
+                    </label>
+                    <label class="promotion-toggle-row">
+                      <span>
+                        <strong>Trạng thái hoạt động</strong>
+                        <small>Cho phép áp dụng chiến dịch ngay khi lưu</small>
+                      </span>
+                      <input name="is_active" type="checkbox" checked>
+                    </label>
+                  </article>
+
+                  <article class="surface promotion-card">
+                    <div class="promotion-section-title">
+                      <span class="info-dot">△</span>
+                      <h3>Hình thức khuyến mãi</h3>
+                    </div>
+                    <div class="promotion-type-grid">
+                      <label class="promotion-type-card active">
+                        <input name="type" type="radio" value="buy_x_get_y" checked>
+                        <span class="promo-icon">□</span>
+                        <strong>Mua X tặng Y</strong>
+                        <small>Tặng sản phẩm miễn phí khi đạt ngưỡng mua hàng nhất định.</small>
+                        <span>Sản phẩm tặng kèm</span>
+                        <div class="promotion-combobox" data-promotion-combobox="gift">
+                          <input name="gift_product_search" data-promotion-search-target="gift_product_id" autocomplete="off" placeholder="Nhấn để chọn hoặc nhập tên/mã sản phẩm...">
+                          <input name="gift_product_id" type="hidden">
+                          <div class="promotion-combobox-menu" data-promotion-menu="gift"></div>
+                        </div>
+                      </label>
+                      <label class="promotion-type-card">
+                        <input name="type" type="radio" value="golden_hour">
+                        <span class="promo-icon">◷</span>
+                        <strong>Giảm giá theo giờ</strong>
+                        <small>Tự động áp dụng chiết khấu trong các khung giờ đặc biệt.</small>
+                      </label>
+                    </div>
+
+                    <div class="promotion-apply-grid">
+                      <label>
+                        <span>Loại áp dụng</span>
+                        <div class="promotion-inline-select">
+                          <select name="apply_scope">
+                            <option value="products">Sản phẩm</option>
+                            <option value="categories">Danh mục</option>
+                          </select>
+                          <button class="icon-chip-button" type="button" data-promotion-action="add-product">+</button>
+                        </div>
+                        <span id="promotionApplyTargetLabel">Sản phẩm áp dụng</span>
+                        <div class="promotion-combobox" data-promotion-combobox="apply">
+                          <input name="apply_product_search" data-promotion-search-target="apply_product_id" autocomplete="off" placeholder="Nhấn để chọn hoặc nhập tên/mã...">
+                          <input name="apply_product_id" type="hidden" value="all">
+                          <div class="promotion-combobox-menu" data-promotion-menu="apply"></div>
+                        </div>
+                      </label>
+                      <label>
+                        <span>Mức chiết khấu (%)</span>
+                        <input name="discount_percent" type="number" min="0" max="100" step="1" placeholder="20">
+                      </label>
+                    </div>
+                    <div id="promotionProductsList" class="promotion-product-list"></div>
+                  </article>
+
+                  <article class="surface promotion-card">
+                    <div class="promotion-section-title">
+                      <span class="info-dot">□</span>
+                      <h3>Thời gian áp dụng</h3>
+                    </div>
+                    <div class="promotion-date-grid">
+                      <label>
+                        <span>Ngày bắt đầu</span>
+                        <input name="start_date" type="date">
+                      </label>
+                      <label>
+                        <span>Ngày kết thúc</span>
+                        <input name="end_date" type="date">
+                      </label>
+                    </div>
+                    <div class="promotion-hour-box">
+                      <strong>Thiết lập giờ vàng</strong>
+                      <div class="promotion-hour-list">
+                        <button class="active" type="button" data-promotion-time="20:00 - 22:00">20:00 - 22:00</button>
+                        <button type="button" data-promotion-time="06:00 - 08:00">06:00 - 08:00</button>
+                        <button type="button" data-promotion-time="11:00 - 13:00">11:00 - 13:00</button>
+                      </div>
+                      <button class="chip-button" type="button" data-promotion-action="add-time">+ Thêm khung giờ</button>
+                      <div id="promotionCustomTimeList" class="promotion-custom-time-list"></div>
+                    </div>
+                  </article>
+                </form>
+
+
+              </div>
+            </article>
+          </div>
+        </article>
+        <article id="voucherListView">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Voucher</p>
+              <h2>Voucher</h2>
+              <p class="section-copy">Quản lý mã giảm giá, điều kiện áp dụng và thời gian phát hành cho gian hàng.</p>
+            </div>
+            <button class="secondary-button" id="refreshVouchersButton" type="button">Làm mới</button>
+          </div>
+
+          <article class="surface" id="voucherFilterCard">
+            <div class="section-head">
+              <h3>Bộ lọc voucher</h3>
+              <button class="primary-button" id="openVoucherFormButton" type="button">+ Thêm voucher</button>
+            </div>
+            <form id="voucherFilterForm" class="compact-grid">
+              <label>
+                <span>Từ khóa</span>
+                <input name="keyword" placeholder="Tìm theo mã hoặc tên voucher...">
+              </label>
+              <label>
+                <span>Trạng thái</span>
+                <select name="is_active">
+                  <option value="">Tất cả</option>
+                  <option value="true">Đang hoạt động</option>
+                  <option value="false">Đang tắt</option>
+                </select>
+              </label>
+              <button class="primary-button" type="submit">Lọc</button>
+            </form>
+          </article>
+
+          <div id="vouchersSummary" class="voucher-summary-grid"></div>
+
+          <article class="surface">
+            <div class="section-head">
+              <h3>Danh sách voucher</h3>
+              <p id="vouchersMeta" class="section-copy"></p>
+            </div>
+            <div id="vouchersContent"></div>
+          </article>
+        </article>
+
+        <div class="voucher-form-modal hidden" id="voucherFormView" role="dialog" aria-modal="true" aria-labelledby="voucherFormTitle">
+          <article class="voucher-form-dialog surface">
+            <div class="voucher-builder-header">
+              <div>
+                <p class="eyebrow">Voucher</p>
+                <h2 id="voucherFormTitle">Tạo voucher</h2>
+                <p class="section-copy">Thiết lập voucher, phạm vi áp dụng và thời gian phát hành.</p>
+              </div>
+              <div class="voucher-builder-actions">
+                <button class="ghost-button" id="cancelVoucherFormButton" type="button">Hủy</button>
+                <button class="secondary-button" form="voucherForm" type="submit" data-voucher-save-mode="draft">Lưu bản nháp</button>
+                <button class="primary-button" id="voucherFormSubmitButton" form="voucherForm" type="submit" data-voucher-save-mode="publish">Lưu &amp; phát hành</button>
+              </div>
+            </div>
+
+            <form id="voucherForm" class="voucher-builder-layout">
+              <input type="hidden" name="id">
+              <input type="hidden" name="save_mode" value="publish">
+
+              <section class="voucher-builder-main">
+                <article class="surface voucher-builder-section">
+                  <div class="section-head">
+                    <h3>Thông tin cơ bản</h3>
+                  </div>
+                  <div class="compact-grid">
+                    <label class="span-2">
+                      <span>Tên voucher</span>
+                      <input name="title" placeholder="Ví dụ: Ưu đãi mùa hè 2026" required>
+                    </label>
+                    <label>
+                      <span>Loại voucher</span>
+                      <select name="campaign_type">
+                        <option value="discount">Giảm giá đơn hàng</option>
+                        <option value="shipping">Miễn phí vận chuyển</option>
+                        <option value="gift">Quà tặng</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>Mã giảm giá</span>
+                      <div class="inline-input-action">
+                        <input id="voucherCodeInput" name="code" placeholder="SUMMER26" required>
+                        <button class="chip-button" id="voucherCodeAutoButton" type="button">Tạo tự động</button>
+                      </div>
+                    </label>
+                    <label>
+                      <span>Loại giảm giá</span>
+                      <select name="discount_type">
+                        <option value="percent">Theo phần trăm (%)</option>
+                        <option value="fixed">Giảm cố định (VND)</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>Giá trị giảm</span>
+                      <input name="discount_value" type="text" inputmode="numeric" data-money-input value="0" required>
+                    </label>
+                    <label>
+                      <span>Giảm tối đa</span>
+                      <input name="max_discount_value" type="text" inputmode="numeric" data-money-input placeholder="0 = không giới hạn">
+                    </label>
+                  </div>
+                </article>
+
+                <article class="surface voucher-builder-section">
+                  <div class="section-head">
+                    <h3>Phạm vi áp dụng</h3>
+                    <button class="icon-chip-button" type="button" data-voucher-apply-action="add" title="Thêm phạm vi áp dụng">+</button>
+                  </div>
+                  <div class="voucher-scope-toggle">
+                    <button class="voucher-scope-chip active" type="button" data-voucher-scope="products">Theo sản phẩm</button>
+                    <button class="voucher-scope-chip" type="button" data-voucher-scope="categories">Theo danh mục</button>
+                    <input type="hidden" name="apply_scope" value="products">
+                  </div>
+                  <div class="voucher-applied-products" id="voucherAppliedProductsList"></div>
+                  <p class="section-copy">Chọn một kiểu áp dụng để voucher không bị áp dụng đồng thời cả sản phẩm và danh mục. Để “Tất cả” nếu muốn áp dụng toàn cửa hàng.</p>
+                </article>
+
+                <article class="surface voucher-builder-section">
+                  <div class="section-head">
+                    <h3>Đối tượng &amp; điều kiện</h3>
+                  </div>
+                  <div class="voucher-audience-group">
+                    <span>Chọn tài khoản được hưởng ưu đãi</span>
+                    <div class="voucher-audience-grid">
+                      <button class="voucher-audience-chip active" type="button" data-voucher-audience="all">Tất cả thành viên</button>
+                      <button class="voucher-audience-chip" type="button" data-voucher-audience="silver">Thành viên Bạc</button>
+                      <button class="voucher-audience-chip" type="button" data-voucher-audience="gold">Thành viên Vàng</button>
+                    </div>
+                    <input type="hidden" name="audience" value="all">
+                  </div>
+                  <div class="compact-grid">
+                    <label>
+                      <span>Giá trị đơn hàng tối thiểu</span>
+                      <input name="min_order_value" type="text" inputmode="numeric" data-money-input placeholder="500.000">
+                    </label>
+                    <label>
+                      <span>Giới hạn số lần sử dụng</span>
+                      <input name="usage_limit" type="number" min="0" step="1" placeholder="100">
+                    </label>
+                    <label class="span-2">
+                      <span>Mô tả chi tiết voucher</span>
+                      <textarea name="note" rows="4" placeholder="Mô tả cách dùng như Shopee: điều kiện, nhóm khách hàng, phạm vi áp dụng..."></textarea>
+                    </label>
+                  </div>
+                </article>
+
+                <article class="surface voucher-builder-section">
+                  <div class="section-head">
+                    <h3>Thời gian áp dụng</h3>
+                  </div>
+                  <div class="compact-grid">
+                    <label>
+                      <span>Ngày bắt đầu</span>
+                      <input name="start_date" type="date">
+                    </label>
+                    <label>
+                      <span>Ngày kết thúc</span>
+                      <input name="end_date" type="date">
+                    </label>
+                    <label class="toggle-row">
+                      <input name="is_active" type="checkbox" checked>
+                      <span>Kích hoạt voucher sau khi lưu</span>
+                    </label>
+                  </div>
+                </article>
+              </section>
+
+              <aside class="voucher-builder-side">
+                <article class="surface voucher-preview-card">
+                  <span class="voucher-preview-badge" id="voucherPreviewBadge">Bản xem trước</span>
+                  <h3 id="voucherPreviewTitle">Mã giảm giá của bạn</h3>
+                  <div class="voucher-preview-code-box" id="voucherPreviewCode">VOUCHER-CODE</div>
+                  <div class="voucher-preview-metrics">
+                    <div><span>Mức giảm</span><strong id="voucherPreviewDiscount">0%</strong></div>
+                    <div><span>Giảm tối đa</span><strong id="voucherPreviewMaxDiscount">0 VND</strong></div>
+                    <div><span>Đơn tối thiểu</span><strong id="voucherPreviewMinOrder">0 VND</strong></div>
+                    <div><span>Phạm vi áp dụng</span><strong id="voucherPreviewScope">Tất cả</strong></div>
+                  </div>
+                </article>
+
+                <article class="surface voucher-note-card">
+                  <h3>Quy định &amp; lưu ý</h3>
+                  <ul class="voucher-note-list">
+                    <li>Mã giảm giá nên ngắn, dễ đọc và không chứa khoảng trắng.</li>
+                    <li>Ngày kết thúc nên lớn hơn hoặc bằng ngày bắt đầu.</li>
+                    <li>Nếu để trống giới hạn sử dụng, voucher có thể được dùng cho đến khi hết thời gian hiệu lực.</li>
+                  </ul>
+                </article>
+              </aside>
+            </form>
+          </article>
+        </div>
+      </section>
+
+
+

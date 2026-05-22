@@ -1,0 +1,109 @@
+﻿.shift-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 31, 17, 0.46);
+  display: grid;
+  place-items: center;
+  z-index: 60;
+}
+
+/* Stats and email marketing module styles moved to ./styles/modules/analytics-email.css */
+.shift-modal-card {
+  width: min(760px, calc(100vw - 40px));
+}
+
+.shift-modal-grid {
+  margin-top: 18px;
+}
+
+.shift-delete-button {
+  color: #b42318;
+  background: #fff0ed;
+  border-color: rgba(180, 35, 24, 0.2);
+}
+
+.shift-delete-button:hover {
+  background: #ffe3dd;
+  color: #8f1d14;
+}
+
+.shift-assign-list {
+  display: grid;
+  gap: 12px;
+  max-height: 420px;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.shift-holiday-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.shift-holiday-option {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #fff8f2;
+  border: 1px solid rgba(220, 96, 42, 0.14);
+}
+
+.shift-holiday-option strong,
+.shift-holiday-option small {
+  display: block;
+}
+
+.shift-holiday-option strong {
+  color: #2e251f;
+}
+
+.shift-holiday-option small {
+  margin-top: 3px;
+  color: #8a6b58;
+}
+
+.shift-assign-limit-note {
+  margin: 14px 0;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(21, 145, 78, 0.08);
+  color: #31533c;
+  font-weight: 700;
+}
+
+.shift-assign-limit-note strong {
+  color: var(--green-strong);
+}
+
+.shift-assign-limit-note.is-full {
+  background: rgba(21, 145, 78, 0.14);
+}
+
+.shift-assign-option {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #f7fbf5;
+  border: 1px solid rgba(18, 87, 48, 0.08);
+}
+
+.shift-assign-option:has(input:disabled) {
+  opacity: 0.54;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .shift-toolbar-field,
+  .shift-week-switcher {
+    min-width: 100%;
+  }
+}
+

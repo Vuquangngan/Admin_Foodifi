@@ -1,0 +1,1141 @@
+﻿.stats-page {
+  display: grid;
+  gap: 18px;
+}
+
+.stats-page-head h2 {
+  margin: 4px 0 0;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  letter-spacing: -0.05em;
+}
+
+.stats-revenue-page {
+  display: grid;
+  gap: 16px;
+}
+
+.revenue-filter-card,
+.revenue-chart-card {
+  padding: 22px;
+  border: 1px solid rgba(20, 96, 54, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 14px 34px rgba(38, 76, 49, 0.08);
+}
+
+.revenue-filter-card > strong,
+.revenue-chart-card h3 {
+  display: block;
+  margin: 0 0 14px;
+  color: #26352a;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.revenue-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+  gap: 18px 24px;
+  align-items: end;
+}
+
+.revenue-filter-grid label {
+  display: grid;
+  gap: 8px;
+  color: #37493c;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.revenue-filter-grid input,
+.revenue-filter-grid select {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(37, 76, 48, 0.18);
+  border-radius: 12px;
+  background: #fffdfa;
+  color: #25372b;
+  font-weight: 800;
+}
+
+.revenue-filter-input {
+  position: relative;
+}
+
+.revenue-filter-input input {
+  padding-right: 42px;
+}
+
+.revenue-filter-input .app-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  color: #556c5b;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.revenue-apply-button {
+  width: 170px;
+  min-height: 42px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f45a00, #ef7d18);
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 12px 20px rgba(236, 96, 12, 0.24);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  cursor: pointer;
+}
+
+.revenue-apply-button .app-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.revenue-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.revenue-metric-card {
+  min-height: 104px;
+  padding: 20px 22px;
+  border: 1px solid rgba(21, 96, 54, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 30px rgba(45, 76, 52, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.revenue-metric-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: #dff5e8;
+  color: #268c56;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.revenue-metric-icon .app-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.revenue-metric-card span {
+  display: block;
+  color: #5a6b5e;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.revenue-metric-card strong {
+  display: block;
+  margin-top: 3px;
+  color: #10924e;
+  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+
+.revenue-metric-card small {
+  display: block;
+  margin-top: 5px;
+  color: #7b8d80;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.revenue-tone-blue .revenue-metric-icon {
+  background: #e2f0ff;
+  color: #2488d8;
+}
+
+.revenue-tone-blue strong {
+  color: #217fe4;
+}
+
+.revenue-tone-orange .revenue-metric-icon {
+  background: #ffe9d7;
+  color: #f0741b;
+}
+
+.revenue-tone-orange strong {
+  color: #ef6413;
+}
+
+.revenue-tone-yellow .revenue-metric-icon {
+  background: #fff1cf;
+  color: #d99410;
+}
+
+.revenue-tone-yellow strong {
+  color: #f07b12;
+}
+
+.revenue-tone-cyan .revenue-metric-icon {
+  background: #dff8f5;
+  color: #1a9fa0;
+}
+
+.revenue-tone-cyan strong {
+  color: #12814f;
+}
+
+.revenue-chart-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(360px, 0.92fr);
+  gap: 14px;
+}
+
+.revenue-bars {
+  min-height: 210px;
+  padding: 16px 8px 4px;
+  display: grid;
+  gap: 20px;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent 38px, rgba(36, 80, 51, 0.1) 39px, transparent 40px);
+}
+
+.revenue-bar-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+}
+
+.revenue-bar-time {
+  color: #5f7465;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.revenue-bar-track {
+  position: relative;
+  height: 18px;
+  border-radius: 999px;
+}
+
+.revenue-bar-track i {
+  display: block;
+  height: 8px;
+  max-width: 100%;
+  min-width: 24px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: #22b56a;
+}
+
+.revenue-bar-track b {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  color: #314232;
+  font-size: 0.78rem;
+  transform: translateX(-50%);
+}
+
+.revenue-donut-layout {
+  min-height: 230px;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+}
+
+.revenue-donut {
+  position: relative;
+  width: 178px;
+  height: 178px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.revenue-donut::after {
+  content: "";
+  position: absolute;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.revenue-donut span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  color: #29392e;
+  font-size: 1rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.revenue-donut small {
+  color: #677a6b;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.revenue-donut-list {
+  display: grid;
+  gap: 13px;
+}
+
+.revenue-donut-list span {
+  display: grid;
+  grid-template-columns: 13px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  color: #526457;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.revenue-donut-list i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.revenue-donut-list em {
+  font-style: normal;
+}
+
+.revenue-donut-list b {
+  color: #2c4131;
+  font-weight: 900;
+}
+
+.email-marketing-page {
+  display: grid;
+  gap: 20px;
+}
+
+.email-marketing-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.email-marketing-head h2 {
+  margin: 4px 0 0;
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  letter-spacing: -0.05em;
+}
+
+.email-marketing-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.email-marketing-actions .primary-button,
+.email-marketing-actions .secondary-button {
+  min-height: 42px;
+  border-radius: 13px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.email-marketing-actions .app-icon {
+  width: 17px;
+  height: 17px;
+}
+
+.email-builder-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(340px, 0.75fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.email-builder-main,
+.email-preview-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.email-builder-section {
+  position: relative;
+  padding: 24px;
+}
+
+.email-builder-section h3 {
+  margin: 0 0 18px;
+  color: #2b3b2d;
+}
+
+.email-section-index {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: #dff4e7;
+  color: #0d8748;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.email-section-index + h3 {
+  padding-left: 34px;
+}
+
+.email-audience-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.email-audience-card {
+  position: relative;
+  min-height: 126px;
+  padding: 18px;
+  border: 1px solid rgba(18, 111, 61, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 252, 247, 0.95);
+  color: #2d3c2e;
+  text-align: left;
+  display: grid;
+  gap: 8px;
+  transition: 160ms ease;
+}
+
+.email-audience-card.active {
+  border-color: #0d8748;
+  background: #eff9f1;
+  box-shadow: inset 0 0 0 1px #0d8748, 0 14px 28px rgba(13, 135, 72, 0.1);
+}
+
+.email-audience-card strong {
+  font-size: 0.96rem;
+}
+
+.email-audience-card small {
+  color: #6a7b6b;
+  line-height: 1.45;
+}
+
+.email-audience-card em {
+  color: #0d8748;
+  font-style: normal;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.email-audience-check {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid #9bc8ab;
+  background: #fff;
+}
+
+.email-audience-card.active .email-audience-check {
+  border-color: #0d8748;
+  background: radial-gradient(circle at center, #0d8748 0 45%, #fff 48% 100%);
+}
+
+.email-audience-icon {
+  width: 38px;
+  height: 38px;
+  margin-left: auto;
+  border-radius: 14px;
+  display: inline-grid;
+  place-items: center;
+  color: #0d8748;
+  background: #e2f5e9;
+}
+
+.email-audience-icon .app-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.email-audience-note {
+  margin: 14px 0 0;
+  color: #617461;
+}
+
+.email-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.email-quick-actions button {
+  border: 1px solid rgba(13, 127, 66, 0.14);
+  border-radius: 999px;
+  background: #eef7ec;
+  color: #0d7f42;
+  padding: 9px 13px;
+  font-weight: 800;
+}
+
+.email-image-link-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.email-image-link-picker .secondary-button,
+.email-image-link-picker .ghost-button {
+  min-height: 40px;
+  border-radius: 12px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.email-image-link-picker .app-icon {
+  width: 17px;
+  height: 17px;
+}
+
+.email-image-link-picker small {
+  min-width: min(260px, 100%);
+  flex: 1 1 260px;
+  overflow: hidden;
+  color: #6b7d6d;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.email-preview-card {
+  padding: 20px;
+}
+
+.email-device-toggle {
+  display: inline-flex;
+  gap: 6px;
+  color: #0d8748;
+}
+
+.email-device-toggle .app-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.email-preview-phone {
+  width: min(100%, 330px);
+  margin: 0 auto;
+  padding: 18px;
+  border-radius: 34px;
+  background: #fff;
+  border: 1px solid rgba(23, 84, 48, 0.14);
+  box-shadow: 0 20px 46px rgba(48, 73, 51, 0.12);
+}
+
+.email-preview-brand {
+  padding: 6px 0 12px;
+  color: #2c3b2e;
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+
+.email-preview-phone img,
+.email-preview-hero {
+  width: 100%;
+  height: 170px;
+  border-radius: 24px 24px 8px 8px;
+  object-fit: cover;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(13, 110, 60, 0.72), rgba(218, 108, 58, 0.58)),
+    radial-gradient(circle at 20% 20%, #f5d77a, transparent 32%),
+    linear-gradient(135deg, #4b8b45, #0c5c36);
+}
+
+.email-preview-hero strong {
+  font-size: 1.4rem;
+  letter-spacing: -0.04em;
+}
+
+.email-preview-hero span {
+  margin-top: -44px;
+  font-size: 0.8rem;
+  opacity: 0.88;
+}
+
+.email-preview-body {
+  padding: 20px 12px 12px;
+  text-align: center;
+}
+
+.email-preview-body h3 {
+  margin: 0 0 12px;
+  color: #0b8448;
+  font-size: 1.15rem;
+}
+
+.email-preview-body p {
+  margin: 0;
+  color: #4d5e51;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.email-preview-body a {
+  display: inline-flex;
+  margin-top: 18px;
+  padding: 11px 18px;
+  border-radius: 10px;
+  background: #0b8448;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 900;
+}
+
+.email-preview-footer {
+  padding-top: 14px;
+  border-top: 1px solid #edf2eb;
+  color: #8a978c;
+  font-size: 0.68rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.email-health-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.email-health-grid article,
+.email-tip-card {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(13, 127, 66, 0.1);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 12px 30px rgba(42, 74, 51, 0.06);
+}
+
+.email-health-grid span,
+.email-health-grid small {
+  display: block;
+  color: #657a67;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.email-health-grid strong {
+  display: block;
+  margin: 6px 0;
+  color: #0d8748;
+  font-size: 1.45rem;
+}
+
+.email-tip-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #2e5137;
+  background: #eef8ef;
+  font-weight: 800;
+}
+
+.email-tip-card .app-icon {
+  width: 24px;
+  height: 24px;
+  color: #0d8748;
+}
+
+@media (max-width: 1100px) {
+  .email-builder-layout,
+  .email-marketing-head {
+    grid-template-columns: 1fr;
+  }
+
+  .email-builder-layout {
+    display: grid;
+  }
+
+  .email-marketing-head {
+    display: grid;
+  }
+}
+
+@media (max-width: 760px) {
+  .email-audience-grid,
+  .email-health-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .email-builder-section {
+    padding: 20px;
+  }
+
+  .email-marketing-actions {
+    width: 100%;
+  }
+
+  .email-marketing-actions .primary-button,
+  .email-marketing-actions .secondary-button {
+    flex: 1 1 150px;
+  }
+}
+
+.stats-filter-card,
+.stats-chart-card,
+.stats-table-card {
+  padding: 20px;
+}
+
+.stats-filter-card {
+  padding: 18px 20px;
+}
+
+.stats-filter-card > strong,
+.stats-chart-card h3,
+.stats-table-card h3 {
+  display: block;
+  margin: 0 0 14px;
+  color: #2c3c2e;
+}
+
+.stats-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr)) minmax(180px, 240px);
+  gap: 14px;
+  align-items: end;
+}
+
+.stats-filter-grid label {
+  display: grid;
+  gap: 7px;
+  font-weight: 800;
+  color: #3c4f40;
+}
+
+.stats-filter-grid input,
+.stats-filter-grid select {
+  min-height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 252, 246, 0.92);
+}
+
+.stats-filter-grid .primary-button {
+  width: 100%;
+  min-height: 44px;
+  height: 44px;
+  border-radius: 14px;
+  padding: 0 28px;
+  align-self: end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.stats-filter-grid .primary-button .app-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.stats-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.stats-order-metrics {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.stats-metric-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 108px;
+  padding: 20px;
+  border: 1px solid rgba(17, 95, 54, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 12px 30px rgba(42, 74, 51, 0.08);
+}
+
+.stats-metric-icon {
+  width: 64px;
+  height: 64px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #148747;
+  background: #d9f4e3;
+  flex: 0 0 auto;
+}
+
+.stats-metric-icon .app-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.stats-metric-card span {
+  display: block;
+  color: #526759;
+  font-weight: 800;
+}
+
+.stats-metric-card strong {
+  display: block;
+  margin-top: 4px;
+  color: #12944f;
+  font-size: clamp(1.45rem, 2.2vw, 2rem);
+  letter-spacing: -0.04em;
+}
+
+.stats-metric-card small {
+  display: block;
+  margin-top: 6px;
+  color: #78907d;
+  font-weight: 700;
+}
+
+.stats-tone-blue .stats-metric-icon {
+  color: #247fc1;
+  background: #dceffc;
+}
+
+.stats-tone-blue strong {
+  color: #247fc1;
+}
+
+.stats-tone-orange .stats-metric-icon {
+  color: #f0781d;
+  background: #ffe8d7;
+}
+
+.stats-tone-orange strong {
+  color: #e56619;
+}
+
+.stats-tone-red .stats-metric-icon {
+  color: #d74444;
+  background: #ffe1e1;
+}
+
+.stats-tone-red strong {
+  color: #d74444;
+}
+
+.stats-tone-yellow .stats-metric-icon {
+  color: #d99910;
+  background: #fff0c8;
+}
+
+.stats-tone-yellow strong {
+  color: #d99910;
+}
+
+.stats-tone-purple .stats-metric-icon {
+  color: #7a55d8;
+  background: #eee6ff;
+}
+
+.stats-tone-purple strong {
+  color: #7a55d8;
+}
+
+.stats-chart-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.85fr);
+  gap: 16px;
+}
+
+.stats-bars {
+  min-height: 220px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(64px, 1fr);
+  align-items: end;
+  gap: 22px;
+  padding: 14px 10px 0;
+  border-bottom: 1px solid rgba(45, 83, 58, 0.18);
+  background: repeating-linear-gradient(to top, rgba(45, 83, 58, 0.08), rgba(45, 83, 58, 0.08) 1px, transparent 1px, transparent 42px);
+}
+
+.stats-bar-item {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.stats-bar-item strong {
+  color: #1d8c4c;
+}
+
+.stats-bar-item span {
+  width: min(62px, 80%);
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(180deg, #48b971 0%, #179152 100%);
+  box-shadow: 0 12px 20px rgba(24, 145, 82, 0.18);
+}
+
+.stats-bar-item small {
+  color: #546957;
+  font-weight: 800;
+  text-align: center;
+}
+
+.stats-donut-wrap {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.stats-donut {
+  width: 184px;
+  height: 184px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.stats-donut::after {
+  content: "";
+  width: 104px;
+  height: 104px;
+  border-radius: 999px;
+  background: #fff;
+  position: absolute;
+}
+
+.stats-donut > span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  color: #27392d;
+  font-size: 1.15rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.stats-donut small {
+  display: block;
+  font-size: 0.78rem;
+  color: #6e7c70;
+}
+
+.stats-donut-legend {
+  display: grid;
+  gap: 12px;
+}
+
+.stats-donut-legend span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  color: #526759;
+  font-weight: 800;
+}
+
+.stats-donut-legend i {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: auto;
+}
+
+.stats-zone-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.stats-zone-card {
+  padding: 16px 18px 14px;
+  display: grid;
+  gap: 14px;
+  min-height: 96px;
+  border-radius: 18px;
+  box-shadow: 0 10px 26px rgba(42, 74, 51, 0.08);
+}
+
+.stats-zone-head {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.stats-zone-icon {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #17894d;
+  background: #dff5e7;
+}
+
+.stats-zone-icon .app-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.stats-zone-fresh .stats-zone-icon {
+  color: #eb7f28;
+  background: #ffe7d4;
+}
+
+.stats-zone-dry .stats-zone-icon {
+  color: #357eae;
+  background: #dceefa;
+}
+
+.stats-zone-head strong {
+  color: #213a2b;
+  font-size: 0.98rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stats-zone-head em {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #e5f8eb;
+  color: #19894f;
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.stats-zone-head em.warning {
+  background: #fff0df;
+  color: #e27b24;
+}
+
+.stats-zone-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stats-zone-metrics span {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 0 10px;
+  border-left: 1px solid rgba(37, 80, 52, 0.12);
+  color: #5f7565;
+  font-weight: 800;
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.stats-zone-metrics span:first-child {
+  border-left: 0;
+}
+
+.stats-zone-metrics b {
+  display: block;
+  color: #13914f;
+  font-size: 1.15rem;
+  line-height: 1.1;
+}
+
+.stats-zone-metrics span:nth-child(2) b,
+.stats-zone-metrics span:nth-child(4) b {
+  color: #f09a17;
+}
+
+.stats-zone-metrics span:nth-child(3) b {
+  color: #d74343;
+}
+
+.stats-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #e7f6ec;
+  color: #148747;
+  font-weight: 900;
+}
+
+.stats-pill.warning {
+  background: #fff1d8;
+  color: #d27a12;
+}
+
+.stats-pill.danger {
+  background: #ffe3e3;
+  color: #d74747;
+}
+
+.stats-pill.neutral {
+  background: #edf1ed;
+  color: #607064;
+}
+
+@media (max-width: 1180px) {
+  .stats-metric-grid,
+  .stats-order-metrics,
+  .stats-chart-grid,
+  .stats-zone-grid,
+  .stats-filter-grid,
+  .revenue-summary-grid,
+  .revenue-chart-grid,
+  .revenue-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-filter-grid .primary-button {
+    width: 100%;
+  }
+
+  .revenue-apply-button {
+    width: 100%;
+  }
+
+  .stats-donut-wrap,
+  .revenue-donut-layout {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+}
+

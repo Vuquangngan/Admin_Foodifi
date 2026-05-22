@@ -1,0 +1,80 @@
+﻿.product-intake-card {
+  grid-column: 1 / -1;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.product-intake-form {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 0.95fr);
+  gap: 18px;
+}
+
+.product-intake-main {
+  display: grid;
+  gap: 18px;
+}
+
+.product-intake-section,
+.product-intake-side {
+  padding: 24px;
+}
+
+.product-intake-side {
+  display: grid;
+  gap: 16px;
+  align-self: start;
+}
+
+.upload-dropzone {
+  min-height: 220px;
+  border: 1px dashed rgba(17, 115, 66, 0.18);
+  border-radius: 24px;
+  background: #eef5ea;
+  color: #557062;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 24px;
+  cursor: pointer;
+}
+
+.upload-dropzone-icon {
+  width: 52px;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  background: rgba(19, 104, 62, 0.08);
+  color: #0d7f42;
+  font-size: 1.35rem;
+}
+
+.product-import-preview-wrap {
+  min-height: 96px;
+}
+
+.product-import-preview {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 22px;
+  background: #eef5ea;
+  border: 1px solid rgba(17, 115, 66, 0.08);
+}
+
+.product-intake-toggle {
+  margin-top: 4px;
+}
+
+.product-intake-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 6px;
+}
+

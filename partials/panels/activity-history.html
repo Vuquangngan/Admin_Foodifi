@@ -1,0 +1,81 @@
+      <section class="panel hidden" id="activityHistoryPanel">
+        <div class="activity-history-page">
+          <div class="panel-head activity-history-head">
+            <div>
+              <p class="eyebrow">Nhật ký hệ thống</p>
+              <h2>Lịch sử thao tác</h2>
+              <p class="section-copy">Theo dõi mọi hoạt động của hệ thống và người dùng.</p>
+            </div>
+            <button class="primary-button activity-export-button" id="activityExportButton" type="button">
+              Xuất báo cáo Excel
+            </button>
+          </div>
+
+          <section class="surface activity-filter-card">
+            <div class="activity-filter-row">
+              <label class="activity-search-field">
+                <span>Tìm kiếm</span>
+                <input id="activitySearchInput" type="search" placeholder="Tìm theo người dùng, thao tác, đối tượng...">
+              </label>
+              <label>
+                <span>Từ ngày</span>
+                <input id="activityDateFrom" type="date">
+              </label>
+              <label>
+                <span>Đến ngày</span>
+                <input id="activityDateTo" type="date">
+              </label>
+              <label>
+                <span>Vai trò</span>
+                <select id="activityRoleFilter">
+                  <option value="all">Tất cả vai trò</option>
+                  <option value="admin">Quản trị viên</option>
+                  <option value="staff">Nhân viên</option>
+                  <option value="customer">Khách hàng</option>
+                  <option value="system">Hệ thống</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="activity-action-tabs" id="activityActionTabs">
+              <button class="chip-button active" type="button" data-activity-action="all">Tất cả</button>
+              <button class="chip-button" type="button" data-activity-action="create">Thêm mới</button>
+              <button class="chip-button" type="button" data-activity-action="update">Chỉnh sửa</button>
+              <button class="chip-button" type="button" data-activity-action="delete">Xóa</button>
+              <button class="chip-button" type="button" data-activity-action="login">Đăng nhập</button>
+            </div>
+          </section>
+
+          <section class="surface activity-table-card">
+            <div class="section-head compact">
+              <div>
+                <h3>Danh sách thao tác</h3>
+                <p class="section-copy" id="activityHistoryMeta">0 thao tác</p>
+              </div>
+            </div>
+            <div id="activityHistoryContent"></div>
+          </section>
+
+          <div class="modal-backdrop hidden" id="activityWarningModal">
+            <form class="modal-card activity-warning-modal" id="activityWarningForm">
+              <div class="modal-head">
+                <div>
+                  <p class="eyebrow">Cảnh báo</p>
+                  <h3>Ghi chú thao tác</h3>
+                  <p class="section-copy" id="activityWarningTarget">Nhập ghi chú để đánh dấu thao tác cần theo dõi.</p>
+                </div>
+                <button class="ghost-button" id="closeActivityWarningButton" type="button">Đóng</button>
+              </div>
+              <input type="hidden" name="entry_id">
+              <label class="activity-warning-field">
+                <span>Nội dung ghi chú</span>
+                <textarea name="note" rows="5" placeholder="Ví dụ: Cần kiểm tra lại dữ liệu thay đổi, thao tác bất thường..."></textarea>
+              </label>
+              <div class="modal-actions">
+                <button class="secondary-button" id="clearActivityWarningButton" type="button">Bỏ đánh dấu</button>
+                <button class="primary-button" type="submit">Lưu ghi chú</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>

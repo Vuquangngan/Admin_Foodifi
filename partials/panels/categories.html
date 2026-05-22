@@ -1,0 +1,126 @@
+﻿      <section class="panel hidden" id="categoriesPanel">
+        <article class="categories-shell" id="categoriesListView">
+          <div class="categories-hero">
+            <div>
+              <h2 class="categories-title">Danh mục sản phẩm</h2>
+              <p class="categories-subtitle">Quản lý và tổ chức các nhóm sản phẩm tươi sạch của cửa hàng theo phong cách hiện đại.</p>
+            </div>
+            <div class="categories-hero-actions">
+              <button class="secondary-button" id="refreshCategoriesButton" type="button">Làm mới</button>
+              <button class="primary-button categories-add-button" id="openCategoryModalButton" type="button">Thêm danh mục mới</button>
+            </div>
+          </div>
+
+          <div class="categories-summary" id="categoriesSummary"></div>
+
+          <article class="surface categories-table-card">
+            <div class="section-head">
+              <p id="categoriesMeta" class="section-copy"></p>
+            </div>
+            <div id="categoriesContent"></div>
+          </article>
+        </article>
+
+        <div class="modal-backdrop hidden" id="categoryModal">
+          <div class="modal-card category-modal-popup">
+            <div class="category-modal-header">
+              <div>
+                <h2 id="categoryFormTitle">Thêm danh mục mới</h2>
+                <p>Thiết lập nhanh danh mục sản phẩm ngay trong trang quản trị.</p>
+              </div>
+              <div class="category-modal-top-actions">
+                <button class="ghost-button" id="closeCategoryModalButton" type="button">Hủy bỏ</button>
+                <button class="primary-button" form="categoryForm" type="submit">Lưu danh mục</button>
+              </div>
+            </div>
+
+            <form id="categoryForm" class="category-modal-form">
+              <input type="hidden" name="id">
+              <input type="hidden" name="image_url">
+
+              <div class="category-modal-grid">
+                <section class="category-modal-section">
+                  <div class="category-modal-copy">
+                    <h3>Thông tin cơ bản</h3>
+                    <p>Xác định tên và mô tả hấp dẫn cho danh mục sản phẩm để khách hàng dễ dàng tìm kiếm.</p>
+                  </div>
+                  <article class="surface category-modal-surface">
+                    <div class="category-modal-field-grid">
+                      <label class="span-2">
+                        <span>Tên danh mục *</span>
+                        <input name="name" placeholder="VD: Rau củ hữu cơ, Trái cây nhiệt đới..." required>
+                      </label>
+                      <label class="span-2">
+                        <span>Mô tả chi tiết</span>
+                        <textarea name="description" rows="5" placeholder="Nhập mô tả ngắn về các loại sản phẩm trong danh mục này..."></textarea>
+                      </label>
+                      <label>
+                        <span>Loại danh mục</span>
+                        <select name="category_type" id="categoryTypeSelect">
+                          <option value="parent">Danh mục cha</option>
+                          <option value="child">Danh mục con</option>
+                        </select>
+                      </label>
+                      <label class="category-parent-field hidden">
+                        <span>Danh mục cha</span>
+                        <select name="parent_id" id="categoryParentSelect">
+                          <option value="">Chọn danh mục cha</option>
+                        </select>
+                      </label>
+                      <label>
+                        <span>Slug</span>
+                        <input name="slug" placeholder="Tự động nếu để trống">
+                      </label>
+                    </div>
+                  </article>
+                </section>
+
+                <section class="category-modal-section">
+                  <div class="category-modal-copy">
+                    <h3>Nhận diện hình ảnh</h3>
+                    <p>Chọn một biểu tượng đại diện hoặc tải lên hình ảnh đặc trưng cho danh mục.</p>
+                  </div>
+                  <article class="surface category-modal-surface">
+                    <div class="category-modal-icons">
+                      <button class="category-icon-chip active" type="button" data-category-icon="leaf">🍃</button>
+                      <button class="category-icon-chip" type="button" data-category-icon="fruit">🍊</button>
+                      <button class="category-icon-chip" type="button" data-category-icon="bakery">🥐</button>
+                      <button class="category-icon-chip" type="button" data-category-icon="market">🪪</button>
+                      <button class="category-icon-chip" type="button" data-category-icon="dessert">🍦</button>
+                    </div>
+                    <label class="upload-dropzone category-upload-dropzone">
+                      <input id="categoryImageFile" type="file" accept="image/*" hidden>
+                      <span class="upload-dropzone-icon">☁</span>
+                      <strong>Tải lên hình ảnh tùy chỉnh</strong>
+                      <span>PNG, JPG hoặc SVG (Tối đa 2MB)</span>
+                    </label>
+                    <div class="category-image-preview-wrap">
+                      <img id="categoryImagePreview" class="category-image-preview hidden" alt="preview">
+                    </div>
+                  </article>
+                </section>
+
+                <section class="category-modal-section">
+                  <div class="category-modal-copy">
+                    <h3>Trạng thái hiển thị</h3>
+                    <p>Điều chỉnh khả năng hiển thị của danh mục này đối với khách hàng trên ứng dụng.</p>
+                  </div>
+                  <article class="surface category-modal-surface category-toggle-card">
+                    <label class="category-switch-row">
+                      <div>
+                        <strong>Kích hoạt danh mục</strong>
+                        <span>Cho phép khách hàng xem và mua các sản phẩm thuộc nhóm này</span>
+                      </div>
+                      <span class="category-switch">
+                        <input name="is_active" type="checkbox" checked>
+                        <i></i>
+                      </span>
+                    </label>
+                  </article>
+                </section>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+

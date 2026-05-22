@@ -1,0 +1,152 @@
+﻿      <section class="panel hidden" id="usersPanel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Tài khoản</p>
+            <h2 id="usersPanelTitle">Quản lý tài khoản</h2>
+            <p class="section-copy" id="usersPanelCopy">Quản lý admin, nhân viên và tài khoản khách hàng trong hệ thống.</p>
+          </div>
+          <button class="secondary-button" id="refreshUsersButton" type="button">Làm mới</button>
+        </div>
+
+        <article class="surface users-toolbar-card" id="usersToolbarCard">
+          <div class="section-head">
+            <h3>Bộ lọc tài khoản</h3>
+            <button class="primary-button" id="openUserFormButton" type="button">Tạo tài khoản mới</button>
+          </div>
+          <form id="userFilterForm" class="compact-grid">
+            <label>
+              <span>Từ khóa</span>
+              <input name="keyword" placeholder="Tìm theo tên, email hoặc số điện thoại...">
+            </label>
+            <label>
+              <span>Vai trò</span>
+              <select name="role">
+                <option value="">Tất cả vai trò</option>
+                <option value="admin">Quản trị</option>
+                <option value="staff">Nhân viên</option>
+                <option value="customer">Khách hàng</option>
+              </select>
+            </label>
+            <label>
+              <span>Trạng thái</span>
+              <select name="status">
+                <option value="">Tất cả trạng thái</option>
+                <option value="active">Đang hoạt động</option>
+                <option value="inactive">Ngừng hoạt động</option>
+                <option value="blocked">Bị khóa</option>
+              </select>
+            </label>
+            <button class="primary-button" type="submit">Áp dụng</button>
+          </form>
+        </article>
+
+        <article class="surface users-list-card">
+          <div class="section-head">
+            <h3 id="usersListTitle">Danh sách tài khoản</h3>
+            <p id="usersMeta" class="section-copy"></p>
+          </div>
+          <div id="usersContent"></div>
+        </article>
+
+        <div class="modal-backdrop hidden" id="userFormModal">
+          <div class="modal-card user-modal-card">
+            <div class="user-modal-header">
+              <div>
+                <h2 id="userFormTitle">Tạo tài khoản nhân viên mới</h2>
+                <p class="section-copy" id="userFormSubtitle">Thiết lập hồ sơ nhân sự, avatar và vai trò truy cập ngay trong popup này.</p>
+              </div>
+              <button class="user-modal-close" id="cancelUserFormButton" type="button" aria-label="Đóng popup">×</button>
+            </div>
+
+            <form id="userForm" class="user-form-layout">
+              <input type="hidden" name="id">
+              <input type="hidden" name="avatar_url">
+              <input type="hidden" name="status" value="active">
+              <div class="user-form-body">
+                <div class="user-avatar-field">
+                  <input class="hidden" id="userAvatarFile" name="avatar_file" type="file" accept="image/png,image/jpeg,image/webp">
+                  <button class="user-avatar-dropzone" id="userAvatarTrigger" type="button">
+                    <img class="user-avatar-preview hidden" id="userAvatarPreview" alt="Avatar preview">
+                    <span class="user-avatar-placeholder" id="userAvatarPlaceholder">
+                      <span class="user-avatar-icon">⊕</span>
+                      <strong>Tải ảnh lên</strong>
+                    </span>
+                  </button>
+                  <button class="user-avatar-edit-button" id="userAvatarEditButton" type="button" aria-label="Chọn lại ảnh">✎</button>
+                  <p>Ảnh đại diện (Avatar)</p>
+                </div>
+
+                <div class="compact-grid user-form-grid">
+                  <label>
+                    <span>Tên nhân viên</span>
+                    <input name="username" placeholder="Nhập họ và tên" required>
+                  </label>
+                  <label>
+                    <span>Email</span>
+                    <input name="email" type="email" placeholder="example@lushharvest.vn" required>
+                  </label>
+                  <label>
+                    <span>Số điện thoại</span>
+                    <input name="phone" placeholder="0901 234 567">
+                  </label>
+                  <label>
+                    <span>Mã nhân viên</span>
+                    <input name="code" placeholder="LH-2026-XXXX">
+                  </label>
+                  <label class="span-2">
+                    <span>Vai trò</span>
+                    <select name="role">
+                      <option value="staff">Chọn vai trò nhân viên</option>
+                      <option value="admin">Quản trị</option>
+                      <option value="customer">Khách hàng</option>
+                    </select>
+                  </label>
+                  <label class="span-2">
+                    <span>Mật khẩu</span>
+                    <input name="password" type="password" placeholder="Tạo mật khẩu đăng nhập" autocomplete="new-password">
+                  </label>
+                  <label class="span-2">
+                    <span>Xác nhận mật khẩu</span>
+                    <input name="confirm_password" type="password" placeholder="Nhập lại mật khẩu" autocomplete="new-password">
+                  </label>
+                  <label class="span-2 hidden" data-password-mode="edit-current">
+                    <span>Mật khẩu cũ</span>
+                    <input name="current_password" type="password" placeholder="Nhập mật khẩu hiện tại" autocomplete="current-password">
+                  </label>
+                  <label class="span-2 hidden" data-password-mode="edit-new">
+                    <span>Mật khẩu mới</span>
+                    <input name="new_password" type="password" placeholder="Nhập mật khẩu mới" autocomplete="new-password">
+                  </label>
+                  <label class="span-2 hidden" data-password-mode="edit-confirm">
+                    <span>Xác nhận mật khẩu mới</span>
+                    <input name="confirm_new_password" type="password" placeholder="Nhập lại mật khẩu mới" autocomplete="new-password">
+                  </label>
+                </div>
+              </div>
+
+              <div class="user-modal-footer">
+                <div class="user-modal-actions">
+                  <button class="ghost-button user-footer-button" type="button" id="resetUserFormButton">Hủy</button>
+                  <button class="primary-button user-footer-button" type="submit" id="userFormSubmitButton">Tạo tài khoản</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="modal-backdrop hidden" id="customerProfileModal">
+          <div class="modal-card customer-profile-modal-card">
+            <div class="customer-profile-header">
+              <div>
+                <p class="eyebrow">Hồ sơ khách hàng</p>
+                <h2 id="customerProfileTitle">Hồ sơ khách hàng</h2>
+                <p class="section-copy" id="customerProfileSubtitle">Theo dõi hạng thành viên, điểm tích lũy và lịch sử mua hàng của khách ngay trong popup.</p>
+              </div>
+              <button class="user-modal-close" id="closeCustomerProfileButton" type="button" aria-label="Đóng hồ sơ khách hàng">×</button>
+            </div>
+
+            <div class="customer-profile-content" id="customerProfileContent"></div>
+          </div>
+        </div>
+      </section>
+

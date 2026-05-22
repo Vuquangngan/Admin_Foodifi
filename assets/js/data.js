@@ -2,7 +2,24 @@ import { apiFetch, showToast, state } from "./core.js";
 import { renderOverview } from "./overview.js";
 import { renderProducts, syncProductCategorySelects } from "./products.js";
 import { renderCategories, syncCategoryParentSelect } from "./categories.js";
+import { renderChats } from "./chats.js";
 import { renderOrders } from "./orders.js";
+import { renderSuppliers, syncSupplierSelects } from "./suppliers.js";
+import { renderUsers } from "./users.js";
+import { renderVouchers } from "./vouchers.js";
+import { renderStats } from "./stats.js";
+import { renderEmailMarketing } from "./email-marketing.js";
+
+async function runOptionalLoad(loader, fallback) {
+    try {
+        await loader();
+        return true;
+    } catch (error) {
+        console.warn("Khong the tai du lieu admin:", error);
+        fallback?.(error);
+        return false;
+    }
+}
 
 export async function loadCategories() {
     state.categories = await apiFetch("/api/categories");
@@ -13,19 +30,35 @@ export async function loadCategories() {
 
 export async function loadCoupons() {
     state.coupons = await apiFetch("/api/coupons");
+    state.vouchers = Array.isArray(state.coupons) ? [...state.coupons] : [];
+    renderVouchers();
 }
 
 export async function loadProducts() {
     const params = new URLSearchParams();
     Object.entries(state.filters.products).forEach(([key, value]) => {
+        if (key === "visibility") return;
         if (value) params.set(key, value);
     });
-    params.set("limit", "100");
+    params.set("limit", "1000");
 
     const payload = await apiFetch(`/api/products?${params.toString()}`);
     state.products = payload.items || [];
     state.productPagination = payload.pagination || null;
     renderProducts();
+    renderCategories();
+    if (state.sidebarSection === "stats") renderStats();
+}
+
+export async function loadSuppliers() {
+    const params = new URLSearchParams();
+    Object.entries(state.filters.suppliers).forEach(([key, value]) => {
+        if (value) params.set(key, value);
+    });
+
+    state.suppliers = await apiFetch(`/api/inventory/suppliers${params.toString() ? `?${params.toString()}` : ""}`);
+    syncSupplierSelects();
+    renderSuppliers();
 }
 
 export async function loadOrders() {
@@ -36,6 +69,7 @@ export async function loadOrders() {
 
     state.orders = await apiFetch(`/api/orders?${params.toString()}`);
     renderOrders();
+    if (state.sidebarSection === "stats") renderStats();
 }
 
 export async function loadOverview() {
@@ -43,9 +77,81 @@ export async function loadOverview() {
     renderOverview();
 }
 
+export async function loadChats() {
+    state.chatConversations = await apiFetch("/api/chat/conversations");
+    renderChats();
+}
+
+export async function loadUsers() {
+    const params = new URLSearchParams();
+    Object.entries(state.filters.users).forEach(([key, value]) => {
+        if (value) params.set(key, value);
+    });
+    params.set("scope", "staff");
+
+    state.users = await apiFetch(`/api/users${params.toString() ? `?${params.toString()}` : ""}`);
+    state.usersHydrated = true;
+    renderUsers();
+}
+
+export async function loadCustomers() {
+    const params = new URLSearchParams();
+    Object.entries(state.filters.customers).forEach(([key, value]) => {
+        if (value) params.set(key, value);
+    });
+
+    state.customers = await apiFetch(`/api/users/customers${params.toString() ? `?${params.toString()}` : ""}`);
+    state.customersHydrated = true;
+    renderUsers();
+    if (state.sidebarItem === "email-campaign-create") renderEmailMarketing();
+}
+
 export async function bootstrapAdmin() {
-    await Promise.all([loadCoupons(), loadCategories(), loadProducts(), loadOrders()]);
-    await loadOverview();
+    const results = await Promise.all([
+        runOptionalLoad(loadCoupons),
+        runOptionalLoad(loadChats, () => {
+            state.chatConversations = [];
+            state.chatMessages = [];
+            state.chatCurrentConversationId = null;
+            renderChats();
+        }),
+        runOptionalLoad(loadCategories, () => {
+            state.categories = [];
+            syncProductCategorySelects();
+            syncCategoryParentSelect();
+            renderCategories();
+        }),
+        runOptionalLoad(loadProducts, () => {
+            state.products = [];
+            state.productPagination = null;
+            renderProducts();
+        }),
+        runOptionalLoad(loadOrders, () => {
+            state.orders = [];
+            renderOrders();
+        }),
+        runOptionalLoad(loadSuppliers, () => {
+            state.suppliers = [];
+            syncSupplierSelects();
+            renderSuppliers();
+        }),
+        runOptionalLoad(loadUsers, () => {
+            state.users = [];
+            state.usersHydrated = false;
+            renderUsers();
+        }),
+        runOptionalLoad(loadCustomers, () => {
+            state.customers = [];
+            state.customersHydrated = false;
+            renderUsers();
+        }),
+        runOptionalLoad(loadOverview, () => {
+            state.dashboard = null;
+            renderOverview();
+        })
+    ]);
+
+    return results.some(Boolean);
 }
 
 export async function withLoading(button, task) {

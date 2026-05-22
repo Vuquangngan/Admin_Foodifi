@@ -15,6 +15,7 @@ import {
     statusPill,
     sumRevenueBetween
 } from "./core.js";
+import { renderAppIcon } from "./icons.js";
 
 export function renderOverview() {
     if (!state.dashboard) {
@@ -91,28 +92,28 @@ export function renderOverview() {
       <div class="overview-metric-grid">
         ${[
             {
-                icon: "◫",
+                icon: "chart",
                 title: "Tổng doanh thu",
                 value: formatCurrency(summary.total_revenue || currentRevenue),
                 note: `${rangeLabel} ghi nhận ${formatCurrency(currentRevenue)}`,
                 growth: revenueGrowth
             },
             {
-                icon: "⌂",
+                icon: "cart",
                 title: "Tổng đơn hàng",
                 value: formatNumber(summary.total_orders),
                 note: `${formatNumber(summary.pending_orders)} đơn cần xử lý`,
                 growth: orderGrowth
             },
             {
-                icon: "✦",
+                icon: "ticket",
                 title: "Voucher đang hoạt động",
                 value: formatNumber(activeCoupons.length),
                 note: `${formatNumber(summary.active_products)} sản phẩm đang bán`,
                 growth: couponGrowth
             },
             {
-                icon: "◌",
+                icon: "user",
                 title: "Khách hàng mới",
                 value: formatNumber(currentCustomers),
                 note: `${formatNumber(summary.total_customers)} khách trong hệ thống`,
@@ -121,7 +122,7 @@ export function renderOverview() {
         ].map((card) => `
           <article class="overview-metric-card">
             <div class="overview-metric-head">
-              <span class="overview-icon">${card.icon}</span>
+              <span class="overview-icon">${renderAppIcon(card.icon)}</span>
               <span class="overview-badge ${card.growth.tone}">${card.growth.value}</span>
             </div>
             <p class="overview-card-title">${card.title}</p>

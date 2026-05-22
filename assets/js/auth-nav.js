@@ -1,20 +1,34 @@
-import {
+﻿import {
     SIDEBAR_MENU,
     apiFetch,
     elements,
     escapeHtml,
+    recordActivityLog,
     saveSession,
     showToast,
     state
 } from "./core.js";
 import { renderProducts, updateProductWorkspace } from "./products.js";
+import { renderRecipes } from "./recipes.js";
+import { renderOrders } from "./orders.js";
+import { renderSuppliers } from "./suppliers.js";
+import { activateChatsPanel, deactivateChatsPanel } from "./chats.js";
+import { renderUsers } from "./users.js";
+import { renderVouchers } from "./vouchers.js";
+import { renderBranches } from "./branches.js";
+import { renderStaffShiftWorkspace } from "./staff-shifts.js";
+import { renderStats } from "./stats.js";
+import { renderEmailMarketing } from "./email-marketing.js";
+import { renderActivityHistory } from "./activity-history.js";
+import { getVisibleSidebarMenu, renderSettings } from "./settings.js";
+import { renderAppIcon } from "./icons.js";
 
 function getMenuSection(sectionKey) {
-    return SIDEBAR_MENU.find((section) => section.key === sectionKey) || null;
+    return getVisibleSidebarMenu().find((section) => section.key === sectionKey) || null;
 }
 
 function getMenuItem(itemKey) {
-    for (const section of SIDEBAR_MENU) {
+    for (const section of getVisibleSidebarMenu()) {
         const item = section.items.find((entry) => entry.key === itemKey);
         if (item) {
             return { ...item, sectionKey: section.key };
@@ -25,7 +39,7 @@ function getMenuItem(itemKey) {
 }
 
 export function renderSidebarMenu() {
-    elements.navCard.innerHTML = SIDEBAR_MENU.map((section) => {
+    elements.navCard.innerHTML = getVisibleSidebarMenu().map((section) => {
         const isExpanded = Boolean(state.expandedSections[section.key]);
         const isActiveSection = state.sidebarSection === section.key;
         const hasItems = section.items.length > 0;
@@ -34,7 +48,7 @@ export function renderSidebarMenu() {
           <section class="nav-section ${isExpanded ? "open" : ""}">
             <button class="nav-section-trigger ${isActiveSection ? "active" : ""}" type="button" data-section-toggle="${section.key}" aria-expanded="${isExpanded}">
               <span class="nav-section-main">
-                <span class="nav-icon">${escapeHtml(section.icon)}</span>
+                <span class="nav-icon">${renderAppIcon(section.icon)}</span>
                 <span>${escapeHtml(section.label)}</span>
               </span>
               ${hasItems ? `<span class="nav-chevron">${isExpanded ? "−" : "+"}</span>` : ""}
@@ -74,6 +88,11 @@ export function toggleSidebarSection(sectionKey) {
     const section = getMenuSection(sectionKey);
     if (!section) return;
 
+    if (!section.items?.length && section.staticLink) {
+        showToast("Mục này mình sẽ làm tiếp ở bước sau.");
+        return;
+    }
+
     state.expandedSections[sectionKey] = !state.expandedSections[sectionKey];
     renderSidebarMenu();
 }
@@ -92,8 +111,44 @@ export function selectSidebarItem(itemKey) {
         return;
     }
 
-    if (item.workspace) {
+    if (item.panel === "products" && item.workspace) {
         state.productWorkspace = item.workspace;
+    }
+
+    if (item.panel === "recipes") {
+        state.recipeWorkspace = item.workspace || "list";
+    }
+
+    if (item.panel === "orders") {
+        state.orderWorkspace = item.workspace || "list";
+    }
+
+    if (item.panel === "users") {
+        state.userWorkspace = item.workspace || "staff";
+    }
+
+    if (item.panel === "vouchers") {
+        state.voucherWorkspace = item.workspace || "list";
+    }
+
+    if (item.panel === "branches") {
+        state.branchWorkspace = item.workspace || "list";
+    }
+
+    if (item.panel === "settings") {
+        state.settingsWorkspace = item.workspace || "general";
+    }
+
+    if (item.panel === "stats") {
+        state.statsWorkspace = item.workspace || "inventory";
+    }
+
+    if (item.panel === "emailMarketing") {
+        state.emailMarketingWorkspace = item.workspace || "campaign";
+    }
+
+    if (item.panel !== "chats") {
+        deactivateChatsPanel();
     }
 
     renderSidebarMenu();
@@ -103,11 +158,59 @@ export function selectSidebarItem(itemKey) {
     if (item.panel === "products") {
         renderProducts();
     }
+
+    if (item.panel === "recipes") {
+        renderRecipes();
+    }
+
+    if (item.panel === "orders") {
+        renderOrders();
+    }
+
+    if (item.panel === "chats") {
+        activateChatsPanel();
+    }
+
+    if (item.panel === "suppliers") {
+        renderSuppliers();
+    }
+
+    if (item.panel === "branches") {
+        renderBranches();
+    }
+
+    if (item.panel === "users") {
+        renderUsers();
+    }
+
+    if (item.panel === "shifts") {
+        renderStaffShiftWorkspace();
+    }
+
+    if (item.panel === "vouchers") {
+        renderVouchers();
+    }
+
+    if (item.panel === "settings") {
+        renderSettings();
+    }
+
+    if (item.panel === "stats") {
+        renderStats();
+    }
+
+    if (item.panel === "emailMarketing") {
+        renderEmailMarketing();
+    }
+
+    if (item.panel === "activityHistory") {
+        renderActivityHistory();
+    }
 }
 
 export function jumpToView(view) {
     if (view === "products") {
-        selectSidebarItem("product-catalog");
+        selectSidebarItem("product-inventory");
         return;
     }
 
@@ -121,12 +224,37 @@ export function jumpToView(view) {
         return;
     }
 
+    if (view === "chats") {
+        selectSidebarItem("chats-inbox");
+        return;
+    }
+
+    if (view === "suppliers") {
+        selectSidebarItem("suppliers-list");
+        return;
+    }
+
+    if (view === "users") {
+        selectSidebarItem("users-manage");
+        return;
+    }
+
+    if (view === "vouchers") {
+        selectSidebarItem("vouchers-list");
+        return;
+    }
+
     selectSidebarItem("overview-home");
 }
 
 export function setAuthMode(mode) {
-    state.authMode = mode === "register" ? "register" : "login";
-    const isRegister = state.authMode === "register";
+    const wantsRegister = mode === "register";
+    if (wantsRegister) {
+        showToast("Web admin chi ho tro dang nhap bang tai khoan admin hoac staff. Tai khoan moi can duoc cap quyen o backend.", true);
+    }
+
+    state.authMode = "login";
+    const isRegister = false;
 
     elements.authTabs.forEach((tab) => {
         tab.classList.toggle("active", tab.dataset.authMode === state.authMode);
@@ -138,21 +266,23 @@ export function setAuthMode(mode) {
     elements.usernameInput.required = isRegister;
     elements.confirmPasswordInput.required = isRegister;
     elements.authTitle.textContent = isRegister ? "Tạo tài khoản quản trị" : "Đăng nhập hệ thống";
-    elements.authSubtitle.textContent = isRegister
-        ? "Nhập thông tin để tạo tài khoản và bắt đầu quản lý cửa hàng."
-        : "Vui lòng nhập thông tin để truy cập không gian quản trị.";
+    elements.authSubtitle.textContent = "";
+    elements.authSubtitle.classList.add("hidden");
     elements.authSubmitButton.textContent = isRegister ? "Đăng ký" : "Đăng nhập";
-    elements.authFooterText.innerHTML = isRegister
-        ? 'Đã có tài khoản? <button class="inline-link" id="authFooterSwitch" type="button">Đăng nhập ngay</button>'
-        : 'Chưa có tài khoản? <button class="inline-link" id="authFooterSwitch" type="button">Đăng ký ngay</button>';
+    elements.authFooterText.textContent = "";
+    elements.authFooterText.classList.add("hidden");
     elements.passwordInput.value = "";
     elements.confirmPasswordInput.value = "";
 }
 
 export async function login(email, password) {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
     const payload = await apiFetch("/api/auth/login", {
         method: "POST",
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({
+            email: normalizedEmail,
+            password: String(password || "")
+        })
     });
 
     if (!payload?.token || !payload?.user) {
@@ -166,6 +296,14 @@ export async function login(email, password) {
     state.token = payload.token;
     state.refreshToken = payload.refresh_token || "";
     state.user = payload.user;
+    recordActivityLog({
+        id: `login-${Date.now()}`,
+        action: "login",
+        targetType: "Hệ thống",
+        targetName: "Web Admin",
+        detail: "Đăng nhập web admin thành công",
+        status: "success"
+    });
     saveSession();
     updateSessionUi();
 }
@@ -173,7 +311,11 @@ export async function login(email, password) {
 export async function registerAccount(username, email, password) {
     await apiFetch("/api/auth/register", {
         method: "POST",
-        body: JSON.stringify({ username, email, password })
+        body: JSON.stringify({
+            username: String(username || "").trim(),
+            email: String(email || "").trim().toLowerCase(),
+            password: String(password || "")
+        })
     });
 }
 
@@ -181,12 +323,26 @@ export function logout(showMessage = true) {
     state.token = "";
     state.refreshToken = "";
     state.user = null;
+    state.chatConversations = [];
+    state.chatMessages = [];
+    state.chatCurrentConversationId = null;
+    state.chatSearch = "";
+    state.chatMessageDraft = "";
     state.categories = [];
+    state.coupons = [];
+    state.vouchers = [];
+    state.users = [];
+    state.customers = [];
+    state.usersHydrated = false;
+    state.customersHydrated = false;
     state.products = [];
     state.orders = [];
+    state.orderWorkspace = "list";
     state.dashboard = null;
+    deactivateChatsPanel();
     saveSession();
     updateSessionUi();
     setActivePanel("login");
     if (showMessage) showToast("Đã đăng xuất.");
 }
+

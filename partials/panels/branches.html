@@ -1,0 +1,91 @@
+﻿      <section class="panel hidden" id="branchesPanel">
+        <div class="panel-head">
+          <div>
+            <h2>Quản lý chi nhánh</h2>
+          </div>
+          <div class="panel-actions">
+            <button class="primary-button" id="openBranchFormButton" type="button">Thêm chi nhánh</button>
+          </div>
+        </div>
+        <p class="section-copy hidden" id="branchesMeta">0 chi nhánh</p>
+
+        <div id="branchesContent"></div>
+
+        <div class="modal-backdrop hidden" id="branchModal">
+          <div class="modal-card branch-modal-card">
+            <div class="branch-modal-header">
+              <h2>Thêm chi nhánh mới</h2>
+              <button class="user-modal-close" id="closeBranchModalButton" type="button" aria-label="Đóng popup thêm chi nhánh">×</button>
+            </div>
+
+            <form id="branchForm" class="branch-form" autocomplete="off">
+              <input type="hidden" name="key">
+              <section class="branch-form-section">
+                <h3>▣ Thông tin chung</h3>
+                <div class="branch-upload-label">
+                  <span>Ảnh chi nhánh</span>
+                  <div class="branch-upload-box" role="button" tabindex="0" aria-label="Chọn ảnh chi nhánh">
+                    <img id="branchImagePreview" class="branch-image-preview hidden" alt="Ảnh chi nhánh">
+                    <div class="branch-upload-placeholder">
+                      <strong>▣</strong>
+                      <b>Nhấn để tải ảnh lên</b>
+                      <small>PNG, JPG tối đa 5MB</small>
+                    </div>
+                  </div>
+                  <input id="branchImageInput" type="file" accept="image/*" hidden>
+                </div>
+                <div class="compact-grid">
+                  <label>
+                    <span>Tên chi nhánh</span>
+                    <input name="label" placeholder="VD: Garden Fresh Quận 1" autocomplete="off" required>
+                  </label>
+                  <label>
+                    <span>Người quản lý</span>
+                    <input name="manager" placeholder="Tên quản lý" autocomplete="off">
+                  </label>
+                </div>
+              </section>
+
+              <section class="branch-form-section">
+                <h3>⌖ Liên hệ & Địa chỉ</h3>
+                <div class="compact-grid">
+                  <label>
+                    <span>Số điện thoại</span>
+                    <input name="phone" placeholder="0901 234 567" autocomplete="off" inputmode="tel" required>
+                  </label>
+                  <label>
+                    <span>Thành phố</span>
+                    <select name="city" autocomplete="off" required>
+                      <option value="">Chọn thành phố</option>
+                    </select>
+                  </label>
+                  <label class="span-2">
+                    <span>Địa chỉ chi tiết</span>
+                    <input name="address" placeholder="Số nhà, Tên đường, Phường/Xã..." autocomplete="off" required>
+                  </label>
+                </div>
+              </section>
+
+              <section class="branch-form-section">
+                <h3>◷ Thời gian làm việc</h3>
+                <div class="compact-grid branch-hours-grid">
+                  <label>
+                    <span>Giờ mở cửa</span>
+                    <input name="open_time" type="time" autocomplete="off" value="07:00" required>
+                  </label>
+                  <label>
+                    <span>Giờ đóng cửa</span>
+                    <input name="close_time" type="time" autocomplete="off" value="21:00" required>
+                  </label>
+                </div>
+              </section>
+
+              <div class="branch-modal-footer">
+                <button class="ghost-button" id="cancelBranchFormButton" type="button">Hủy</button>
+                <button class="primary-button" type="submit">Thêm chi nhánh</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+

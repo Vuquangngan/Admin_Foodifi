@@ -1,0 +1,71 @@
+﻿      <section class="panel hidden" id="ordersPanel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Orders</p>
+            <h2>Đơn hàng</h2>
+          </div>
+          <button class="secondary-button" id="refreshOrdersButton" type="button">Làm mới</button>
+        </div>
+
+        <article class="surface" id="orderFilterCard">
+          <div class="section-head">
+            <h3>Bộ lọc đơn hàng</h3>
+          </div>
+          <form id="orderFilterForm" class="compact-grid order-filter-form">
+            <label class="order-filter-search">
+              <span>Tìm theo mã đơn</span>
+              <input name="order_code" placeholder="Ví dụ: ORD-1776...">
+            </label>
+            <label class="order-filter-payment">
+              <span>Thanh toán</span>
+              <select name="payment_status">
+                <option value="">Tất cả</option>
+                <option value="unpaid">Chưa thanh toán</option>
+                <option value="pending">Chờ thanh toán</option>
+                <option value="paid">Đã thanh toán</option>
+                <option value="failed">Thanh toán lỗi</option>
+                <option value="cancelled">Đã hủy</option>
+              </select>
+            </label>
+            <button class="primary-button order-filter-submit" type="submit">Tìm kiếm</button>
+            <label class="span-2 order-status-filter-field">
+              <span>Trạng thái đơn</span>
+              <input type="hidden" name="status" value="">
+              <div class="order-status-filter-chips" data-order-status-filter>
+                <button class="order-status-filter-chip active" type="button" data-order-status-value="">Tất cả</button>
+                <button class="order-status-filter-chip" type="button" data-order-status-value="pending">Chờ xác nhận</button>
+                <button class="order-status-filter-chip" type="button" data-order-status-value="confirmed">Đã xác nhận</button>
+                <button class="order-status-filter-chip" type="button" data-order-status-value="preparing">Đang xử lý</button>
+                <button class="order-status-filter-chip" type="button" data-order-status-value="shipping">Đang giao</button>
+                <button class="order-status-filter-chip" type="button" data-order-status-value="completed">Hoàn thành</button>
+                <button class="order-status-filter-chip" type="button" data-order-status-value="cancelled">Đã hủy</button>
+              </div>
+            </label>
+          </form>
+        </article>
+
+        <article class="surface" id="orderListCard">
+          <div class="section-head">
+            <h3>Danh sách đơn hàng</h3>
+            <p id="ordersMeta" class="section-copy"></p>
+          </div>
+          <div id="ordersContent" class="stack-list"></div>
+        </article>
+
+        <article class="surface hidden" id="orderComplaintsCard">
+          <div class="section-head">
+            <h3>Danh sách khiếu nại</h3>
+            <p id="complaintsMeta" class="section-copy"></p>
+          </div>
+          <div id="complaintsContent" class="stack-list"></div>
+        </article>
+
+        <article class="surface hidden" id="orderCreateCard">
+          <div class="section-head">
+            <h3>Tạo đơn hàng mới</h3>
+            <p class="section-copy">Chọn sản phẩm, nhập thông tin khách và tạo đơn trực tiếp từ admin.</p>
+          </div>
+          <div id="orderCreateContent"></div>
+        </article>
+      </section>
+

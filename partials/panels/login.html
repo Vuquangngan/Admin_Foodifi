@@ -1,0 +1,66 @@
+﻿      <section class="panel active auth-panel" id="loginPanel">
+        <div class="auth-stage">
+          <article class="auth-card">
+            <div class="auth-brand-line">
+              <span class="auth-brand-icon">◔</span>
+              <span>Garden Fresh Admin</span>
+            </div>
+
+            <div class="auth-tab-row">
+              <button class="auth-tab active" data-auth-mode="login" type="button">Đăng nhập</button>
+              <button class="auth-tab" data-auth-mode="register" type="button">Đăng ký</button>
+            </div>
+
+            <div class="auth-head">
+              <h2 id="authTitle">Đăng nhập hệ thống</h2>
+              <p id="authSubtitle" class="hidden"></p>
+            </div>
+
+            <form id="loginForm" class="auth-form" method="post">
+              <label class="auth-field hidden" id="usernameField">
+                <span>Tên hiển thị</span>
+                <div class="input-shell">
+                  <span class="input-icon">👤</span>
+                  <input id="usernameInput" name="username" placeholder="Nhập tên quản trị viên">
+                </div>
+              </label>
+
+              <label class="auth-field">
+                <span>Email</span>
+                <div class="input-shell">
+                  <span class="input-icon">@</span>
+                  <input id="emailInput" name="email" type="email" placeholder="Nhập email quản trị" required>
+                </div>
+              </label>
+
+              <div class="auth-row">
+                <span class="auth-label">Mật khẩu</span>
+                <button class="inline-link" id="forgotPasswordButton" type="button">Quên mật khẩu?</button>
+              </div>
+
+              <label class="auth-field">
+                <div class="input-shell">
+                  <span class="input-icon">🔒</span>
+                  <input id="passwordInput" name="password" type="password" placeholder="Nhập mật khẩu" required>
+                  <button class="password-toggle" type="button" data-password-toggle="passwordInput">👁</button>
+                </div>
+              </label>
+
+              <label class="auth-field hidden" id="confirmPasswordField">
+                <span>Xác nhận mật khẩu</span>
+                <div class="input-shell">
+                  <span class="input-icon">🔐</span>
+                  <input id="confirmPasswordInput" name="confirm_password" type="password" placeholder="Nhập lại mật khẩu">
+                  <button class="password-toggle" type="button" data-password-toggle="confirmPasswordInput">👁</button>
+                </div>
+              </label>
+
+              <button class="auth-submit" id="authSubmitButton" type="submit">Đăng nhập</button>
+              <input id="apiBaseInput" name="apiBase" type="hidden" value="http://localhost:3000">
+            </form>
+
+            <p class="auth-footer hidden" id="authFooterText"></p>
+          </article>
+        </div>
+      </section>
+

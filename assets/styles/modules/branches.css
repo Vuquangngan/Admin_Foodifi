@@ -1,0 +1,1223 @@
+﻿.branches-shell {
+  display: grid;
+  gap: 22px;
+}
+
+.branches-search-bar {
+  width: min(420px, 100%);
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #dfead9;
+  color: #688174;
+}
+
+.branches-search-bar input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #2c4034;
+  font-weight: 700;
+}
+
+.branches-search-bar input::placeholder {
+  color: #7c8f83;
+}
+
+.branches-toolbar {
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 18px 22px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18px 46px rgba(63, 92, 61, 0.08);
+}
+
+.branch-filter-toggle,
+.branch-filter-pill,
+.branch-city-pill {
+  border: none;
+  border-radius: 999px;
+  min-height: 38px;
+  padding: 0 16px;
+  background: #e8f1e3;
+  color: #284334;
+  font-weight: 800;
+}
+
+.branch-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  padding-left: 0;
+}
+
+.branch-filter-pill.active {
+  background: #35cf72;
+  color: #fff;
+}
+
+.branch-filter-label {
+  color: #253b2f;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.branch-table-card {
+  border-radius: 34px;
+  padding: 34px 38px;
+}
+
+.branch-table-wrap {
+  overflow: auto;
+}
+
+.branch-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.branch-table th {
+  padding: 16px 14px;
+  text-align: left;
+  color: #214434;
+  font-size: 0.92rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+  background: linear-gradient(180deg, #f1f7ed 0%, #e8f2e4 100%);
+  border-bottom: 1px solid rgba(17, 95, 54, 0.24);
+  border-right: 1px solid rgba(17, 95, 54, 0.18);
+  white-space: nowrap;
+}
+
+.branch-table td {
+  padding: 18px 14px;
+  background: rgba(250, 253, 248, 0.84);
+  vertical-align: middle;
+  font-size: 1.04rem;
+  border-bottom: 1px solid rgba(17, 95, 54, 0.16);
+  border-right: 1px solid rgba(17, 95, 54, 0.14);
+}
+
+.branch-table th:last-child,
+.branch-table td:last-child {
+  border-right: none;
+}
+
+.branch-table tbody tr:nth-child(even) td {
+  background: rgba(241, 247, 237, 0.42);
+}
+
+.branch-table tbody tr:hover td {
+  background: rgba(219, 238, 211, 0.42);
+}
+
+.branch-table thead th:first-child {
+  border-radius: 18px 0 0 18px;
+}
+
+.branch-table thead th:last-child {
+  border-radius: 0 18px 18px 0;
+}
+
+.branch-empty-state {
+  text-align: center;
+  color: var(--ink-muted);
+  padding: 34px !important;
+}
+
+.table-wrap,
+.categories-table-wrap,
+.suppliers-table-wrap,
+.users-table-wrap,
+.customer-history-table-wrap,
+.voucher-table-wrap,
+.orders-table-scroll,
+.warehouse-table-scroll,
+.publish-table-scroll,
+.branch-table-wrap,
+.shift-board-table-wrap {
+  border-radius: 20px;
+}
+
+.list-table th,
+.categories-table th,
+.suppliers-table th,
+.users-table th,
+.customer-history-table th,
+.orders-table th,
+.warehouse-table th,
+.publish-table th,
+.branch-table th,
+.shift-board-table thead th {
+  color: #214434;
+  font-size: 0.92rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.075em;
+  background: linear-gradient(180deg, #f1f7ed 0%, #e8f2e4 100%);
+  border-bottom: 1px solid rgba(17, 95, 54, 0.24);
+  border-right: 1px solid rgba(17, 95, 54, 0.18);
+  white-space: nowrap;
+}
+
+.list-table td,
+.categories-table td,
+.suppliers-table td,
+.users-table td,
+.customer-history-table td,
+.orders-table td,
+.warehouse-table td,
+.publish-table td,
+.branch-table td,
+.shift-board-table td {
+  border-bottom: 1px solid rgba(17, 95, 54, 0.16);
+  border-right: 1px solid rgba(17, 95, 54, 0.14);
+}
+
+.list-table th:last-child,
+.list-table td:last-child,
+.categories-table th:last-child,
+.categories-table td:last-child,
+.suppliers-table th:last-child,
+.suppliers-table td:last-child,
+.users-table th:last-child,
+.users-table td:last-child,
+.customer-history-table th:last-child,
+.customer-history-table td:last-child,
+.orders-table th:last-child,
+.orders-table td:last-child,
+.warehouse-table th:last-child,
+.warehouse-table td:last-child,
+.publish-table th:last-child,
+.publish-table td:last-child,
+.branch-table th:last-child,
+.branch-table td:last-child,
+.shift-board-table th:last-child,
+.shift-board-table td:last-child {
+  border-right: none;
+}
+
+.list-table tbody tr:nth-child(even),
+.categories-table tbody tr:nth-child(even),
+.suppliers-table tbody tr:nth-child(even),
+.users-table tbody tr:nth-child(even),
+.customer-history-table tbody tr:nth-child(even),
+.orders-table tbody tr:nth-child(even),
+.warehouse-table tbody tr:nth-child(even),
+.publish-table tbody tr:nth-child(even),
+.branch-table tbody tr:nth-child(even),
+.shift-board-table tbody tr:nth-child(even) {
+  background: rgba(241, 247, 237, 0.28);
+}
+
+.list-table tbody tr:hover,
+.categories-table tbody tr:hover,
+.suppliers-table tbody tr:hover,
+.users-table tbody tr:hover,
+.customer-history-table tbody tr:hover,
+.orders-table tbody tr:hover,
+.warehouse-table tbody tr:hover,
+.publish-table tbody tr:hover,
+.branch-table tbody tr:hover,
+.shift-board-table tbody tr:hover {
+  background: rgba(219, 238, 211, 0.28);
+}
+
+.branch-identity {
+  display: grid;
+  grid-template-columns: 64px minmax(150px, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+
+.branch-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: #dfebe0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--green-strong);
+  font-weight: 900;
+}
+
+.branch-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.branch-identity strong,
+.branch-admin strong,
+.branch-operation strong {
+  display: block;
+  color: #14251b;
+  font-weight: 900;
+}
+
+.branch-identity small,
+.branch-admin small,
+.branch-operation small {
+  display: block;
+  margin-top: 4px;
+  color: #617568;
+  font-size: 0.88rem;
+}
+
+.branch-address {
+  max-width: 230px;
+  color: #24372c;
+  line-height: 1.45;
+}
+
+.branch-operation small {
+  color: #008b55;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.82rem;
+}
+
+.branch-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 0.84rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.branch-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.branch-status.active {
+  background: #bff3d5;
+  color: #087a43;
+}
+
+.branch-status.danger {
+  background: #ffe1df;
+  color: #d0473f;
+}
+
+.branch-status.warning {
+  background: #fff0d8;
+  color: #b96219;
+}
+
+.branch-actions {
+  display: grid;
+  gap: 10px;
+  justify-items: stretch;
+}
+
+.branch-actions button {
+  min-width: 78px;
+  height: 40px;
+  border: 1px solid rgba(18, 50, 36, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: #123224;
+  font-size: 0.98rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.branch-actions button .app-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  stroke-width: 3;
+}
+
+.branch-actions button:hover {
+  transform: translateY(-1px);
+  background: #e8f5e6;
+}
+
+.branch-actions button[data-branch-action="delete"]:hover {
+  background: #ffe9e7;
+  color: #c83f36;
+}
+
+.branch-actions button[data-branch-action="toggle-status"]:hover {
+  background: #fff1df;
+  color: #ad5a17;
+}
+
+.branch-modal-card {
+  width: min(620px, calc(100vw - 32px));
+  max-height: calc(100vh - 42px);
+  padding: 0;
+  overflow: auto;
+}
+
+.branch-modal-header,
+.branch-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 26px;
+}
+
+.branch-modal-header h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.branch-form {
+  display: grid;
+  gap: 26px;
+  padding: 0 26px 24px;
+}
+
+.branch-form-section {
+  display: grid;
+  gap: 14px;
+}
+
+.branch-form-section h3 {
+  margin: 0;
+  color: #2d9a66;
+  font-size: 0.95rem;
+}
+
+.branch-hours-grid input[type="time"] {
+  min-height: 48px;
+}
+
+.branch-upload-label {
+  display: grid;
+  gap: 8px;
+}
+
+.branch-upload-box {
+  min-height: 128px;
+  border-radius: 14px;
+  border: 1px dashed rgba(31, 132, 77, 0.28);
+  background: #eef7eb;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.branch-upload-placeholder {
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  color: #4a9b70;
+  text-align: center;
+  z-index: 0;
+}
+
+.branch-upload-placeholder strong {
+  font-size: 1.8rem;
+}
+
+.branch-upload-placeholder small {
+  color: #6f8474;
+}
+
+.branch-image-preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 2;
+}
+
+.branch-modal-footer {
+  justify-content: flex-end;
+  background: #f3faef;
+  border-radius: 0 0 22px 22px;
+}
+
+.branch-import-shell {
+  display: grid;
+  gap: 18px;
+}
+
+.branch-import-topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+  gap: 16px;
+  align-items: end;
+}
+
+.branch-import-topbar h3 {
+  margin: 0 0 8px;
+  font-size: clamp(1.8rem, 2.4vw, 2.4rem);
+  letter-spacing: -0.04em;
+}
+
+.branch-import-topbar p {
+  margin: 0;
+  color: #617665;
+}
+
+.branch-import-select,
+.branch-import-note,
+.branch-import-date {
+  display: grid;
+  gap: 8px;
+  font-weight: 900;
+}
+
+.branch-import-select select,
+.branch-import-note textarea,
+.branch-import-date input,
+.branch-import-stepper input,
+.branch-request-draft-item input {
+  border: 1px solid rgba(90, 64, 42, 0.18);
+  background: #fffdf9;
+  border-radius: 14px;
+  color: #2b211a;
+  font: inherit;
+}
+
+.branch-import-select select,
+.branch-import-date input {
+  min-height: 48px;
+  padding: 0 14px;
+}
+
+.branch-import-info-card {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 14px 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(17, 95, 54, 0.1);
+}
+
+.branch-import-info-card div {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 2px 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.branch-import-info-card .app-icon {
+  grid-row: span 2;
+  color: #0f8b48;
+}
+
+.branch-import-info-card span,
+.branch-import-muted,
+.branch-request-draft-total span {
+  color: #66796b;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.branch-import-info-card strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch-import-stats,
+.branch-import-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.branch-import-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.branch-import-stat {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(17, 95, 54, 0.08);
+  box-shadow: 0 18px 40px rgba(28, 62, 37, 0.07);
+}
+
+.branch-import-stat-icon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ddf5e8;
+  color: #0d8d48;
+  flex: none;
+}
+
+.branch-import-stat.danger .branch-import-stat-icon {
+  background: #ffe8df;
+  color: #d26035;
+}
+
+.branch-import-stat.pending .branch-import-stat-icon {
+  background: #e7f1ff;
+  color: #2b78d4;
+}
+
+.branch-import-stat.shipping .branch-import-stat-icon {
+  background: #efe7ff;
+  color: #7c4dff;
+}
+
+.branch-import-stat span {
+  color: #314b3a;
+  font-weight: 800;
+}
+
+.branch-import-stat strong {
+  display: block;
+  margin: 2px 0;
+  color: #0d8d48;
+  font-size: 1.7rem;
+}
+
+.branch-import-stat small {
+  color: #66796b;
+}
+
+.branch-import-layout {
+  grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.65fr);
+  align-items: start;
+}
+
+.branch-import-card {
+  padding: 20px;
+  border-radius: 24px;
+}
+
+.branch-import-table-wrap {
+  overflow: auto;
+}
+
+.branch-import-table,
+.branch-import-history-table {
+  min-width: 860px;
+}
+
+.branch-product-cell,
+.branch-request-draft-item {
+  display: grid;
+  align-items: center;
+  gap: 12px;
+}
+
+.branch-product-cell {
+  grid-template-columns: 46px minmax(170px, 1fr);
+}
+
+.branch-product-cell img,
+.branch-request-draft-item img {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #edf6e9;
+}
+
+.branch-product-cell span,
+.branch-request-draft-item span {
+  color: #687d6b;
+  font-size: 0.86rem;
+}
+
+.branch-stock-danger {
+  color: #d22f2f;
+}
+
+.branch-import-stepper {
+  display: grid;
+  grid-template-columns: 34px 64px 34px;
+  align-items: center;
+  gap: 6px;
+}
+
+.branch-import-stepper button,
+.branch-request-draft-item button {
+  border: none;
+  border-radius: 10px;
+  min-height: 34px;
+  background: #edf4ea;
+  color: #214434;
+  font-weight: 900;
+}
+
+.branch-import-stepper input,
+.branch-request-draft-item input {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 8px;
+  text-align: center;
+  font-weight: 900;
+}
+
+.branch-request-draft-card {
+  position: sticky;
+  top: 18px;
+}
+
+.branch-import-badge,
+.branch-request-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #ddf5e8;
+  color: #0d8d48;
+  font-weight: 900;
+  font-size: 0.82rem;
+}
+
+.branch-request-status.warning {
+  background: #fff0d8;
+  color: #bd6b00;
+}
+
+.branch-request-status.neutral {
+  background: #edf4ea;
+  color: #617665;
+}
+
+.branch-request-status.shipping {
+  background: #efe7ff;
+  color: #6d40e8;
+}
+
+.branch-request-status.completed,
+.branch-request-status.active {
+  background: #ddf5e8;
+  color: #0d8d48;
+}
+
+.branch-request-status.cancelled {
+  background: #ffe4e1;
+  color: #c2382f;
+}
+
+.branch-request-draft-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.branch-request-draft-item {
+  grid-template-columns: 46px minmax(0, 1fr) 70px 46px 36px;
+  padding: 10px;
+  border-radius: 16px;
+  background: #f5faf2;
+}
+
+.branch-request-draft-item button {
+  display: grid;
+  place-items: center;
+  color: #c2382f;
+}
+
+.branch-import-empty {
+  margin: 0;
+  padding: 18px;
+  border-radius: 16px;
+  background: #f5faf2;
+  color: #66796b;
+}
+
+.branch-import-note,
+.branch-import-date {
+  margin-top: 16px;
+}
+
+.branch-import-note textarea {
+  min-height: 112px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.branch-request-draft-total {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  border-top: 1px solid rgba(17, 95, 54, 0.12);
+  border-bottom: 1px solid rgba(17, 95, 54, 0.12);
+}
+
+.branch-request-draft-total div {
+  display: grid;
+  gap: 4px;
+  text-align: center;
+}
+
+.branch-request-draft-total strong {
+  color: #0d8d48;
+  font-size: 1.35rem;
+}
+
+.branch-request-draft-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.branch-shipment-shell {
+  display: grid;
+  gap: 12px;
+}
+
+.branch-shipment-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(380px, 430px);
+  gap: 16px;
+  align-items: start;
+}
+
+.branch-shipment-main-column {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.branch-shipment-branch-select {
+  width: min(320px, 100%);
+}
+
+.branch-shipment-branch-select select {
+  background: #fffefa;
+}
+
+.branch-shipment-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.branch-shipment-stats .branch-import-stat {
+  min-height: 112px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(28, 62, 37, 0.06);
+}
+
+.branch-shipment-stats .branch-import-stat-icon {
+  width: 44px;
+  height: 44px;
+}
+
+.branch-shipment-stats .branch-import-stat strong {
+  font-size: 1.45rem;
+}
+
+.branch-shipment-list-card,
+.branch-shipment-detail-card {
+  padding: 14px;
+  border-radius: 18px;
+}
+
+.branch-shipment-tabs,
+.branch-shipment-filter-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.branch-shipment-tabs button {
+  border: none;
+  border-radius: 999px;
+  min-height: 34px;
+  padding: 0 13px;
+  background: #edf4ea;
+  color: #526757;
+  font-weight: 900;
+}
+
+.branch-shipment-tabs button.active {
+  background: #0f8b48;
+  color: #fff;
+}
+
+.branch-shipment-filter-row input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(90, 64, 42, 0.18);
+  border-radius: 16px;
+  background: #fffdf9;
+  font: inherit;
+}
+
+.branch-shipment-request-list {
+  display: grid;
+  gap: 8px;
+}
+
+.branch-shipment-request-card {
+  display: grid;
+  grid-template-columns: 44px minmax(150px, 1fr) minmax(160px, 0.9fr) minmax(125px, 0.7fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid rgba(17, 95, 54, 0.12);
+  border-radius: 16px;
+  background: #fffefa;
+  cursor: pointer;
+}
+
+.branch-shipment-request-card.active {
+  border-color: rgba(15, 139, 72, 0.4);
+  box-shadow: 0 14px 30px rgba(15, 139, 72, 0.1);
+}
+
+.branch-shipment-status-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff0d8;
+  color: #bd6b00;
+}
+
+.branch-shipment-status-icon.active {
+  background: #ddf5e8;
+  color: #0d8d48;
+}
+
+.branch-shipment-status-icon.shipping {
+  background: #efe7ff;
+  color: #6d40e8;
+}
+
+.branch-shipment-status-icon.cancelled {
+  background: #ffe4e1;
+  color: #c2382f;
+}
+
+.branch-shipment-request-main,
+.branch-shipment-request-meta,
+.branch-shipment-request-time {
+  display: grid;
+  gap: 5px;
+}
+
+.branch-shipment-request-main span,
+.branch-shipment-request-meta span,
+.branch-shipment-request-time span,
+.branch-shipment-request-time small {
+  color: #66796b;
+  font-size: 0.86rem;
+}
+
+.branch-shipment-detail-card {
+  position: sticky;
+  top: 0;
+  min-height: calc(100vh - 18px);
+  max-height: calc(100vh - 18px);
+  overflow: auto;
+}
+
+.branch-shipment-detail-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.branch-shipment-detail-head h3 {
+  margin: 0 0 8px;
+}
+
+.branch-shipment-detail-head button {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: #edf4ea;
+  font-size: 1.35rem;
+}
+
+.branch-shipment-detail-code,
+.branch-shipment-detail-meta,
+.branch-shipment-detail-products {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.branch-shipment-detail-code strong {
+  font-size: 1.25rem;
+}
+
+.branch-shipment-detail-code span,
+.branch-shipment-detail-meta span {
+  color: #66796b;
+}
+
+.branch-shipment-detail-meta {
+  padding: 12px;
+  border-radius: 16px;
+  background: #f5faf2;
+}
+
+.branch-shipment-detail-meta div {
+  display: grid;
+  gap: 4px;
+}
+
+.branch-shipment-detail-products h4 {
+  margin: 0;
+}
+
+.branch-shipment-product-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 64px 38px;
+  gap: 8px;
+  align-items: center;
+  padding: 9px;
+  border-radius: 14px;
+  background: #f5faf2;
+}
+
+.branch-shipment-product-row img {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.branch-shipment-product-row div {
+  display: grid;
+  gap: 3px;
+}
+
+.branch-shipment-product-row span,
+.branch-shipment-product-row small {
+  color: #66796b;
+  font-size: 0.82rem;
+}
+
+.branch-shipment-product-row input {
+  min-height: 36px;
+  width: 100%;
+  text-align: center;
+  border: 1px solid rgba(90, 64, 42, 0.18);
+  border-radius: 12px;
+  background: #fffdf9;
+  font-weight: 900;
+}
+
+.branch-shipment-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(17, 95, 54, 0.12);
+  border-bottom: 1px solid rgba(17, 95, 54, 0.12);
+}
+
+.branch-shipment-total span {
+  color: #66796b;
+  font-weight: 800;
+}
+
+.branch-shipment-total strong {
+  color: #0d8d48;
+  font-size: 1.25rem;
+}
+
+.branch-shipment-detail-actions {
+  display: grid;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.branch-shipment-danger-button {
+  color: #c2382f;
+  border: 1px solid rgba(194, 56, 47, 0.2);
+  background: #fff7f5;
+}
+
+@media (max-width: 1180px) {
+  .branch-import-topbar,
+  .branch-import-layout,
+  .branch-import-info-card,
+  .branch-import-stats,
+  .branch-shipment-stats,
+  .branch-shipment-layout,
+  .branch-shipment-request-card {
+    grid-template-columns: 1fr;
+  }
+
+  .branch-request-draft-card {
+    position: static;
+  }
+}
+
+/* Shipment review layout: keep filters/list on the left and the detail pane pinned on the right. */
+.branch-shipment-layout {
+  grid-template-columns: minmax(0, 1fr) clamp(380px, 28vw, 440px);
+  align-items: start;
+}
+
+.branch-shipment-main-column {
+  min-width: 0;
+}
+
+.branch-shipment-branch-select {
+  justify-self: start;
+  width: min(320px, 100%);
+}
+
+.branch-shipment-detail-card {
+  position: sticky;
+  top: 12px;
+  align-self: start;
+  height: calc(100vh - 24px);
+  min-height: calc(100vh - 24px);
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+}
+
+@media (max-width: 1180px) {
+  .branch-shipment-detail-card {
+    position: static;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+}
+
+/* Compact branch list: keep rows readable without oversized manager icons. */
+.branches-shell {
+  gap: 16px;
+}
+
+.branches-search-bar {
+  width: min(360px, 100%);
+  height: 40px;
+}
+
+.branches-toolbar {
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 22px;
+}
+
+.branch-filter-toggle,
+.branch-filter-pill,
+.branch-city-pill {
+  min-height: 34px;
+  padding: 0 14px;
+}
+
+.branch-filter-toggle {
+  padding: 0 6px 0 0;
+}
+
+.branch-table-card {
+  border-radius: 28px;
+  padding: 18px 22px;
+}
+
+.branch-table th {
+  padding: 13px 12px;
+  font-size: 0.84rem;
+}
+
+.branch-table td {
+  padding: 14px 12px;
+  font-size: 0.96rem;
+}
+
+.branch-identity {
+  grid-template-columns: 52px minmax(150px, 1fr);
+  gap: 12px;
+}
+
+.branch-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+
+.branch-admin {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-width: 180px;
+}
+
+.branch-admin-avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e3f0dc;
+  color: #244434;
+}
+
+.branch-admin-avatar .app-icon {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2.4;
+}
+
+.branch-address {
+  max-width: 280px;
+}
+
+.branch-status {
+  padding: 7px 13px;
+  font-size: 0.78rem;
+}
+
+.branch-actions {
+  gap: 8px;
+  min-width: 136px;
+}
+
+.branch-actions button {
+  min-width: 0;
+  height: 34px;
+  font-size: 0.9rem;
+}
+

@@ -1,0 +1,129 @@
+﻿      <section class="panel hidden" id="suppliersPanel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Suppliers</p>
+            <h2>Nhà cung cấp</h2>
+            <p class="section-copy">Quản lý đối tác đầu vào, thông tin liên hệ và số lượng sản phẩm đang nhập từ từng nhà cung cấp.</p>
+          </div>
+          <button class="secondary-button" id="refreshSuppliersButton" type="button">Làm mới</button>
+        </div>
+
+        <article class="surface" id="supplierFilterCard">
+          <div class="section-head">
+            <h3>Bộ lọc nhà cung cấp</h3>
+            <button class="primary-button" id="openSupplierFormButton" type="button">Thêm nhà cung cấp</button>
+          </div>
+          <form id="supplierFilterForm" class="compact-grid">
+            <label>
+              <span>Từ khóa</span>
+              <input name="keyword" placeholder="Tìm kiếm nhà cung cấp...">
+            </label>
+            <label>
+              <span>Trạng thái</span>
+              <select name="status">
+                <option value="">Tất cả</option>
+                <option value="active">Đang hoạt động</option>
+                <option value="inactive">Ngừng hoạt động</option>
+              </select>
+            </label>
+            <button class="primary-button" type="submit">Lọc</button>
+          </form>
+        </article>
+
+        <div id="suppliersSummary" class="suppliers-summary"></div>
+
+        <div class="modal-backdrop hidden" id="supplierFormCard">
+          <div class="modal-card supplier-modal-popup">
+            <div class="supplier-form-header">
+              <div>
+                <h2 id="supplierFormTitle">Thêm nhà cung cấp</h2>
+                <p class="section-copy">Lưu thông tin định danh, liên hệ và địa chỉ để đồng bộ vào luồng nhập sản phẩm.</p>
+              </div>
+              <div class="supplier-form-header-actions">
+                <button class="ghost-button" id="cancelSupplierFormButton" type="button">Hủy</button>
+                <button class="primary-button" id="supplierFormSubmitButton" form="supplierForm" type="submit">Lưu nhà cung cấp</button>
+              </div>
+            </div>
+
+            <form id="supplierForm" class="supplier-form-layout">
+              <input type="hidden" name="id">
+              <input type="hidden" name="logo_url">
+              <article class="surface supplier-form-section supplier-form-media-section">
+                <div class="section-head">
+                  <h3>Logo đối tác</h3>
+                </div>
+                <div class="supplier-logo-layout">
+                  <label class="upload-dropzone supplier-logo-dropzone">
+                    <input id="supplierLogoFile" type="file" accept="image/*" hidden>
+                    <span class="upload-dropzone-icon">☁</span>
+                    <strong>Tải logo đối tác</strong>
+                    <span>JPG, PNG, WEBP hoặc GIF. Logo sẽ hiện ngay trong bảng nhà cung cấp.</span>
+                  </label>
+                  <div class="supplier-logo-preview-card">
+                    <img id="supplierLogoPreview" class="supplier-logo-preview hidden" alt="Logo đối tác">
+                    <p class="section-copy">Nên dùng logo nền sáng hoặc PNG trong suốt để hiển thị đẹp hơn.</p>
+                  </div>
+                </div>
+              </article>
+              <article class="surface supplier-form-section">
+                <div class="section-head">
+                  <h3>Thông tin định danh</h3>
+                </div>
+                <div class="compact-grid">
+                  <label>
+                    <span>Tên nhà cung cấp</span>
+                    <input name="name" placeholder="Ví dụ: Nông trại Xanh Đà Lạt" required>
+                  </label>
+                  <label>
+                    <span>Mã nhà cung cấp</span>
+                    <input name="code" placeholder="NCC-2026-001" required>
+                  </label>
+                  <label class="span-2">
+                    <span>Ghi chú đối tác</span>
+                    <textarea name="note" rows="4" placeholder="Thông tin về năng lực cung ứng, mùa vụ hoặc ghi chú nội bộ..."></textarea>
+                  </label>
+                </div>
+              </article>
+
+              <article class="surface supplier-form-section">
+                <div class="section-head">
+                  <h3>Thông tin liên hệ</h3>
+                </div>
+                <div class="compact-grid">
+                  <label>
+                    <span>Người liên hệ</span>
+                    <input name="contact_person" placeholder="Họ và tên">
+                  </label>
+                  <label>
+                    <span>Số điện thoại</span>
+                    <input name="phone" placeholder="09xx xxx xxx">
+                  </label>
+                  <label class="span-2">
+                    <span>Email</span>
+                    <input name="email" type="email" placeholder="contact@supplier.com">
+                  </label>
+                  <label class="span-2">
+                    <span>Địa chỉ chi tiết</span>
+                    <input name="address" placeholder="Số nhà, tên đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố...">
+                  </label>
+                  <label>
+                    <span>Trạng thái</span>
+                    <select name="status">
+                      <option value="active">Đang hoạt động</option>
+                      <option value="inactive">Ngừng hoạt động</option>
+                    </select>
+                  </label>
+                </div>
+              </article>
+            </form>
+          </div>
+        </div>
+
+        <article class="surface" id="supplierListCard">
+          <div class="section-head">
+            <p id="suppliersMeta" class="section-copy"></p>
+          </div>
+          <div id="suppliersContent"></div>
+        </article>
+      </section>
+

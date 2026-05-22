@@ -1,0 +1,463 @@
+﻿      <section class="panel hidden" id="productsPanel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow" id="productsPanelEyebrow"></p>
+            <h2 id="productsPanelTitle">Kho hàng</h2>
+            <p class="section-copy" id="productsPanelDescription">Theo dõi tồn kho, SKU và mức sẵn sàng bán của từng sản phẩm.</p>
+          </div>
+          <div class="products-panel-actions">
+            <article class="publish-branch-card hidden" id="publishBranchCard">
+              <span>Chi nhánh</span>
+              <strong id="publishBranchName">-</strong>
+              <small id="publishBranchCount">Tổng số chi nhánh: 0</small>
+              <i></i>
+            </article>
+            <button class="secondary-button" id="refreshProductsButton" type="button">Làm mới</button>
+          </div>
+        </div>
+
+        <div class="grid two-columns products-workspace-grid">
+          <article class="surface" id="productFilterCard">
+            <div class="section-head">
+              <h3>Bộ lọc</h3>
+            </div>
+            <form id="productFilterForm" class="compact-grid">
+              <label>
+                <span>Từ khóa</span>
+                <input name="keyword" placeholder="Tên sản phẩm...">
+              </label>
+              <label>
+                <span>Trạng thái</span>
+                <select name="visibility">
+                  <option value="">Tất cả</option>
+                  <option value="published">Đã đưa lên sàn</option>
+                  <option value="hidden">Ẩn khỏi sàn</option>
+                </select>
+              </label>
+              <label>
+                <span>Danh mục</span>
+                <select name="category_id" id="productFilterCategory">
+                  <option value="">Tất cả</option>
+                </select>
+              </label>
+              <button class="primary-button" type="submit">Áp dụng</button>
+            </form>
+          </article>
+
+          <article class="surface" id="productCreateCard">
+            <div class="section-head">
+              <h3 id="productFormTitle">Tạo sản phẩm</h3>
+              <button class="ghost-button" id="resetProductFormButton" type="button">Form mới</button>
+            </div>
+            <form id="productForm" class="compact-grid">
+              <input type="hidden" name="id">
+              <label>
+                <span>Danh mục</span>
+                <select name="category_id" id="productCategorySelect" required></select>
+              </label>
+              <label>
+                <span>Tên sản phẩm</span>
+                <input name="name" required>
+              </label>
+              <label>
+                <span>Slug</span>
+                <input name="slug" placeholder="tu-dong-neu-bo-trong">
+              </label>
+              <label>
+                <span>SKU</span>
+                <input name="sku">
+              </label>
+              <label>
+                <span>Giá bán</span>
+                <input name="price" type="text" inputmode="numeric" data-money-input required>
+              </label>
+              <label>
+                <span>Giá khuyến mãi</span>
+                <input name="sale_price" type="text" inputmode="numeric" data-money-input>
+              </label>
+              <label>
+                <span>Tồn kho</span>
+                <input name="stock_quantity" type="number" min="0" step="0.001" value="0">
+              </label>
+              <label>
+                <span>Trạng thái</span>
+                <select name="status">
+                  <option value="draft">Bản nháp</option>
+                  <option value="active">Đang bán</option>
+                  <option value="out_of_stock">Hết hàng</option>
+                  <option value="archived">Lưu trữ</option>
+                </select>
+              </label>
+              <label>
+                <span>Đơn vị bán</span>
+                <input name="sale_unit" value="đơn vị">
+              </label>
+              <label>
+                <span>Đơn vị kho</span>
+                <input name="stock_unit" value="đơn vị">
+              </label>
+              <label>
+                <span>Tỷ lệ kho / đơn vị bán</span>
+                <input name="stock_per_sale_unit" type="number" min="0.001" step="0.001" value="1">
+              </label>
+              <label>
+                <span>Ảnh đại diện URL</span>
+                <input name="thumbnail_url" placeholder="https://...">
+              </label>
+              <label class="span-2">
+                <span>Mô tả ngắn</span>
+                <textarea name="short_description" rows="2"></textarea>
+              </label>
+              <label class="span-2">
+                <span>Mô tả chi tiết</span>
+                <textarea name="description" rows="4"></textarea>
+              </label>
+              <label class="toggle-row">
+                <input name="is_published" type="checkbox">
+                <span>Hiển thị ngay sau khi lưu</span>
+              </label>
+              <label class="toggle-row">
+                <input name="is_featured" type="checkbox">
+                <span>Đánh dấu nổi bật</span>
+              </label>
+              <button class="primary-button span-2" type="submit">Lưu sản phẩm</button>
+            </form>
+          </article>
+
+          <article class="surface hidden product-intake-card" id="productImportCard">
+            <form id="productImportForm" class="product-intake-form">
+              <input type="hidden" name="id">
+              <section class="product-intake-main">
+                <article class="surface product-intake-section">
+                  <div class="section-head">
+                    <div>
+                      <h3>Thông tin cơ bản</h3>
+                    </div>
+                  </div>
+                  <div class="compact-grid">
+                    <label class="span-2">
+                      <span>Tên sản phẩm</span>
+                      <input name="name" placeholder="Ví dụ: Bưởi da xanh loại 1" required>
+                    </label>
+                    <label>
+                      <span>Danh mục</span>
+                      <select name="category_id" id="productImportCategory" required></select>
+                    </label>
+                    <label>
+                      <span>Thương hiệu / Xuất xứ</span>
+                      <input name="origin" placeholder="Ví dụ: Hợp tác xã Bến Tre">
+                    </label>
+                    <label class="span-2">
+                      <span>Mô tả ngắn</span>
+                      <textarea name="short_description" rows="4" placeholder="Thông tin tóm tắt về đặc điểm nổi bật của sản phẩm..."></textarea>
+                    </label>
+                  </div>
+                </article>
+
+                <article class="surface product-intake-section">
+                  <div class="section-head">
+                    <div>
+                      <h3>Giá và đơn vị</h3>
+                    </div>
+                  </div>
+                  <div class="compact-grid">
+                    <label>
+                      <span>Giá nhập (VND)</span>
+                      <input name="import_cost" type="text" inputmode="numeric" data-money-input value="0">
+                    </label>
+                    <input name="price" type="hidden" value="0">
+                    <label>
+                      <span>Đơn vị tính</span>
+                      <input name="sale_unit" list="productUnitOptions" placeholder="Ví dụ: kg, hộp, chai, gói, quả..." value="kg">
+                    </label>
+                  </div>
+                </article>
+
+                <article class="surface product-intake-section">
+                  <div class="section-head">
+                    <div>
+                      <h3>Kho và nguồn nhập</h3>
+                    </div>
+                  </div>
+                  <div class="compact-grid">
+                    <label>
+                      <span>Số lượng nhập kho</span>
+                      <input name="stock_quantity" type="number" min="0" step="0.001" value="0" required>
+                    </label>
+                    <label>
+                      <span>Ngưỡng cảnh báo hết hàng</span>
+                      <input name="reorder_level" type="number" min="0" step="1" placeholder="Ví dụ: 10">
+                    </label>
+                    <label>
+                      <span>Ngày sản xuất</span>
+                      <input name="production_date" type="date">
+                    </label>
+                    <label>
+                      <span>Ngày hết hạn</span>
+                      <input name="expiration_date" type="date">
+                    </label>
+                    <label class="span-2">
+                      <span>Nhà cung cấp</span>
+                      <select name="supplier_id" id="productImportSupplierSelect">
+                        <option value="">Chọn nhà cung cấp trong kho</option>
+                      </select>
+                    </label>
+                  </div>
+                </article>
+              </section>
+
+              <aside class="surface product-intake-side">
+                <div class="section-head">
+                  <div>
+                    <h3>Hình ảnh</h3>
+                    <p class="section-copy">Có thể chọn ảnh trực tiếp hoặc dán URL để dùng làm ảnh đại diện.</p>
+                  </div>
+                </div>
+                <label class="upload-dropzone">
+                  <input id="productImportImageFile" name="image_file" type="file" accept="image/*" hidden>
+                  <span class="upload-dropzone-icon">☁</span>
+                  <strong>Nhấp để tải lên</strong>
+                  <span>Định dạng JPG, PNG, tối đa 5MB</span>
+                </label>
+                <div class="product-import-preview-wrap">
+                  <img id="productImportPreview" class="product-import-preview hidden" alt="preview">
+                </div>
+                <label>
+                  <span>Hoặc dán URL ảnh</span>
+                  <input id="productImportImageUrl" name="thumbnail_url" placeholder="https://...">
+                </label>
+                <label>
+                  <span>Trạng thái hiển thị</span>
+                  <select name="status">
+                    <option value="draft">Nháp</option>
+                    <option value="active">Sẵn sàng bán</option>
+                  </select>
+                </label>
+                <label class="toggle-row product-intake-toggle">
+                  <input name="is_featured" type="checkbox">
+                  <span>Đánh dấu nổi bật</span>
+                </label>
+                <div class="product-intake-actions">
+                  <button class="ghost-button" id="resetProductImportButton" type="button">Hủy</button>
+                  <button class="primary-button" type="submit">Lưu sản phẩm</button>
+                </div>
+              </aside>
+            </form>
+          </article>
+        </div>
+
+        <article class="surface" id="productsListCard">
+          <div class="section-head">
+            <h3 id="productsListTitle">Tổng quan tồn kho</h3>
+            <p id="productsMeta" class="section-copy"></p>
+          </div>
+          <div id="productsContent" class="table-wrap"></div>
+        </article>
+
+        <div class="modal-backdrop hidden" id="productEditorModal">
+          <div class="modal-card product-editor-modal">
+            <div class="product-editor-header">
+              <div>
+                <h2 id="productEditorTitle">Cập nhật sản phẩm</h2>
+                <p>Chỉnh nhanh tên, mã, ảnh và các thông tin hiển thị của sản phẩm ngay trong popup.</p>
+              </div>
+              <button class="ghost-button" id="closeProductEditorButton" type="button">Đóng</button>
+            </div>
+
+            <form id="productEditorForm" class="product-editor-form">
+              <input type="hidden" name="id">
+              <input type="hidden" name="thumbnail_url">
+              <input type="hidden" name="slug">
+              <input type="hidden" name="sku">
+
+              <div class="product-editor-grid">
+                <article class="surface product-editor-preview">
+                  <span class="product-editor-preview-label">Ảnh hiện tại</span>
+                  <img id="productEditorPreviewImage" class="product-editor-preview-image" alt="Ảnh sản phẩm">
+                  <div class="product-editor-preview-meta">
+                    <strong id="productEditorPreviewName">-</strong>
+                    <span id="productEditorPreviewSku">-</span>
+                  </div>
+                </article>
+
+                <article class="surface product-editor-fields">
+                  <div class="compact-grid">
+                    <label>
+                      <span>Danh mục</span>
+                      <select name="category_id" id="productEditorCategorySelect" required></select>
+                    </label>
+                    <label>
+                      <span>Tên sản phẩm</span>
+                      <input name="name" required>
+                    </label>
+                    <label>
+                      <span>Giá gốc</span>
+                      <input name="price" type="text" inputmode="numeric" data-money-input required>
+                    </label>
+                    <label>
+                      <span>Đơn vị kho</span>
+                      <input name="stock_unit" value="đơn vị">
+                    </label>
+                    <label>
+                      <span>Giá bán lẻ</span>
+                      <input name="sale_price" type="text" inputmode="numeric" data-money-input>
+                    </label>
+                    <label>
+                      <span>Đơn vị bán</span>
+                      <input name="sale_unit" value="đơn vị">
+                    </label>
+                    <label>
+                      <span>Tồn kho</span>
+                      <input name="stock_quantity" type="number" min="0" step="0.001" value="0">
+                    </label>
+                    <label>
+                      <span>Trạng thái</span>
+                      <select name="status">
+                        <option value="draft">Bản nháp</option>
+                        <option value="active">Đang bán</option>
+                        <option value="out_of_stock">Hết hàng</option>
+                        <option value="archived">Lưu trữ</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>Tỷ lệ kho / đơn vị bán</span>
+                      <input name="stock_per_sale_unit" type="number" min="0.001" step="0.001" value="1">
+                    </label>
+                    <label>
+                      <span>Ngày sản xuất</span>
+                      <input name="production_date" type="date">
+                    </label>
+                    <label>
+                      <span>Ngày hết hạn</span>
+                      <input name="expiration_date" type="date">
+                    </label>
+                    <div class="span-2">
+                      <span>Ảnh đại diện</span>
+                      <label class="upload-dropzone product-editor-upload">
+                        <input id="productEditorImageFile" type="file" accept="image/*" hidden>
+                        <span class="upload-dropzone-icon">☁</span>
+                        <strong>Chọn ảnh từ máy</strong>
+                        <span>JPG, PNG, WEBP - ảnh mới sẽ cập nhật ngay ở khung xem trước</span>
+                      </label>
+                    </div>
+                    <label class="span-2">
+                      <span>Mô tả ngắn</span>
+                      <textarea name="short_description" rows="2"></textarea>
+                    </label>
+                    <label class="span-2">
+                      <span>Mô tả chi tiết</span>
+                      <textarea name="description" rows="4"></textarea>
+                    </label>
+                    <label class="toggle-row">
+                      <input name="is_published" type="checkbox">
+                      <span>Hiển thị ngay sau khi lưu</span>
+                    </label>
+                    <label class="toggle-row">
+                      <input name="is_featured" type="checkbox">
+                      <span>Đánh dấu nổi bật</span>
+                    </label>
+                  </div>
+                </article>
+              </div>
+
+              <div class="product-editor-actions">
+                <button class="ghost-button" id="resetProductEditorButton" type="button">Khôi phục</button>
+                <button class="primary-button" type="submit" id="productEditorSubmitButton">Lưu cập nhật</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="modal-backdrop hidden" id="publishEditorModal">
+          <div class="modal-card publish-editor-modal">
+            <div class="publish-editor-header">
+              <div>
+                <h2 id="publishEditorTitle">Thiết lập niêm yết sản phẩm</h2>
+                <p>Chuyển hàng từ kho tổng sang từng cửa hàng, sau đó chọn có đưa lên bán ngay hay chỉ lưu tồn cửa hàng.</p>
+              </div>
+              <button class="ghost-button" id="closePublishEditorButton" type="button">Đóng</button>
+            </div>
+
+            <form id="publishEditorForm" class="publish-editor-form">
+              <input type="hidden" name="id">
+
+              <div class="publish-editor-grid">
+                <aside class="publish-editor-preview-card">
+                  <span class="publish-editor-preview-label">Mã sản phẩm</span>
+                  <strong id="publishEditorSku">-</strong>
+
+                  <span class="publish-editor-preview-label">Tên sản phẩm</span>
+                  <h3 id="publishEditorName">-</h3>
+
+                  <span class="publish-editor-preview-label">Hình ảnh hiện tại</span>
+                  <img id="publishEditorImage" class="publish-editor-image" alt="Ảnh sản phẩm">
+
+                  <div class="publish-editor-stock-card">
+                    <span>Xem nhanh tồn kho</span>
+                    <strong id="publishEditorStock">0</strong>
+                    <small id="publishEditorStockNote">Hệ thống sẽ tự trừ kho khi bán hàng.</small>
+                  </div>
+                </aside>
+
+                <section class="publish-editor-fields">
+                  <article class="surface publish-editor-surface">
+                    <h3>Thiết lập phân bổ lên cửa hàng</h3>
+                    <div class="compact-grid">
+                      <label>
+                        <span>Cửa hàng nhận hàng</span>
+                        <select name="store_key" required></select>
+                      </label>
+                      <label>
+                        <span>Số lượng chuyển từ kho tổng</span>
+                        <input name="store_quantity" type="number" min="0" step="0.001" placeholder="Ví dụ: 70" required>
+                      </label>
+                      <label>
+                        <span>Giá nhập</span>
+                        <input name="import_price_display" type="text" readonly>
+                      </label>
+                      <label>
+                        <span>Giá bán lẻ (VND)</span>
+                        <input name="retail_price" type="text" inputmode="numeric" data-money-input required>
+                      </label>
+                      <label>
+                        <span>Đơn vị niêm yết</span>
+                        <input name="sale_unit" placeholder="Ví dụ: kg, hộp, quả" required>
+                      </label>
+                      <label>
+                        <span>Định lượng niêm yết</span>
+                        <input name="listing_quantity" type="number" min="0.001" step="0.001" placeholder="Ví dụ: 0.4" required>
+                      </label>
+                      <label>
+                        <span>Trạng thái niêm yết</span>
+                        <select name="publish_mode">
+                          <option value="published">Đang bán tại cửa hàng</option>
+                          <option value="draft">Chỉ chuyển hàng, chưa bán</option>
+                        </select>
+                      </label>
+                      <label class="span-2">
+                        <span>Ghi chú phân bổ</span>
+                        <textarea name="allocation_note" rows="2" readonly>Khi lưu, hệ thống sẽ trừ số lượng này khỏi kho tổng và gán thành tồn riêng của cửa hàng đã chọn.</textarea>
+                      </label>
+                    </div>
+                  </article>
+
+                  <article class="surface publish-editor-surface">
+                    <h3>Ghi chú vận hành</h3>
+                    <div class="publish-editor-note-list">
+                      <p>Mỗi cửa hàng có một lượng phân bổ riêng, lấy trực tiếp từ kho tổng.</p>
+                      <p>Nếu tăng số lượng cho cửa hàng, hệ thống sẽ kiểm tra kho tổng trước khi cấp thêm.</p>
+                      <p>Nếu gỡ cửa hàng khỏi sàn, lượng đã phân bổ sẽ tự hoàn về kho tổng.</p>
+                    </div>
+                  </article>
+                </section>
+              </div>
+
+              <div class="publish-editor-actions">
+                <button class="ghost-button" type="button" id="publishEditorCancelButton">Hủy bỏ</button>
+                <button class="primary-button" type="submit" id="publishEditorSubmit">Lưu niêm yết</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
