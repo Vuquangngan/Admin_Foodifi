@@ -1,6 +1,7 @@
 ﻿import {
     STORE_BRANCHES,
     STORAGE_KEYS,
+    apiFetch,
     elements,
     escapeHtml,
     formatDate,
@@ -10,6 +11,7 @@
     showToast,
     state
 } from "./core.js";
+import { loadProducts } from "./data.js";
 import { renderProducts, updateProductWorkspace } from "./products.js";
 import { renderAppIcon } from "./icons.js";
 
@@ -321,6 +323,48 @@ function updateShipmentItemQuantity(requestId, productId, quantity) {
                 : item
         ))
     }));
+}
+
+async function completeShipmentRequest(requestId) {
+    const requests = readBranchImportRequests();
+    const request = requests.find((item) => String(item.id) === String(requestId));
+    if (!request) throw new Error("Không tìm thấy yêu cầu gửi hàng.");
+    if (!request.items?.length) throw new Error("Yêu cầu chưa có sản phẩm.");
+
+    const branch = getRequestBranch(request);
+    if (!branch) throw new Error("Chi nhánh nhận hàng không hợp lệ.");
+    if (!window.confirm(`Hoàn tất gửi hàng cho ${request.branch_name || getBranchLabel(branch)}? Kho tổng sẽ bị trừ theo số lượng trong phiếu.`)) {
+        return;
+    }
+
+    for (const item of request.items) {
+        const product = (state.products || []).find((productItem) => String(productItem.id) === String(item.product_id));
+        if (!product) throw new Error(`Không tìm thấy sản phẩm ${item.name || item.product_id}.`);
+
+        const existingAllocation = (product.store_allocations || []).find((allocation) => String(allocation.store_key) === String(request.branch_key));
+        const currentBranchQuantity = Number(existingAllocation?.allocated_quantity || 0);
+        const addedQuantity = Math.max(1, Number(item.quantity || 1));
+
+        await apiFetch(`/api/products/${product.id}/store-allocation`, {
+            method: "PUT",
+            body: JSON.stringify({
+                store_key: request.branch_key,
+                store_name: request.branch_name || getBranchLabel(branch),
+                allocated_quantity: currentBranchQuantity + addedQuantity,
+                sale_price: product.sale_price || product.price || 0,
+                sale_unit: product.sale_unit || product.unit || product.stock_unit || item.unit || "đơn vị",
+                stock_per_sale_unit: product.stock_per_sale_unit || 1,
+                publish_mode: existingAllocation?.publish_mode === "published" ? "published" : "draft"
+            })
+        });
+    }
+
+    changeShipmentRequestStatus(requestId, "completed");
+    await loadProducts();
+    if (!elements.panels.products?.classList.contains("hidden")) {
+        updateProductWorkspace();
+        renderProducts();
+    }
 }
 
 function renderBranchListWorkspace() {
@@ -940,7 +984,7 @@ export function handleBranchAction(action, branchKey) {
     }
 }
 
-export function handleBranchImportClick(event) {
+export async function handleBranchImportClick(event) {
     const shipmentStatusButton = event.target.closest("[data-branch-shipment-filter-status]");
     if (shipmentStatusButton) {
         state.branchShipmentStatusFilter = shipmentStatusButton.dataset.branchShipmentFilterStatus || "all";
@@ -979,7 +1023,7 @@ export function handleBranchImportClick(event) {
         }
 
         if (action === "complete-request") {
-            changeShipmentRequestStatus(requestId, "completed");
+            await completeShipmentRequest(requestId);
             renderBranches();
             return true;
         }

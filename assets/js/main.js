@@ -3,6 +3,7 @@
     bindMoneyInputFormatting,
     collectFormData,
     elements,
+    bindImageFallbacks,
     normalizeApiBase,
     restoreSession,
     saveSession,
@@ -31,6 +32,7 @@ import {
     closePublishEditor,
     handleLowStockFilterChange,
     handleProductAction,
+    prepareProductImageUpload,
     resetProductEditorForm,
     renderProducts,
     resetProductForm,
@@ -39,6 +41,7 @@ import {
     closeWarehouseCapacityEditor,
     openWarehouseCapacityEditor,
     prepareProductImportFromLowStock,
+    recordProductImportSupplier,
     setWarehouseCapacity,
     syncProductEditorPreview,
     submitProductEditor,
@@ -135,6 +138,7 @@ import {
     resetUserForm,
     submitUserForm
 } from "./users.js";
+import { bindProfileEvents } from "./profile.js";
 import {
     handleStaffShiftAction,
     handleStaffShiftFieldChange,
@@ -175,6 +179,9 @@ function bindGlobalEvents() {
 
     elements.loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
+        elements.authSubtitle.textContent = "";
+        elements.authSubtitle.classList.add("hidden");
+        elements.authSubtitle.classList.remove("auth-error-message");
         await withLoading(event.submitter, async () => {
             const formData = collectFormData(elements.loginForm);
             state.apiBase = normalizeApiBase(formData.apiBase || state.apiBase || "http://localhost:3000");
@@ -482,10 +489,13 @@ function bindGlobalEvents() {
             }
 
             await withLoading(event.submitter, async () => {
-                await apiFetch(isRestocking ? `/api/products/${raw.id}` : "/api/products", {
+                const preparedRaw = await prepareProductImageUpload(raw, elements.productImportImageFile);
+                const preparedPayload = isRestocking ? buildInventoryRestockPayload(preparedRaw) : buildInventoryImportPayload(preparedRaw);
+                const savedProduct = await apiFetch(isRestocking ? `/api/products/${raw.id}` : "/api/products", {
                     method: isRestocking ? "PUT" : "POST",
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(preparedPayload)
                 });
+                recordProductImportSupplier(preparedRaw, savedProduct);
                 resetProductImportForm();
                 await Promise.all([loadProducts(), loadOverview()]);
                 showToast(isRestocking ? "Đã nhập thêm hàng vào kho tổng." : "Đã lưu sản phẩm mới.");
@@ -736,8 +746,8 @@ function bindGlobalEvents() {
             submitBranchForm(raw);
         });
     });
-    elements.branchesContent?.addEventListener("click", (event) => {
-        if (handleBranchImportClick(event)) return;
+    elements.branchesContent?.addEventListener("click", async (event) => {
+        if (await handleBranchImportClick(event)) return;
 
         const statusButton = event.target.closest("[data-branch-status]");
         if (statusButton) {
@@ -884,6 +894,13 @@ function bindGlobalEvents() {
         await withLoading(button, () => handleSupplierAction(button.dataset.supplierAction, button.dataset.id));
     });
 
+    document.addEventListener("click", async (event) => {
+        const button = event.target.closest(".supplier-return-backdrop [data-supplier-action]");
+        if (!button) return;
+        event.preventDefault();
+        await withLoading(button, () => handleSupplierAction(button.dataset.supplierAction, button.dataset.id));
+    }, true);
+
     elements.voucherFilterForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
         state.filters.vouchers = collectFormData(elements.voucherFilterForm);
@@ -1017,7 +1034,7 @@ function bindGlobalEvents() {
     elements.promotionForm?.addEventListener("input", syncPromotionPreview);
     elements.promotionForm?.addEventListener("change", syncPromotionPreview);
     elements.promotionForm?.addEventListener("input", (event) => {
-        const target = event.target.closest("[data-promotion-search-target]");
+        const target = event.target.closest("[data-promotion-search-target], [data-promotion-extra-search]");
         if (!target) return;
         handlePromotionAction("open-combobox", target);
     });
@@ -1048,7 +1065,15 @@ function bindGlobalEvents() {
         handlePromotionAction("refresh-selects");
     });
     document.addEventListener("click", (event) => {
+        const optionButton = event.target.closest("[data-promotion-select-value]");
+        if (optionButton) {
+            event.preventDefault();
+            handlePromotionAction("select-option", optionButton);
+            return;
+        }
+
         if (event.target.closest(".promotion-combobox")) return;
+        if (event.target.closest(".promotion-combobox-menu")) return;
         handlePromotionAction("close-comboboxes");
     });
     elements.promotionForm?.addEventListener("submit", (event) => {
@@ -1201,7 +1226,7 @@ function bindGlobalEvents() {
     });
 
     elements.chatsContent?.addEventListener("submit", async (event) => {
-        const form = event.target.closest("#chatComposerForm");
+        const form = event.target.closest("#chatComposerForm, #aiSupportForm");
         if (!form) return;
         event.preventDefault();
         try {
@@ -1251,6 +1276,7 @@ function bindGlobalEvents() {
 
 async function initialize() {
     restoreSession();
+    bindImageFallbacks();
     renderSidebarMenu();
     setAuthMode("login");
     updateProductWorkspace();
@@ -1268,6 +1294,7 @@ async function initialize() {
     bindUserMediaEvents();
     bindRecipeMediaEvents();
     bindSettingsEvents();
+    bindProfileEvents();
     bindGlobalEvents();
 
     if (!state.token || !state.user) {

@@ -1709,6 +1709,229 @@ handleChatAction = async function handleChatActionRealtimePatched(button) {
     }
 };
 
+const renderChatInboxWorkspace = renderChats;
+const activateChatInboxPanel = activateChatsPanel;
+const handleChatInboxAction = handleChatAction;
+const handleChatInboxInput = handleChatInput;
+const submitChatInboxComposer = submitChatComposer;
+
+const AI_SUPPORT_SUGGESTIONS = [
+    "Hướng dẫn khách đặt hàng trên app",
+    "Chính sách đổi trả và hoàn tiền",
+    "Cách dùng voucher trong Garden Fresh",
+    "Gợi ý công thức từ rau củ đang có"
+];
+
+function normalizeAiSupportMessages() {
+    if (!Array.isArray(state.aiSupportMessages)) {
+        state.aiSupportMessages = [];
+    }
+
+    if (!state.aiSupportMessages.length) {
+        state.aiSupportMessages = [{
+            role: "assistant",
+            content: "Chào bạn, tôi là trợ lý AI của Garden Fresh. Bạn có thể hỏi về sản phẩm, đơn hàng, voucher, công thức nấu ăn hoặc cách hỗ trợ khách hàng.",
+            createdAt: new Date().toISOString()
+        }];
+    }
+}
+
+function buildAiSupportMessage(message) {
+    const isUser = message.role === "user";
+    return `
+      <article class="ai-support-message ${isUser ? "is-user" : "is-assistant"}">
+        <div class="ai-support-avatar">${isUser ? "AD" : "AI"}</div>
+        <div class="ai-support-bubble">
+          <p>${escapeHtml(message.content || "").replace(/\n/g, "<br>")}</p>
+          <span>${escapeHtml(formatChatListTime(message.createdAt || new Date().toISOString()))}</span>
+        </div>
+      </article>
+    `;
+}
+
+function scrollAiSupportThreadToBottom() {
+    const thread = document.querySelector("#aiSupportThread");
+    if (!thread) return;
+    thread.scrollTop = thread.scrollHeight;
+}
+
+function renderAiSupportWorkspace() {
+    if (!elements.chatsContent) return;
+    normalizeAiSupportMessages();
+
+    elements.chatsContent.innerHTML = `
+      <section class="ai-support-workspace">
+        <header class="ai-support-hero">
+          <div>
+            <p class="eyebrow">Tin nhắn / Hỏi đáp AI</p>
+            <h2>Hỏi đáp AI nội bộ</h2>
+            <p class="section-copy">Trợ lý dùng dữ liệu backend Garden Fresh để hỗ trợ admin trả lời khách nhanh hơn. API key Gemini chỉ đặt ở backend.</p>
+          </div>
+          <button class="secondary-button" type="button" data-chat-action="ai-clear">Xóa hội thoại</button>
+        </header>
+
+        <div class="ai-support-layout">
+          <aside class="ai-support-guide">
+            <h3>Gợi ý câu hỏi</h3>
+            <p>Chọn nhanh một mẫu hoặc nhập câu hỏi riêng ở khung bên phải.</p>
+            <div class="ai-support-suggestions">
+              ${AI_SUPPORT_SUGGESTIONS.map((prompt) => `
+                <button type="button" data-chat-action="ai-suggest" data-prompt="${escapeHtml(prompt)}">${escapeHtml(prompt)}</button>
+              `).join("")}
+            </div>
+            <div class="ai-support-note">
+              <strong>Lưu ý</strong>
+              <span>AI chỉ hỗ trợ soạn câu trả lời. Với thông tin nhạy cảm, admin vẫn cần kiểm tra lại trước khi gửi khách.</span>
+            </div>
+          </aside>
+
+          <section class="ai-support-chat">
+            <div class="ai-support-thread" id="aiSupportThread">
+              ${state.aiSupportMessages.map((message) => buildAiSupportMessage(message)).join("")}
+              ${state.aiSupportSending ? `
+                <article class="ai-support-message is-assistant">
+                  <div class="ai-support-avatar">AI</div>
+                  <div class="ai-support-bubble is-loading"><p>Đang suy nghĩ...</p></div>
+                </article>
+              ` : ""}
+            </div>
+
+            <form class="ai-support-form" id="aiSupportForm">
+              <textarea rows="3" data-chat-input="ai-draft" placeholder="Nhập câu hỏi cho AI...">${escapeHtml(state.aiSupportDraft || "")}</textarea>
+              <button class="primary-button" type="submit" ${state.aiSupportSending || !String(state.aiSupportDraft || "").trim() ? "disabled" : ""}>
+                ${state.aiSupportSending ? "Đang gửi..." : "Gửi câu hỏi"}
+              </button>
+            </form>
+          </section>
+        </div>
+      </section>
+    `;
+
+    window.requestAnimationFrame(scrollAiSupportThreadToBottom);
+}
+
+async function submitAiSupportQuestion() {
+    const message = String(state.aiSupportDraft || "").trim();
+    if (!message) {
+        throw new Error("Vui lòng nhập câu hỏi trước khi gửi.");
+    }
+
+    normalizeAiSupportMessages();
+    state.aiSupportMessages = [
+        ...state.aiSupportMessages,
+        { role: "user", content: message, createdAt: new Date().toISOString() }
+    ];
+    state.aiSupportDraft = "";
+    state.aiSupportSending = true;
+    renderAiSupportWorkspace();
+
+    try {
+        const payload = await postAiSupportQuestion(message);
+        const answer = payload?.answer || payload?.tra_loi || payload?.data?.answer || "AI chưa trả về nội dung phù hợp.";
+        state.aiSupportMessages = [
+            ...state.aiSupportMessages,
+            { role: "assistant", content: answer, createdAt: new Date().toISOString() }
+        ];
+    } catch (error) {
+        state.aiSupportMessages = [
+            ...state.aiSupportMessages,
+            { role: "assistant", content: error.message || "Không thể kết nối trợ lý AI.", createdAt: new Date().toISOString() }
+        ];
+        throw error;
+    } finally {
+        state.aiSupportSending = false;
+        renderAiSupportWorkspace();
+    }
+}
+
+async function postAiSupportQuestion(message) {
+    const attempts = ["/api/ai/support", "/api/chat/ai-support", "/ai/support"];
+    let lastError = null;
+
+    for (const path of attempts) {
+        try {
+            return await apiFetch(path, {
+                method: "POST",
+                body: JSON.stringify({ message })
+            });
+        } catch (error) {
+            lastError = error;
+            const text = String(error?.message || "");
+            if (!/không tìm thấy đường dẫn|not found|cannot post/i.test(text)) {
+                throw error;
+            }
+        }
+    }
+
+    throw new Error("Backend chưa có route hỏi đáp AI. Hãy restart hoặc deploy lại backend sau khi thêm /api/ai/support.");
+}
+
+renderChats = function renderChatsWithAiSupport() {
+    if (state.chatWorkspace === "aiSupport") {
+        renderAiSupportWorkspace();
+        return;
+    }
+
+    renderChatInboxWorkspace();
+};
+
+activateChatsPanel = async function activateChatsPanelWithWorkspace() {
+    if (state.chatWorkspace === "aiSupport") {
+        deactivateChatsPanel();
+        renderAiSupportWorkspace();
+        return;
+    }
+
+    await activateChatInboxPanel();
+};
+
+handleChatAction = async function handleChatActionWithAiSupport(button) {
+    const action = button.dataset.chatAction;
+
+    if (action === "ai-clear") {
+        state.aiSupportMessages = [];
+        state.aiSupportDraft = "";
+        renderAiSupportWorkspace();
+        return;
+    }
+
+    if (action === "ai-suggest") {
+        state.aiSupportDraft = button.dataset.prompt || "";
+        renderAiSupportWorkspace();
+        const input = document.querySelector('[data-chat-input="ai-draft"]');
+        input?.focus();
+        return;
+    }
+
+    if (state.chatWorkspace === "aiSupport") {
+        return;
+    }
+
+    await handleChatInboxAction(button);
+};
+
+handleChatInput = function handleChatInputWithAiSupport(target) {
+    if (target.dataset.chatInput === "ai-draft") {
+        state.aiSupportDraft = String(target.value || "");
+        const sendButton = document.querySelector("#aiSupportForm .primary-button");
+        if (sendButton) {
+            sendButton.disabled = state.aiSupportSending || !String(state.aiSupportDraft || "").trim();
+        }
+        return;
+    }
+
+    handleChatInboxInput(target);
+};
+
+submitChatComposer = async function submitChatComposerWithAiSupport() {
+    if (state.chatWorkspace === "aiSupport") {
+        await submitAiSupportQuestion();
+        return;
+    }
+
+    await submitChatInboxComposer();
+};
+
 
 
 

@@ -569,6 +569,17 @@
   border-color: rgba(49, 88, 67, 0.18);
 }
 
+.user-form-grid label.is-disabled > span {
+  color: rgba(36, 59, 47, 0.58);
+}
+
+.user-form-grid select:disabled {
+  cursor: not-allowed;
+  color: rgba(36, 59, 47, 0.58);
+  background: #eef2ea;
+  border-color: rgba(49, 88, 67, 0.1);
+}
+
 .user-form-option {
   display: flex;
   align-items: center;

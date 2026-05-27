@@ -124,6 +124,36 @@ function isBranchShipmentMenuText(value) {
     return /(gui hang cho chi nhanh|duyet hang|duyet yeu cau|xuat hang chi nhanh|branch shipment)/.test(text);
 }
 
+function isAiSupportMenuText(value) {
+    const text = normalizeMenuMatchText(value);
+    return /(hoi dap ai|ho tro ai|ai support|gemini|tro ly ai)/.test(text);
+}
+
+function resolveCustomMenuTarget(item) {
+    if (isProfileMenuText(item.label)) {
+        return { panel: "profile", workspace: undefined, staticLink: false };
+    }
+
+    if (isAiSupportMenuText(item.label)) {
+        return { panel: "chats", workspace: "aiSupport", staticLink: false };
+    }
+
+    if (isBranchImportRequestMenuText(item.label)) {
+        return { panel: "branches", workspace: "importRequests", staticLink: false };
+    }
+
+    if (isBranchShipmentMenuText(item.label)) {
+        return { panel: "branches", workspace: "shipments", staticLink: false };
+    }
+
+    return { panel: "overview", workspace: undefined, staticLink: true };
+}
+
+function isProfileMenuText(value) {
+    const text = normalizeMenuMatchText(value);
+    return /(thong tin ca nhan|ho so ca nhan|tai khoan ca nhan|profile|my account)/.test(text);
+}
+
 function isDuplicatePromotionChild(item) {
     const text = normalizeMenuMatchText(item?.label);
     return text === "danh sach chien dich"
@@ -197,6 +227,12 @@ function normalizeMenuItemsForCurrentSidebar(items, sidebarItems) {
         .map((item) => {
             const baseItem = baseById.get(String(item.id));
             if (baseItem) {
+                const savedLabel = cleanMenuText(item.label);
+                const savedSubtitle = cleanMenuText(item.subtitle);
+                const savedIcon = normalizeMenuIcon(item.icon || baseItem.icon, item);
+                const canMoveSidebarChild = ["branches-shipments"].includes(String(baseItem.id));
+                const savedParentId = String(item.parentId || "");
+                const nextParentId = canMoveSidebarChild && savedParentId ? savedParentId : baseItem.parentId;
                 return {
                     ...baseItem,
                     isActive: item.isActive,
@@ -204,11 +240,11 @@ function normalizeMenuItemsForCurrentSidebar(items, sidebarItems) {
                         ? getMenuSortPosition(baseItem)
                         : Number(item.position || baseItem.position || 999),
                     id: baseItem.id,
-                    parentId: baseItem.parentId,
+                    parentId: nextParentId,
                     type: baseItem.type,
-                    label: baseItem.label,
-                    subtitle: baseItem.subtitle,
-                    icon: baseItem.icon,
+                    label: savedLabel || baseItem.label,
+                    subtitle: savedSubtitle || baseItem.subtitle,
+                    icon: savedIcon,
                     route: baseItem.route,
                     source: "sidebar",
                     locked: true
@@ -250,6 +286,9 @@ function readMenuItems() {
             const mergedSidebarItems = sidebarItems.map((item) => ({
                 ...item,
                 ...(savedById.get(String(item.id)) || {}),
+                parentId: ["branches-shipments"].includes(String(item.id)) && savedById.get(String(item.id))?.parentId
+                    ? String(savedById.get(String(item.id)).parentId)
+                    : item.parentId,
                 source: "sidebar",
                 locked: true
             })).map((item) => ({
@@ -311,7 +350,7 @@ export function getVisibleSidebarMenu() {
             return {
                 ...section,
                 icon: section.key === "vouchers" ? "megaphone" : (sectionState?.icon || section.icon),
-                label: section.key === "vouchers" ? "Quảng bá và Khuyến mãi" : cleanMenuText(sectionState?.label || section.label),
+                label: section.key === "vouchers" ? "Quảng bá và Khuyến mãi" : (section.key === "chats" ? "Tin nhắn" : cleanMenuText(sectionState?.label || section.label)),
                 position: Number(sectionState?.position || 999),
                 items: [
                     ...visibleItems,
@@ -326,14 +365,17 @@ export function getVisibleSidebarMenu() {
                     })) : []),
                     ...(customChildrenByParent.get(String(section.key)) || [])
                     .filter((item) => !(section.key === "branches" && (isBranchImportRequestMenuText(item.label) || isBranchShipmentMenuText(item.label))))
-                    .map((item) => ({
-                        key: String(item.id),
-                        label: cleanMenuText(item.label),
-                        panel: section.key === "branches" && (isBranchImportRequestMenuText(item.label) || isBranchShipmentMenuText(item.label)) ? "branches" : "overview",
-                        workspace: section.key === "branches" && isBranchImportRequestMenuText(item.label) ? "importRequests" : section.key === "branches" && isBranchShipmentMenuText(item.label) ? "shipments" : undefined,
-                        staticLink: !(section.key === "branches" && (isBranchImportRequestMenuText(item.label) || isBranchShipmentMenuText(item.label))),
-                        route: item.route
-                    }))
+                    .map((item) => {
+                        const target = resolveCustomMenuTarget(item);
+                        return {
+                            key: String(item.id),
+                            label: cleanMenuText(item.label),
+                            panel: target.panel,
+                            workspace: target.workspace,
+                            staticLink: target.staticLink,
+                            route: item.route
+                        };
+                    })
                 ]
             };
         })
@@ -354,14 +396,19 @@ export function getVisibleSidebarMenu() {
             icon: normalizeMenuIcon(item.icon, item),
             defaultExpanded: false,
             position: Number(item.position || 999),
-            staticLink: true,
-            items: (customChildrenByParent.get(String(item.id)) || []).map((child) => ({
-                key: String(child.id),
-                label: cleanMenuText(child.label),
-                panel: "overview",
-                staticLink: true,
-                route: child.route
-            }))
+            staticLink: !isProfileMenuText(item.label),
+            panel: isProfileMenuText(item.label) ? "profile" : "overview",
+            items: (customChildrenByParent.get(String(item.id)) || []).map((child) => {
+                const target = resolveCustomMenuTarget(child);
+                return {
+                    key: String(child.id),
+                    label: cleanMenuText(child.label),
+                    panel: target.panel,
+                    workspace: target.workspace,
+                    staticLink: target.staticLink,
+                    route: child.route
+                };
+            })
         }));
 
     return [...baseSections, ...customSections]

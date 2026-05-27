@@ -1,4 +1,4 @@
-import { apiFetch, showToast, state } from "./core.js";
+import { apiFetch, elements, showToast, state } from "./core.js";
 import { renderOverview } from "./overview.js";
 import { renderProducts, syncProductCategorySelects } from "./products.js";
 import { renderCategories, syncCategoryParentSelect } from "./categories.js";
@@ -15,6 +15,12 @@ async function runOptionalLoad(loader, fallback) {
         await loader();
         return true;
     } catch (error) {
+        const message = error.message || "Có lỗi xảy ra.";
+        if (elements.appShell?.classList.contains("auth-screen") && elements.authSubtitle) {
+            elements.authSubtitle.textContent = message;
+            elements.authSubtitle.classList.remove("hidden");
+            elements.authSubtitle.classList.add("auth-error-message");
+        }
         console.warn("Khong the tai du lieu admin:", error);
         fallback?.(error);
         return false;
@@ -107,14 +113,12 @@ export async function loadCustomers() {
 }
 
 export async function bootstrapAdmin() {
-    const results = await Promise.all([
-        runOptionalLoad(loadCoupons),
-        runOptionalLoad(loadChats, () => {
-            state.chatConversations = [];
-            state.chatMessages = [];
-            state.chatCurrentConversationId = null;
-            renderChats();
-        }),
+    const overviewLoaded = await runOptionalLoad(loadOverview, () => {
+        state.dashboard = null;
+        renderOverview();
+    });
+
+    const backgroundLoads = [
         runOptionalLoad(loadCategories, () => {
             state.categories = [];
             syncProductCategorySelects();
@@ -130,6 +134,7 @@ export async function bootstrapAdmin() {
             state.orders = [];
             renderOrders();
         }),
+        runOptionalLoad(loadCoupons),
         runOptionalLoad(loadSuppliers, () => {
             state.suppliers = [];
             syncSupplierSelects();
@@ -145,13 +150,19 @@ export async function bootstrapAdmin() {
             state.customersHydrated = false;
             renderUsers();
         }),
-        runOptionalLoad(loadOverview, () => {
-            state.dashboard = null;
-            renderOverview();
+        runOptionalLoad(loadChats, () => {
+            state.chatConversations = [];
+            state.chatMessages = [];
+            state.chatCurrentConversationId = null;
+            renderChats();
         })
-    ]);
+    ];
 
-    return results.some(Boolean);
+    Promise.all(backgroundLoads).catch((error) => {
+        console.warn("Khong the tai nen du lieu admin:", error);
+    });
+
+    return overviewLoaded;
 }
 
 export async function withLoading(button, task) {

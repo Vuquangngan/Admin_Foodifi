@@ -25,6 +25,11 @@
   max-height: calc(100vh - 32px);
 }
 
+.modal-card.supplier-return-sheet {
+  width: min(1320px, calc(100vw - 32px));
+  max-width: min(1320px, calc(100vw - 32px));
+}
+
 .category-modal-card .compact-grid {
   margin-top: 10px;
 }

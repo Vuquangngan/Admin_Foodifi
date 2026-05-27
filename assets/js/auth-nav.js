@@ -12,7 +12,7 @@ import { renderProducts, updateProductWorkspace } from "./products.js";
 import { renderRecipes } from "./recipes.js";
 import { renderOrders } from "./orders.js";
 import { renderSuppliers } from "./suppliers.js";
-import { activateChatsPanel, deactivateChatsPanel } from "./chats.js";
+import { activateChatsPanel, deactivateChatsPanel, renderChats } from "./chats.js";
 import { renderUsers } from "./users.js";
 import { renderVouchers } from "./vouchers.js";
 import { renderBranches } from "./branches.js";
@@ -21,6 +21,7 @@ import { renderStats } from "./stats.js";
 import { renderEmailMarketing } from "./email-marketing.js";
 import { renderActivityHistory } from "./activity-history.js";
 import { getVisibleSidebarMenu, renderSettings } from "./settings.js";
+import { renderProfile } from "./profile.js";
 import { renderAppIcon } from "./icons.js";
 
 function getMenuSection(sectionKey) {
@@ -147,7 +148,11 @@ export function selectSidebarItem(itemKey) {
         state.emailMarketingWorkspace = item.workspace || "campaign";
     }
 
-    if (item.panel !== "chats") {
+    if (item.panel === "chats") {
+        state.chatWorkspace = item.workspace || "inbox";
+    }
+
+    if (item.panel !== "chats" || state.chatWorkspace !== "inbox") {
         deactivateChatsPanel();
     }
 
@@ -167,11 +172,14 @@ export function selectSidebarItem(itemKey) {
         renderOrders();
     }
 
-    if (item.panel === "chats") {
+    if (item.panel === "chats" && state.chatWorkspace === "inbox") {
         activateChatsPanel();
+    } else if (item.panel === "chats") {
+        renderChats();
     }
 
     if (item.panel === "suppliers") {
+        state.supplierView = item.workspace || "list";
         renderSuppliers();
     }
 
@@ -181,6 +189,10 @@ export function selectSidebarItem(itemKey) {
 
     if (item.panel === "users") {
         renderUsers();
+    }
+
+    if (item.panel === "profile") {
+        renderProfile();
     }
 
     if (item.panel === "shifts") {
@@ -268,6 +280,7 @@ export function setAuthMode(mode) {
     elements.authTitle.textContent = isRegister ? "Tạo tài khoản quản trị" : "Đăng nhập hệ thống";
     elements.authSubtitle.textContent = "";
     elements.authSubtitle.classList.add("hidden");
+    elements.authSubtitle.classList.remove("auth-error-message");
     elements.authSubmitButton.textContent = isRegister ? "Đăng ký" : "Đăng nhập";
     elements.authFooterText.textContent = "";
     elements.authFooterText.classList.add("hidden");

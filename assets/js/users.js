@@ -143,6 +143,10 @@ function calculateOrderLoyaltyPoints(orderValue) {
     return Math.ceil((value / 100000) * 50);
 }
 
+function canManageUserRoles() {
+    return state.user?.role === "admin";
+}
+
 function syncRoleOptions(selectedRole = "staff") {
     const roleField = elements.userForm?.elements.role;
     if (!roleField) return;
@@ -150,14 +154,18 @@ function syncRoleOptions(selectedRole = "staff") {
     if (isCustomerWorkspace()) {
         roleField.innerHTML = '<option value="customer">Khách hàng</option>';
         roleField.value = "customer";
+        roleField.disabled = true;
         return;
     }
 
+    const canEditRole = canManageUserRoles();
     roleField.innerHTML = `
       <option value="staff">Nhân viên</option>
-      ${state.user?.role === "admin" ? '<option value="admin">Quản trị</option>' : ""}
+      ${canEditRole ? '<option value="admin">Quản trị</option>' : ""}
     `;
-    roleField.value = selectedRole;
+    roleField.value = canEditRole ? selectedRole : "staff";
+    roleField.disabled = !canEditRole;
+    roleField.title = canEditRole ? "" : "Chỉ tài khoản quản trị mới được thay đổi vai trò.";
 }
 
 function setPanelHeadings() {
@@ -603,6 +611,7 @@ function applyUserFormWorkspaceMode() {
     const roleField = elements.userForm?.elements.role?.closest("label");
     if (codeField) codeField.classList.toggle("hidden", isCustomerWorkspace());
     if (roleField) roleField.classList.toggle("hidden", isCustomerWorkspace());
+    if (roleField) roleField.classList.toggle("is-disabled", !isCustomerWorkspace() && !canManageUserRoles());
 }
 
 function setUserPasswordMode(isEditing) {
@@ -820,7 +829,9 @@ function buildUserPayload(raw) {
         email,
         phone: String(raw.phone || "").trim(),
         avatar_url: String(raw.avatar_url || "").trim(),
-        role: isCustomerWorkspace() ? "customer" : (String(raw.role || "staff").trim() || "staff"),
+        role: isCustomerWorkspace()
+            ? "customer"
+            : (canManageUserRoles() ? (String(raw.role || "staff").trim() || "staff") : "staff"),
         status: String(raw.status || "active").trim() || "active"
     };
 

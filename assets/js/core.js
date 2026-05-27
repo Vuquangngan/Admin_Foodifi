@@ -8,6 +8,8 @@
     emailCampaignDraft: "shopfood_admin_email_campaign_draft",
     promotionRules: "shopfood_admin_promotion_rules",
     branchImportRequests: "shopfood_admin_branch_import_requests",
+    supplierReturns: "shopfood_admin_supplier_returns",
+    productImportSuppliers: "shopfood_admin_product_import_suppliers",
     activityLogs: "garden_fresh_admin_activity_logs",
     activityWarningNotes: "garden_fresh_admin_activity_warning_notes",
     recipes: "garden_fresh_admin_recipes",
@@ -35,7 +37,7 @@ export const SIDEBAR_MENU = [
             { key: "product-import", label: "Nhập sản phẩm", panel: "products", workspace: "import" },
             { key: "product-inventory", label: "Kho hàng", panel: "products", workspace: "inventory" },
             { key: "product-low-stock", label: "Sản phẩm sắp hết", panel: "products", workspace: "lowStock" },
-            { key: "product-publish", label: "Đưa sản phẩm lên sàn", panel: "products", workspace: "publish" },
+            { key: "branches-shipments", label: "Gửi hàng cho chi nhánh", panel: "branches", workspace: "shipments" },
             { key: "product-categories", label: "Danh mục sản phẩm", panel: "categories" }
         ]
     },
@@ -51,11 +53,12 @@ export const SIDEBAR_MENU = [
     },
     {
         key: "chats",
-        label: "Chat khách hàng",
+        label: "Tin nhắn",
         icon: "chat",
         defaultExpanded: false,
         items: [
-            { key: "chats-inbox", label: "Hội thoại hỗ trợ", panel: "chats" }
+            { key: "chats-inbox", label: "Hội thoại khách hàng", panel: "chats", workspace: "inbox" },
+            { key: "chats-ai-support", label: "Hỏi đáp AI", panel: "chats", workspace: "aiSupport" }
         ]
     },
     {
@@ -83,7 +86,8 @@ export const SIDEBAR_MENU = [
         icon: "basket",
         defaultExpanded: false,
         items: [
-            { key: "suppliers-list", label: "Danh sách nhà cung cấp", panel: "suppliers" }
+            { key: "suppliers-list", label: "Danh sách nhà cung cấp", panel: "suppliers", workspace: "list" },
+            { key: "supplier-returns", label: "Hoàn trả hàng", panel: "suppliers", workspace: "returns" }
         ]
     },
     {
@@ -93,8 +97,8 @@ export const SIDEBAR_MENU = [
         defaultExpanded: false,
         items: [
             { key: "branches-list", label: "Quản lý chi nhánh", panel: "branches", workspace: "list" },
-            { key: "branches-import-requests", label: "Yêu cầu nhập hàng", panel: "branches", workspace: "importRequests" },
-            { key: "branches-shipments", label: "Gửi hàng cho chi nhánh", panel: "branches", workspace: "shipments" }
+            { key: "product-publish", label: "Kho chi nhánh", panel: "products", workspace: "publish" },
+            { key: "branches-import-requests", label: "Yêu cầu nhập hàng", panel: "branches", workspace: "importRequests" }
         ]
     },
     {
@@ -180,9 +184,9 @@ export const PRODUCT_WORKSPACES = {
         showImport: false
     },
     publish: {
-        eyebrow: "Marketplace",
-        title: "Đưa sản phẩm lên sàn",
-        description: "Kiểm soát sản phẩm nào đang publish và sản phẩm nào còn chờ lên sàn.",
+        eyebrow: "Chi nhánh",
+        title: "Kho chi nhánh",
+        description: "Quản lý tồn kho riêng và trạng thái bán hàng của từng chi nhánh.",
         showFilter: true,
         showCreate: false,
         showImport: false
@@ -336,6 +340,10 @@ export const state = {
     chatStatusFilter: "open",
     chatSearch: "",
     chatMessageDraft: "",
+    chatWorkspace: "inbox",
+    aiSupportDraft: "",
+    aiSupportMessages: [],
+    aiSupportSending: false,
     inventoryZone: "frozen",
     inventorySearch: "",
     productImportSourceId: "",
@@ -366,6 +374,12 @@ export const state = {
     warehouseCapacityEditorZone: null,
     productImportImageDataUrl: "",
     supplierView: "list",
+    supplierReturnFilters: {
+        keyword: "",
+        supplier: "",
+        until: ""
+    },
+    supplierReturnModalProductId: "",
     branchSearch: "",
     branchStatusFilter: "all",
     branchWorkspace: "list",
@@ -553,6 +567,7 @@ export const elements = {
     categoriesMeta: document.querySelector("#categoriesMeta"),
     refreshCategoriesButton: document.querySelector("#refreshCategoriesButton"),
     suppliersPanel: document.querySelector("#suppliersPanel"),
+    supplierFilterCard: document.querySelector("#supplierFilterCard"),
     supplierFilterForm: document.querySelector("#supplierFilterForm"),
     supplierListCard: document.querySelector("#supplierListCard"),
     suppliersContent: document.querySelector("#suppliersContent"),
@@ -649,6 +664,7 @@ export const elements = {
     activityWarningTarget: document.querySelector("#activityWarningTarget"),
     closeActivityWarningButton: document.querySelector("#closeActivityWarningButton"),
     clearActivityWarningButton: document.querySelector("#clearActivityWarningButton"),
+    profileContent: document.querySelector("#profileContent"),
     panels: {
         login: document.querySelector("#loginPanel"),
         overview: document.querySelector("#overviewPanel"),
@@ -656,6 +672,7 @@ export const elements = {
         recipes: document.querySelector("#recipesPanel"),
         chats: document.querySelector("#chatsPanel"),
         users: document.querySelector("#usersPanel"),
+        profile: document.querySelector("#profilePanel"),
         shifts: document.querySelector("#shiftsPanel"),
         stats: document.querySelector("#statsPanel"),
         emailMarketing: document.querySelector("#emailMarketingPanel"),
@@ -674,6 +691,7 @@ export function showToast(message, isError = false) {
     elements.toast.textContent = message;
     elements.toast.classList.remove("hidden");
     elements.toast.style.background = isError ? "rgba(180, 55, 55, 0.94)" : "rgba(46, 32, 20, 0.92)";
+    elements.toast.style.zIndex = "10000";
     window.clearTimeout(showToast.timerId);
     showToast.timerId = window.setTimeout(() => elements.toast?.classList.add("hidden"), 3200);
 }
@@ -878,6 +896,22 @@ export function resolveMediaUrl(path, fallback = "") {
     return `${state.apiBase}/${value.replace(/^\/+/, "")}`;
 }
 
+export function defaultImagePlaceholder(label = "SP") {
+    const safeLabel = encodeURIComponent(String(label || "SP").slice(0, 8));
+    return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='100%25' height='100%25' rx='20' fill='%23efe5d8'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23765f4a' font-family='Arial' font-size='16'%3E${safeLabel}%3C/text%3E%3C/svg%3E`;
+}
+
+export function bindImageFallbacks(root = document) {
+    root.addEventListener("error", (event) => {
+        const image = event.target;
+        if (!(image instanceof HTMLImageElement) || image.dataset.fallbackApplied === "true") return;
+
+        image.dataset.fallbackApplied = "true";
+        image.src = image.dataset.fallbackSrc || defaultImagePlaceholder(image.alt || "SP");
+        image.classList.add("image-fallback");
+    }, true);
+}
+
 export function getGrowthMeta(currentValue, previousValue) {
     const current = Number(currentValue || 0);
     const previous = Number(previousValue || 0);
@@ -1003,10 +1037,15 @@ export async function apiFetch(path, options = {}) {
         headers.set("Authorization", `Bearer ${state.token}`);
     }
 
-    const response = await fetch(`${state.apiBase}${path}`, {
-        ...options,
-        headers
-    });
+    let response;
+    try {
+        response = await fetch(`${state.apiBase}${path}`, {
+            ...options,
+            headers
+        });
+    } catch (_error) {
+        throw new Error(`Không kết nối được backend tại ${state.apiBase}. Hãy kiểm tra server backend đã chạy và API base URL đúng.`);
+    }
 
     const contentType = response.headers.get("content-type") || "";
     const payload = contentType.includes("application/json")

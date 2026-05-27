@@ -250,6 +250,17 @@ button {
   line-height: 1.55;
 }
 
+.auth-head p.auth-error-message {
+  display: block;
+  padding: 10px 12px;
+  border: 1px solid rgba(185, 42, 42, 0.22);
+  border-radius: 14px;
+  background: #fff1ed;
+  color: #9d2f22;
+  font-weight: 700;
+  text-align: left;
+}
+
 .auth-form {
   display: grid;
   gap: 16px;

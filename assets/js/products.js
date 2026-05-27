@@ -1,9 +1,31 @@
-import { PRODUCT_WORKSPACES, STORE_BRANCHES, WAREHOUSE_ZONES, apiFetch, elements, escapeHtml, fillSelectOptions, formatCurrency, formatMoneyInputValue, formatNumber, resolveMediaUrl, saveWarehouseCapacities, showToast, state, statusPill } from "./core.js";
+import { PRODUCT_WORKSPACES, STORE_BRANCHES, WAREHOUSE_ZONES, STORAGE_KEYS, apiFetch, elements, escapeHtml, fillSelectOptions, formatCurrency, formatMoneyInputValue, formatNumber, resolveMediaUrl, saveWarehouseCapacities, showToast, state, statusPill } from "./core.js";
 import { loadOverview, loadProducts } from "./data.js";
 import { renderAppIcon } from "./icons.js";
 
+let productEditorImagePreview = "";
+
 function defaultProductThumb() {
     return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='100%25' height='100%25' fill='%23efe5d8'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' fill='%23765f4a' font-family='Arial' font-size='16'%3ESP%3C/text%3E%3C/svg%3E";
+}
+
+function getProductImageSource(product) {
+    const images = Array.isArray(product?.images)
+        ? product.images
+        : Array.isArray(product?.danh_sach_hinh_anh)
+            ? product.danh_sach_hinh_anh
+            : [];
+    const firstImage = images.find((image) => image?.image_url || image?.duong_dan_anh);
+    return product?.thumbnail_url
+        || product?.anh_dai_dien
+        || firstImage?.image_url
+        || firstImage?.duong_dan_anh
+        || "";
+}
+
+function renderProductThumb(product, className = "product-thumb") {
+    const fallback = defaultProductThumb();
+    const src = resolveMediaUrl(getProductImageSource(product), fallback);
+    return `<img class="${escapeHtml(className)}" src="${escapeHtml(src)}" data-fallback-src="${escapeHtml(fallback)}" alt="${escapeHtml(product?.name || "S?n ph?m")}" loading="lazy">`;
 }
 
 function getProductById(productId) {
@@ -16,6 +38,48 @@ function getInlineProductMeta(product) {
 
 function toDateInputValue(value) {
     return value ? String(value).slice(0, 10) : "";
+}
+
+function normalizeProductImageUrl(value) {
+    const text = String(value || "").trim();
+    if (!text || text.startsWith("data:image/") || text.startsWith("blob:")) return "";
+    return text;
+}
+
+async function uploadProductImage(file) {
+    if (!file || !file.size) return "";
+    if (!String(file.type || "").startsWith("image/")) {
+        throw new Error("Vui lòng chọn đúng file ảnh.");
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        throw new Error("Ảnh sản phẩm tối đa 5MB.");
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const payload = await apiFetch("/api/uploads/images?folder=products", {
+        method: "POST",
+        body: formData
+    });
+
+    return payload?.file?.relative_url
+        || payload?.file?.url
+        || payload?.hinh_anh?.duong_dan_tuong_doi
+        || payload?.hinh_anh?.duong_dan
+        || "";
+}
+
+export async function prepareProductImageUpload(raw, fileInput) {
+    const nextRaw = {
+        ...raw,
+        thumbnail_url: normalizeProductImageUrl(raw.thumbnail_url)
+    };
+    const file = fileInput?.files?.[0];
+    if (file) {
+        nextRaw.thumbnail_url = await uploadProductImage(file);
+    }
+    return nextRaw;
 }
 
 function getCategoryDescendantIds(categoryId) {
@@ -509,7 +573,7 @@ function renderWarehouseWorkspace() {
             <table class="list-table warehouse-table">
             <thead><tr><th>Sản phẩm</th><th>Danh mục</th><th>Tồn kho</th><th>Đơn vị</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
             <tbody>
-              ${zoneProducts.map((product) => `<tr><td><div class="product-cell"><img class="product-thumb" src="${escapeHtml(resolveMediaUrl(product.thumbnail_url, defaultProductThumb()))}" alt=""><div><strong>${escapeHtml(product.name)}</strong><br><span class="section-copy">SKU: ${escapeHtml(product.sku || "-")}</span></div></div></td><td>${escapeHtml(product.category_name || product.category?.name || "-")}</td><td><strong>${formatNumber(product.stock_quantity)}</strong></td><td>${escapeHtml(product.stock_unit || product.unit || product.sale_unit || "-")}</td><td>${getWarehouseStatus(product)}</td><td>${buildProductActionButtons(product)}</td></tr>`).join("") || '<tr><td colspan="6">Không có sản phẩm phù hợp trong khu này.</td></tr>'}
+              ${zoneProducts.map((product) => `<tr><td><div class="product-cell">${renderProductThumb(product)}<div><strong>${escapeHtml(product.name)}</strong><br><span class="section-copy">SKU: ${escapeHtml(product.sku || "-")}</span></div></div></td><td>${escapeHtml(product.category_name || product.category?.name || "-")}</td><td><strong>${formatNumber(product.stock_quantity)}</strong></td><td>${escapeHtml(product.stock_unit || product.unit || product.sale_unit || "-")}</td><td>${getWarehouseStatus(product)}</td><td>${buildProductActionButtons(product)}</td></tr>`).join("") || '<tr><td colspan="6">Không có sản phẩm phù hợp trong khu này.</td></tr>'}
             </tbody>
             </table>
           </div>
@@ -619,7 +683,7 @@ function renderLowStockWorkspace(items) {
                       <tr>
                         <td>
                           <div class="product-cell">
-                            <img class="product-thumb" src="${escapeHtml(resolveMediaUrl(product.thumbnail_url, defaultProductThumb()))}" alt="">
+                            ${renderProductThumb(product)}
                             <div>
                               <strong>${escapeHtml(product.name || "Sản phẩm")}</strong>
                               <br><span class="section-copy">SKU: ${escapeHtml(product.sku || "-")}</span>
@@ -651,6 +715,16 @@ function renderLowStockWorkspace(items) {
         </article>
       </section>
     `;
+    elements.productsContent.querySelectorAll('[data-action="open-publish-editor"]').forEach((button) => {
+        button.textContent = "Sửa";
+    });
+    const branchStockHeader = elements.productsContent.querySelector(".publish-table thead th:nth-child(4)");
+    if (branchStockHeader) {
+        branchStockHeader.textContent = "Kho chi nhánh";
+    }
+    elements.productsContent.querySelectorAll(".publish-table tbody td:nth-child(4) .section-copy").forEach((node) => {
+        node.remove();
+    });
 }
 
 function renderPublishWorkspace(items) {
@@ -680,7 +754,7 @@ function renderPublishWorkspace(items) {
                 const draft = getPublishDraft(product);
                 const publishStatus = getPublishStatusCopy(product);
                 const zone = WAREHOUSE_ZONES.find((item) => item.key === getWarehouseZoneForProduct(product));
-                return `<tr><td><div class="product-cell"><img class="product-thumb" src="${escapeHtml(resolveMediaUrl(product.thumbnail_url, defaultProductThumb()))}" alt=""><div><strong>${escapeHtml(product.name)}</strong><br><span class="section-copy">${getInlineProductMeta(product)} • SKU: ${escapeHtml(product.sku || "-")}</span></div></div></td><td><span class="status-pill ${escapeHtml(zone?.tone || "")}">${escapeHtml(zone ? `${zone.label}: ${zone.name}` : "Chưa phân loại")}</span></td><td><strong>${formatNumber(product.stock_quantity)}</strong> ${escapeHtml(product.stock_unit || product.sale_unit || product.unit || "")}</td><td>${formatCurrency(parseImportReferencePrice(product))}</td><td><strong>${formatCurrency(draft.retailPrice)}</strong><div class="section-copy" style="margin-top:8px;">${escapeHtml(String(draft.listingQuantity || 1))} ${escapeHtml(draft.saleUnit || "-")}</div></td><td>${publishStatus.pill}<div class="section-copy" style="margin-top:8px;">${publishStatus.note}</div></td><td><div class="publish-action-stack"><button class="chip-button" type="button" data-action="open-publish-editor" data-id="${product.id}">Cập nhật</button>${product.is_published ? `<button class="chip-button" type="button" data-action="unpublish-product" data-id="${product.id}" data-tone="danger">Gỡ xuống</button>` : `<button class="chip-button" type="button" data-action="edit-product" data-id="${product.id}">Đăng bán</button>`}</div></td></tr>`;
+                return `<tr><td><div class="product-cell">${renderProductThumb(product)}<div><strong>${escapeHtml(product.name)}</strong><br><span class="section-copy">${getInlineProductMeta(product)} • SKU: ${escapeHtml(product.sku || "-")}</span></div></div></td><td><span class="status-pill ${escapeHtml(zone?.tone || "")}">${escapeHtml(zone ? `${zone.label}: ${zone.name}` : "Chưa phân loại")}</span></td><td><strong>${formatNumber(product.stock_quantity)}</strong> ${escapeHtml(product.stock_unit || product.sale_unit || product.unit || "")}</td><td>${formatCurrency(parseImportReferencePrice(product))}</td><td><strong>${formatCurrency(draft.retailPrice)}</strong><div class="section-copy" style="margin-top:8px;">${escapeHtml(String(draft.listingQuantity || 1))} ${escapeHtml(draft.saleUnit || "-")}</div></td><td>${publishStatus.pill}<div class="section-copy" style="margin-top:8px;">${publishStatus.note}</div></td><td><div class="publish-action-stack"><button class="chip-button" type="button" data-action="open-publish-editor" data-id="${product.id}">Cập nhật</button>${product.is_published ? `<button class="chip-button" type="button" data-action="unpublish-product" data-id="${product.id}" data-tone="danger">Gỡ xuống</button>` : `<button class="chip-button" type="button" data-action="edit-product" data-id="${product.id}">Đăng bán</button>`}</div></td></tr>`;
             }).join("") || '<tr><td colspan="7">Không có sản phẩm phù hợp.</td></tr>'}
           </tbody>
             </table>
@@ -716,13 +790,15 @@ function renderStorePublishWorkspace(items) {
                     const zone = WAREHOUSE_ZONES.find((item) => item.key === getWarehouseZoneForProduct(product));
                     const publishedStoreCount = getPublishedStoreCount(product);
                     const allocationValue = `${formatNumber(publishStatus.quantity || 0)} ${product.stock_unit || product.sale_unit || product.unit || ""}`.trim();
-                    const primaryActionLabel = publishStatus.stage === "not_allocated" ? "Chuyển hàng" : publishStatus.stage === "allocated" ? "Đưa lên bán" : "Cập nhật";
+                    const actionButton = publishStatus.stage === "published"
+                        ? `<button class="chip-button" type="button" data-action="hide-store-product" data-id="${product.id}" data-store-key="${activeStore.key}" data-tone="danger">Ẩn khỏi sàn</button>`
+                        : `<button class="chip-button" type="button" data-action="open-publish-editor" data-id="${product.id}" data-store-key="${activeStore.key}" data-tone="accent">Đưa lên sàn</button>`;
 
                     return `
                       <tr>
                         <td>
                           <div class="product-cell">
-                            <img class="product-thumb" src="${escapeHtml(resolveMediaUrl(product.thumbnail_url, defaultProductThumb()))}" alt="">
+                            ${renderProductThumb(product)}
                             <div>
                               <strong>${escapeHtml(product.name)}</strong><br>
                               <span class="section-copy">${getInlineProductMeta(product)} • SKU: ${escapeHtml(product.sku || "-")}</span>
@@ -736,8 +812,7 @@ function renderStorePublishWorkspace(items) {
                         <td>${publishStatus.pill}<div class="section-copy" style="margin-top:8px;">${escapeHtml(publishStatus.note)}</div></td>
                         <td>
                           <div class="publish-action-stack">
-                            <button class="chip-button" type="button" data-action="open-publish-editor" data-id="${product.id}" data-store-key="${activeStore.key}" data-tone="accent">${primaryActionLabel}</button>
-                            ${publishStatus.stage !== "not_allocated" ? `<button class="chip-button" type="button" data-action="unpublish-product" data-id="${product.id}" data-store-key="${activeStore.key}" data-tone="danger">Thu hồi</button>` : ""}
+                            ${actionButton}
                           </div>
                         </td>
                       </tr>
@@ -777,9 +852,9 @@ export function getRenderableProducts() {
     if (state.productWorkspace === "publish") {
         const filtered = items.filter((product) => {
             const storeStatus = getStorePublishStatusCopy(product, state.publishStoreFilter);
+            if (storeStatus.stage === "not_allocated") return false;
             if (state.publishStatusFilter === "published") return Boolean(storeStatus.isPublished);
             if (state.publishStatusFilter === "allocated") return storeStatus.stage === "allocated";
-            if (state.publishStatusFilter === "not_allocated") return storeStatus.stage === "not_allocated";
             if (state.publishStatusFilter === "unpublished") return !storeStatus.isPublished;
             return true;
         }).filter((product) => {
@@ -808,8 +883,8 @@ export function renderProducts() {
     if (workspace === "lowStock") return renderLowStockWorkspace(items);
     if (workspace === "publish") return renderStorePublishWorkspace(items);
     const table = workspace === "import"
-        ? `<table class="list-table"><thead><tr><th>Sản phẩm</th><th>SKU</th><th>Tồn kho</th><th>Giá nhập</th><th>Trạng thái</th><th>Tác vụ</th></tr></thead><tbody>${items.map((product) => `<tr><td><div class="product-cell"><img class="product-thumb" src="${escapeHtml(resolveMediaUrl(product.thumbnail_url, defaultProductThumb()))}" alt=""><div><strong>${escapeHtml(product.name)}</strong><br><span class="section-copy">${getInlineProductMeta(product)}</span></div></div></td><td>${escapeHtml(product.sku || "-")}</td><td><strong>${formatNumber(product.stock_quantity)}</strong> ${escapeHtml(product.stock_unit || product.unit || "")}</td><td>${formatCurrency(parseImportReferencePrice(product))}</td><td>${statusPill(product.status, product.status_label)}</td><td>${buildProductActionButtons(product)}</td></tr>`).join("") || '<tr><td colspan="6">Không có sản phẩm phù hợp.</td></tr>'}</tbody></table>`
-        : `<table class="list-table"><thead><tr><th>Sản phẩm</th><th>Danh mục</th><th>Giá</th><th>Tồn kho</th><th>Trạng thái</th><th>Tác vụ</th></tr></thead><tbody>${items.map((product) => `<tr><td><div class="product-cell"><img class="product-thumb" src="${escapeHtml(resolveMediaUrl(product.thumbnail_url, defaultProductThumb()))}" alt=""><div><strong>${escapeHtml(product.name)}</strong><br><span class="section-copy">${escapeHtml(product.slug || "-")} • ${escapeHtml(product.sku || "-")}</span></div></div></td><td>${getInlineProductMeta(product)}</td><td>${formatCurrency(product.current_price || product.price)}</td><td>${formatNumber(product.stock_quantity)} ${escapeHtml(product.stock_unit || product.unit || "")}</td><td>${statusPill(product.status, product.status_label)}<div class="section-copy" style="margin-top:8px;">${product.is_published ? "Đã đưa lên sàn" : "Chưa đưa lên sàn"}</div></td><td>${buildProductActionButtons(product)}</td></tr>`).join("") || '<tr><td colspan="6">Không có sản phẩm phù hợp.</td></tr>'}</tbody></table>`;
+        ? `<table class="list-table"><thead><tr><th>Sản phẩm</th><th>SKU</th><th>Tồn kho</th><th>Giá nhập</th><th>Trạng thái</th><th>Tác vụ</th></tr></thead><tbody>${items.map((product) => `<tr><td><div class="product-cell">${renderProductThumb(product)}<div><strong>${escapeHtml(product.name)}</strong><br><span class="section-copy">${getInlineProductMeta(product)}</span></div></div></td><td>${escapeHtml(product.sku || "-")}</td><td><strong>${formatNumber(product.stock_quantity)}</strong> ${escapeHtml(product.stock_unit || product.unit || "")}</td><td>${formatCurrency(parseImportReferencePrice(product))}</td><td>${statusPill(product.status, product.status_label)}</td><td>${buildProductActionButtons(product)}</td></tr>`).join("") || '<tr><td colspan="6">Không có sản phẩm phù hợp.</td></tr>'}</tbody></table>`
+        : `<table class="list-table"><thead><tr><th>Sản phẩm</th><th>Danh mục</th><th>Giá</th><th>Tồn kho</th><th>Trạng thái</th><th>Tác vụ</th></tr></thead><tbody>${items.map((product) => `<tr><td><div class="product-cell">${renderProductThumb(product)}<div><strong>${escapeHtml(product.name)}</strong><br><span class="section-copy">${escapeHtml(product.slug || "-")} • ${escapeHtml(product.sku || "-")}</span></div></div></td><td>${getInlineProductMeta(product)}</td><td>${formatCurrency(product.current_price || product.price)}</td><td>${formatNumber(product.stock_quantity)} ${escapeHtml(product.stock_unit || product.unit || "")}</td><td>${statusPill(product.status, product.status_label)}<div class="section-copy" style="margin-top:8px;">${product.is_published ? "Đã đưa lên sàn" : "Chưa đưa lên sàn"}</div></td><td>${buildProductActionButtons(product)}</td></tr>`).join("") || '<tr><td colspan="6">Không có sản phẩm phù hợp.</td></tr>'}</tbody></table>`;
     elements.productsContent.innerHTML = table;
 }
 
@@ -850,8 +925,7 @@ function renderProductFilterForm(isPublishWorkspace) {
       <label>
         <span>Tại cửa hàng</span>
         <select class="publish-store-select" data-publish-status-select>
-          <option value="all" ${state.publishStatusFilter === "all" ? "selected" : ""}>Tất cả</option>
-          <option value="not_allocated" ${state.publishStatusFilter === "not_allocated" ? "selected" : ""}>Chưa chuyển ${storeCounts.not_allocated ? `(${storeCounts.not_allocated})` : ""}</option>
+          <option value="all" ${state.publishStatusFilter === "all" || state.publishStatusFilter === "not_allocated" ? "selected" : ""}>Có trong chi nhánh</option>
           <option value="allocated" ${state.publishStatusFilter === "allocated" ? "selected" : ""}>Đã chuyển ${storeCounts.allocated ? `(${storeCounts.allocated})` : ""}</option>
           <option value="published" ${state.publishStatusFilter === "published" ? "selected" : ""}>Đang bán ${storeCounts.published ? `(${storeCounts.published})` : ""}</option>
         </select>
@@ -955,6 +1029,7 @@ export function resetProductForm() {
 export function resetProductEditorForm() {
     elements.productEditorForm?.reset();
     if (!elements.productEditorForm) return;
+    productEditorImagePreview = "";
     elements.productEditorForm.elements.id.value = "";
     elements.productEditorForm.elements.thumbnail_url.value = "";
     elements.productEditorForm.elements.stock_quantity.value = "0";
@@ -962,6 +1037,7 @@ export function resetProductEditorForm() {
     elements.productEditorForm.elements.status.value = "draft";
     elements.productEditorTitle.textContent = "Cập nhật sản phẩm";
     if (state.categories[0]) elements.productEditorForm.elements.category_id.value = String(state.categories[0].id);
+    if (elements.productEditorImageFile) elements.productEditorImageFile.value = "";
     if (elements.productEditorPreviewImage) elements.productEditorPreviewImage.src = defaultProductThumb();
     if (elements.productEditorPreviewName) elements.productEditorPreviewName.textContent = "-";
     if (elements.productEditorPreviewSku) elements.productEditorPreviewSku.textContent = "-";
@@ -972,6 +1048,7 @@ export function resetProductImportForm() {
     elements.productImportForm.reset();
     state.productImportSourceId = "";
     state.productImportImageDataUrl = "";
+    if (elements.productImportImageFile) elements.productImportImageFile.value = "";
     if (elements.productImportForm.elements.id) elements.productImportForm.elements.id.value = "";
     if (elements.productImportCategory && state.categories[0]) elements.productImportCategory.value = String(state.categories[0].id);
     if (elements.productImportSupplierSelect) elements.productImportSupplierSelect.value = "";
@@ -1083,7 +1160,7 @@ export function openProductEditor(productId) {
 
     elements.productEditorForm.elements.is_published.checked = Boolean(product.is_published);
     elements.productEditorForm.elements.is_featured.checked = Boolean(product.is_featured);
-    elements.productEditorPreviewImage.src = resolveMediaUrl(product.thumbnail_url, defaultProductThumb());
+    elements.productEditorPreviewImage.src = resolveMediaUrl(getProductImageSource(product), defaultProductThumb());
     elements.productEditorPreviewName.textContent = product.name || "-";
     elements.productEditorPreviewSku.textContent = product.sku || `SP-${product.id}`;
     elements.productEditorModal.classList.remove("hidden");
@@ -1096,7 +1173,8 @@ export function closeProductEditor() {
 }
 
 export async function submitProductEditor(raw) {
-    const payload = buildProductPayload(raw);
+    const preparedRaw = await prepareProductImageUpload(raw, elements.productEditorImageFile);
+    const payload = buildProductPayload(preparedRaw);
     await apiFetch(`/api/products/${raw.id}`, {
         method: "PUT",
         body: JSON.stringify(payload)
@@ -1116,7 +1194,7 @@ export function syncProductEditorPreview() {
     if (!elements.productEditorForm) return;
     const name = elements.productEditorForm.elements.name?.value || "-";
     const sku = elements.productEditorForm.elements.sku?.value || "-";
-    const imageUrl = elements.productEditorForm.elements.thumbnail_url?.value || "";
+    const imageUrl = productEditorImagePreview || elements.productEditorForm.elements.thumbnail_url?.value || "";
 
     if (elements.productEditorPreviewName) elements.productEditorPreviewName.textContent = name;
     if (elements.productEditorPreviewSku) elements.productEditorPreviewSku.textContent = sku;
@@ -1146,7 +1224,7 @@ export function openPublishEditor(productId, storeKey = state.publishStoreFilter
     elements.publishEditorTitle.textContent = `Chuyển hàng cho ${activeStore.label}`;
     elements.publishEditorSku.textContent = product.sku || `SP-${product.id}`;
     elements.publishEditorName.textContent = product.name || "-";
-    elements.publishEditorImage.src = resolveMediaUrl(product.thumbnail_url, defaultProductThumb());
+    elements.publishEditorImage.src = resolveMediaUrl(getProductImageSource(product), defaultProductThumb());
     elements.publishEditorStock.textContent = `${formatNumber(product.stock_quantity)} ${product.stock_unit || product.sale_unit || product.unit || ""}`.trim();
     elements.publishEditorStockNote.textContent = `Kho tổng hiện còn ${formatNumber(product.stock_quantity)} ${product.stock_unit || product.sale_unit || product.unit || ""}. Tồn hiện tại tại ${activeStore.label}: ${formatNumber(allocation?.allocated_quantity || 0)} ${product.stock_unit || product.sale_unit || product.unit || ""}.`;
     elements.publishEditorSubmit.textContent = "Lưu phân bổ cửa hàng";
@@ -1175,8 +1253,65 @@ export async function submitPublishEditor(raw) {
     await Promise.all([loadProducts(), loadOverview()]);
 }
 
+async function publishAllocatedStoreProduct(product, storeKey) {
+    const allocation = getStoreAllocation(product, storeKey);
+    if (!allocation || Number(allocation.allocated_quantity || 0) <= 0) {
+        openPublishEditor(product.id, storeKey);
+        return;
+    }
+
+    const activeStore = getStoreBranch(storeKey);
+    if (!window.confirm(`Đưa "${product.name || "sản phẩm"}" lên bán tại ${activeStore.label || activeStore.name || "cửa hàng"}?`)) {
+        return;
+    }
+
+    const draft = getPublishDraft(product);
+    const payload = {
+        store_key: storeKey,
+        store_name: allocation.store_name || activeStore.name || activeStore.label || "",
+        allocated_quantity: Number(allocation.allocated_quantity || 0),
+        sale_price: draft.retailPrice,
+        sale_unit: draft.saleUnit || product.sale_unit || product.unit || product.stock_unit || "",
+        stock_per_sale_unit: draft.listingQuantity || product.stock_per_sale_unit || 1,
+        publish_mode: "published",
+        is_published: true
+    };
+
+    await apiFetch(`/api/products/${product.id}/store-allocation`, { method: "PUT", body: JSON.stringify(payload) });
+    showToast("Đã đưa sản phẩm lên bán.");
+    await Promise.all([loadProducts(), loadOverview()]);
+}
+
+async function hidePublishedStoreProduct(product, storeKey) {
+    const allocation = getStoreAllocation(product, storeKey);
+    if (!allocation || Number(allocation.allocated_quantity || 0) <= 0) {
+        throw new Error("Sản phẩm chưa có hàng tại chi nhánh này.");
+    }
+
+    const activeStore = getStoreBranch(storeKey);
+    if (!window.confirm(`Ẩn "${product.name || "sản phẩm"}" khỏi sàn tại ${activeStore.label || activeStore.name || "cửa hàng"}?`)) {
+        return;
+    }
+
+    const draft = getPublishDraft(product);
+    const payload = {
+        store_key: storeKey,
+        store_name: allocation.store_name || activeStore.name || activeStore.label || "",
+        allocated_quantity: Number(allocation.allocated_quantity || 0),
+        sale_price: draft.retailPrice,
+        sale_unit: draft.saleUnit || product.sale_unit || product.unit || product.stock_unit || "",
+        stock_per_sale_unit: draft.listingQuantity || product.stock_per_sale_unit || 1,
+        publish_mode: "draft",
+        is_published: false
+    };
+
+    await apiFetch(`/api/products/${product.id}/store-allocation`, { method: "PUT", body: JSON.stringify(payload) });
+    showToast("Đã ẩn sản phẩm khỏi sàn tại chi nhánh, hàng vẫn giữ trong kho chi nhánh.");
+    await Promise.all([loadProducts(), loadOverview()]);
+}
+
 export function buildProductPayload(raw) {
-    const payload = { category_id: Number(raw.category_id), name: String(raw.name || "").trim(), price: Number(raw.price || 0), sale_price: raw.sale_price ? Number(raw.sale_price) : null, stock_quantity: raw.stock_quantity ? Number(raw.stock_quantity) : 0, stock_unit: String(raw.stock_unit || "").trim(), sale_unit: String(raw.sale_unit || "").trim(), stock_per_sale_unit: raw.stock_per_sale_unit ? Number(raw.stock_per_sale_unit) : 1, production_date: String(raw.production_date || "").trim() || null, expiration_date: String(raw.expiration_date || "").trim() || null, thumbnail_url: String(raw.thumbnail_url || "").trim(), short_description: String(raw.short_description || "").trim(), description: String(raw.description || "").trim(), status: raw.status, is_published: Boolean(raw.is_published), is_featured: Boolean(raw.is_featured) };
+    const payload = { category_id: Number(raw.category_id), name: String(raw.name || "").trim(), price: Number(raw.price || 0), sale_price: raw.sale_price ? Number(raw.sale_price) : null, stock_quantity: raw.stock_quantity ? Number(raw.stock_quantity) : 0, stock_unit: String(raw.stock_unit || "").trim(), sale_unit: String(raw.sale_unit || "").trim(), stock_per_sale_unit: raw.stock_per_sale_unit ? Number(raw.stock_per_sale_unit) : 1, production_date: String(raw.production_date || "").trim() || null, expiration_date: String(raw.expiration_date || "").trim() || null, thumbnail_url: normalizeProductImageUrl(raw.thumbnail_url), short_description: String(raw.short_description || "").trim(), description: String(raw.description || "").trim(), status: raw.status, is_published: Boolean(raw.is_published), is_featured: Boolean(raw.is_featured) };
     if (String(raw.slug || "").trim()) payload.slug = String(raw.slug).trim();
     if (String(raw.sku || "").trim()) payload.sku = String(raw.sku).trim();
     return payload;
@@ -1189,7 +1324,7 @@ export function buildInventoryImportPayload(raw) {
     const expirationDate = String(raw.expiration_date || "").trim();
     const dateDetailLines = [productionDate ? `Ngày sản xuất: ${productionDate}` : "", expirationDate ? `Ngày hết hạn: ${expirationDate}` : ""].filter(Boolean);
     const detailLines = [raw.origin ? `Xuất xứ: ${String(raw.origin).trim()}` : "", supplierName ? `Nhà cung cấp: ${supplierName}` : "", raw.reorder_level ? `Ngưỡng cảnh báo hết hàng: ${String(raw.reorder_level).trim()}` : "", raw.import_cost ? `Giá nhập tham chiếu: ${formatCurrency(raw.import_cost)}` : ""].filter(Boolean);
-    return { category_id: Number(raw.category_id), name: String(raw.name || "").trim(), price: Number(raw.import_cost || 0), sale_price: null, stock_quantity: raw.stock_quantity ? Number(raw.stock_quantity) : 0, stock_unit: String(raw.sale_unit || "kg").trim(), sale_unit: String(raw.sale_unit || "kg").trim(), stock_per_sale_unit: 1, thumbnail_url: String(raw.thumbnail_url || state.productImportImageDataUrl || "").trim(), short_description: String(raw.short_description || "").trim(), description: detailLines.concat(dateDetailLines).join("\n"), production_date: productionDate || null, expiration_date: expirationDate || null, status: raw.status || "draft", is_published: false, is_featured: Boolean(raw.is_featured) };
+    return { category_id: Number(raw.category_id), name: String(raw.name || "").trim(), price: Number(raw.import_cost || 0), sale_price: null, stock_quantity: raw.stock_quantity ? Number(raw.stock_quantity) : 0, stock_unit: String(raw.sale_unit || "kg").trim(), sale_unit: String(raw.sale_unit || "kg").trim(), stock_per_sale_unit: 1, thumbnail_url: normalizeProductImageUrl(raw.thumbnail_url), short_description: String(raw.short_description || "").trim(), description: detailLines.concat(dateDetailLines).join("\n"), production_date: productionDate || null, expiration_date: expirationDate || null, status: raw.status || "draft", is_published: false, is_featured: Boolean(raw.is_featured) };
 }
 
 export function buildInventoryRestockPayload(raw) {
@@ -1227,13 +1362,72 @@ export function buildInventoryRestockPayload(raw) {
     };
 }
 
+function readProductImportSupplierRecords() {
+    try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEYS.productImportSuppliers) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (_error) {
+        localStorage.removeItem(STORAGE_KEYS.productImportSuppliers);
+        return [];
+    }
+}
+
+export function recordProductImportSupplier(raw, savedProduct = {}) {
+    const selectedSupplier = (state.suppliers || []).find((supplier) => Number(supplier.id) === Number(raw.supplier_id));
+    const supplierName = String(selectedSupplier?.name || raw.supplier_name || "").trim();
+    if (!supplierName) return;
+
+    const productId = Number(savedProduct?.id || raw.id || 0);
+    const sku = String(savedProduct?.sku || raw.sku || "").trim();
+    const productName = String(savedProduct?.name || raw.name || "").trim();
+    const records = readProductImportSupplierRecords();
+    const payload = {
+        product_id: Number.isFinite(productId) && productId > 0 ? productId : null,
+        sku,
+        product_name: productName,
+        supplier_id: Number(raw.supplier_id || selectedSupplier?.id || 0) || null,
+        supplier_name: supplierName,
+        imported_at: new Date().toISOString()
+    };
+
+    const nextRecords = [
+        payload,
+        ...records.filter((record) => {
+            if (payload.product_id && Number(record.product_id) === Number(payload.product_id)) return false;
+            if (payload.sku && String(record.sku || "").trim().toLowerCase() === payload.sku.toLowerCase()) return false;
+            if (payload.product_name && String(record.product_name || "").trim().toLowerCase() === payload.product_name.toLowerCase()) return false;
+            return true;
+        })
+    ].slice(0, 500);
+
+    localStorage.setItem(STORAGE_KEYS.productImportSuppliers, JSON.stringify(nextRecords));
+}
+
 export async function handleProductAction(action, productId, extra = {}) {
     if (action === "edit-product") {
         openProductEditor(productId);
         return;
     }
     if (action === "open-publish-editor") {
+        const product = getProductById(productId);
+        if (!extra.storeKey && product && !product.is_published) {
+            if (!window.confirm(`Đưa "${product.name || "sản phẩm"}" lên sàn bán?`)) return;
+            await apiFetch(`/api/products/${productId}/publish`, { method: "PATCH" });
+            showToast("Đã đưa sản phẩm lên sàn.");
+            await Promise.all([loadProducts(), loadOverview()]);
+            return;
+        }
+        if (extra.storeKey && product && getStoreProductStage(product, extra.storeKey) === "allocated") {
+            await publishAllocatedStoreProduct(product, extra.storeKey);
+            return;
+        }
         openPublishEditor(productId, extra.storeKey || state.publishStoreFilter);
+        return;
+    }
+    if (action === "hide-store-product") {
+        const product = getProductById(productId);
+        if (!product) throw new Error("Không tìm thấy sản phẩm.");
+        await hidePublishedStoreProduct(product, extra.storeKey || state.publishStoreFilter);
         return;
     }
     if (action === "delete-product") {
@@ -1244,6 +1438,9 @@ export async function handleProductAction(action, productId, extra = {}) {
         return;
     }
     if (action === "publish-product" || action === "unpublish-product") {
+        const product = getProductById(productId);
+        if (action === "publish-product" && !window.confirm(`Đưa "${product?.name || "sản phẩm"}" lên sàn bán?`)) return;
+        if (action === "unpublish-product" && !window.confirm(`Ẩn "${product?.name || "sản phẩm"}" khỏi sàn bán?`)) return;
         const endpoint = action === "publish-product" ? "publish" : "unpublish";
         const body = action === "unpublish-product" && extra.storeKey
             ? JSON.stringify({ store_key: extra.storeKey })
@@ -1274,7 +1471,7 @@ export function bindProductMediaEvents() {
 
             const reader = new FileReader();
             reader.onload = () => {
-                elements.productEditorForm.elements.thumbnail_url.value = String(reader.result || "");
+                productEditorImagePreview = String(reader.result || "");
                 syncProductEditorPreview();
             };
             reader.readAsDataURL(file);
@@ -1288,7 +1485,6 @@ export function bindProductMediaEvents() {
             const reader = new FileReader();
             reader.onload = () => {
                 state.productImportImageDataUrl = String(reader.result || "");
-                if (elements.productImportImageUrl) elements.productImportImageUrl.value = state.productImportImageDataUrl;
                 updateProductImportPreview(state.productImportImageDataUrl);
             };
             reader.readAsDataURL(file);
@@ -1297,6 +1493,7 @@ export function bindProductMediaEvents() {
     if (elements.productImportImageUrl) {
         elements.productImportImageUrl.addEventListener("input", (event) => {
             const value = String(event.target.value || "").trim();
+            if (value && elements.productImportImageFile) elements.productImportImageFile.value = "";
             state.productImportImageDataUrl = value;
             updateProductImportPreview(value);
         });

@@ -14,6 +14,8 @@
     statusPill
 } from "./core.js";
 
+let promotionComboboxUid = 0;
+
 function getVoucherById(id) {
     return (state.vouchers || []).find((coupon) => Number(coupon.id) === Number(id))
         || (state.coupons || []).find((coupon) => Number(coupon.id) === Number(id))
@@ -535,6 +537,40 @@ function promotionProductSelect(value = "", scope = "products") {
     `;
 }
 
+function ensurePromotionComboboxId(root) {
+    if (!root) return "";
+    if (!root.dataset.promotionComboboxId) {
+        promotionComboboxUid += 1;
+        root.dataset.promotionComboboxId = `promo-combobox-${promotionComboboxUid}`;
+    }
+    return root.dataset.promotionComboboxId;
+}
+
+function getPromotionMenu(root) {
+    if (!root) return null;
+    const ownerId = ensurePromotionComboboxId(root);
+    return root.querySelector(".promotion-combobox-menu")
+        || document.querySelector(`.promotion-combobox-menu[data-portal-owner="${ownerId}"]`);
+}
+
+function getPromotionRootFromTarget(target) {
+    const localRoot = target?.closest?.("[data-promotion-combobox]");
+    if (localRoot) return localRoot;
+
+    const portalOwner = target?.closest?.(".promotion-combobox-menu")?.dataset.portalOwner;
+    return portalOwner ? document.querySelector(`[data-promotion-combobox-id="${portalOwner}"]`) : null;
+}
+
+function restorePromotionComboboxMenu(root) {
+    const menu = getPromotionMenu(root);
+    if (!root || !menu) return;
+    menu.removeAttribute("style");
+    delete menu.dataset.portalOwner;
+    if (menu.parentElement !== root) {
+        root.appendChild(menu);
+    }
+}
+
 function populatePromotionSelects() {
     if (!elements.promotionForm) return;
     const applyScope = getPromotionApplyScope();
@@ -554,7 +590,7 @@ function renderPromotionCombobox(kind, container = null) {
         : kind === "apply"
             ? elements.promotionForm.elements.apply_product_id
             : root.querySelector("[data-promotion-product]");
-    const menu = root.querySelector(".promotion-combobox-menu");
+    const menu = getPromotionMenu(root);
     if (!searchInput || !hiddenInput || !menu) return;
 
     const scope = kind === "gift" ? "products" : String(elements.promotionForm.elements.apply_scope?.value || root.dataset.scope || "products");
@@ -578,9 +614,31 @@ function renderPromotionCombobox(kind, container = null) {
     ].join("") || '<span class="promotion-combobox-empty">Không tìm thấy dữ liệu phù hợp.</span>';
 }
 
+function positionPromotionComboboxMenu(root) {
+    const searchInput = root?.querySelector("[data-promotion-search-target], [data-promotion-extra-search]");
+    const menu = getPromotionMenu(root);
+    if (!searchInput || !menu) return;
+
+    const rect = searchInput.getBoundingClientRect();
+    const ownerId = ensurePromotionComboboxId(root);
+    menu.dataset.portalOwner = ownerId;
+    if (menu.parentElement !== document.body) {
+        document.body.appendChild(menu);
+    }
+    menu.style.position = "fixed";
+    menu.style.left = `${rect.left}px`;
+    menu.style.top = `${rect.bottom + 6}px`;
+    menu.style.width = `${rect.width}px`;
+    menu.style.zIndex = "2000";
+    menu.style.display = "grid";
+    menu.style.gap = "6px";
+}
+
 function closePromotionComboboxes(exceptRoot = null) {
     document.querySelectorAll(".promotion-combobox.open").forEach((root) => {
-        if (root !== exceptRoot) root.classList.remove("open");
+        if (root === exceptRoot) return;
+        root.classList.remove("open");
+        restorePromotionComboboxMenu(root);
     });
 }
 
@@ -766,7 +824,7 @@ export function handlePromotionAction(action, target = null) {
         return;
     }
     if (action === "select-option") {
-        const root = target?.closest?.("[data-promotion-combobox]");
+        const root = getPromotionRootFromTarget(target);
         const value = target?.dataset.promotionSelectValue || "";
         const label = target?.dataset.promotionSelectLabel || "";
         if (!root) return;
@@ -779,6 +837,7 @@ export function handlePromotionAction(action, target = null) {
         if (hiddenInput) hiddenInput.value = value;
         if (searchInput) searchInput.value = label;
         root.classList.remove("open");
+        restorePromotionComboboxMenu(root);
         syncPromotionPreview();
         return;
     }
@@ -788,6 +847,7 @@ export function handlePromotionAction(action, target = null) {
         closePromotionComboboxes(root);
         renderPromotionCombobox(root.dataset.promotionCombobox || "extra", root);
         root.classList.add("open");
+        positionPromotionComboboxMenu(root);
         return;
     }
     if (action === "close-comboboxes") {

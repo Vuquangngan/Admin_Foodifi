@@ -147,6 +147,11 @@
   background: rgba(46, 32, 20, 0.08);
 }
 
+.product-thumb.image-fallback {
+  object-fit: contain;
+  padding: 10px;
+}
+
 .action-row {
   display: flex;
   flex-wrap: wrap;
