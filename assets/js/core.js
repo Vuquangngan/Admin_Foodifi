@@ -754,6 +754,17 @@ const MONEY_FIELD_NAMES = new Set([
 export function parseMoneyInputValue(value) {
     const rawValue = String(value ?? "").trim();
     if (!rawValue) return "";
+
+    const dotParts = rawValue.split(".");
+    if (
+        dotParts.length === 2
+        && /^\d+$/.test(dotParts[0])
+        && /^\d{1,3}$/.test(dotParts[1])
+        && dotParts[0].length > 3
+    ) {
+        return String(Number(dotParts[0]));
+    }
+
     const integerPart = rawValue.includes(",") ? rawValue.split(",")[0] : rawValue;
     const digits = integerPart.replace(/[^\d]/g, "");
     return digits ? String(Number(digits)) : "";
