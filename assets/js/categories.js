@@ -7,7 +7,8 @@ import {
     resolveMediaUrl,
     showToast,
     state,
-    statusPill
+    statusPill,
+    uploadImageFile
 } from "./core.js";
 import { loadCategories, loadOverview, loadProducts } from "./data.js";
 import { iconDataUri, renderAppIcon } from "./icons.js";
@@ -169,7 +170,7 @@ function setCategoryPreview(value) {
         return;
     }
 
-    elements.categoryImagePreview.src = nextValue;
+    elements.categoryImagePreview.src = resolveMediaUrl(nextValue, defaultCategoryThumb());
     elements.categoryImagePreview.classList.remove("hidden");
 }
 
@@ -387,7 +388,7 @@ export function bindCategoryMediaEvents() {
     });
 
     if (elements.categoryImageFile) {
-        elements.categoryImageFile.addEventListener("change", (event) => {
+        elements.categoryImageFile.addEventListener("change", async (event) => {
             const file = event.target.files?.[0];
             if (!file) return;
 
@@ -401,6 +402,19 @@ export function bindCategoryMediaEvents() {
                 setCategoryPreview(result);
             };
             reader.readAsDataURL(file);
+
+            try {
+                showToast("Đang tải ảnh danh mục lên hệ thống...");
+                const uploadedUrl = await uploadImageFile(file, "categories");
+                if (elements.categoryForm?.elements.image_url) {
+                    elements.categoryForm.elements.image_url.value = uploadedUrl;
+                }
+                setCategoryPreview(uploadedUrl);
+                showToast("Đã tải ảnh danh mục.");
+            } catch (error) {
+                event.target.value = "";
+                showToast(error.message || "Không tải được ảnh danh mục.", true);
+            }
         });
     }
 }

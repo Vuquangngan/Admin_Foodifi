@@ -896,6 +896,44 @@ export function resolveMediaUrl(path, fallback = "") {
     return `${state.apiBase}/${value.replace(/^\/+/, "")}`;
 }
 
+export function getUploadedMediaUrl(payload) {
+    return payload?.file?.relative_url
+        || payload?.hinh_anh?.duong_dan_tuong_doi
+        || payload?.files?.[0]?.relative_url
+        || payload?.files?.[0]?.duong_dan_tuong_doi
+        || payload?.file?.url
+        || payload?.hinh_anh?.url
+        || payload?.file?.duong_dan
+        || payload?.hinh_anh?.duong_dan
+        || payload?.files?.[0]?.url
+        || payload?.files?.[0]?.duong_dan
+        || "";
+}
+
+export async function uploadImageFile(file, folder = "general") {
+    if (!file || !file.size) return "";
+    if (!String(file.type || "").startsWith("image/")) {
+        throw new Error("Vui lòng chọn đúng tệp ảnh.");
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        throw new Error("Ảnh tải lên tối đa 5MB.");
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const payload = await apiFetch(`/api/uploads/images?folder=${encodeURIComponent(folder)}`, {
+        method: "POST",
+        body: formData
+    });
+    const uploadedUrl = getUploadedMediaUrl(payload);
+    if (!uploadedUrl) {
+        throw new Error("Không lấy được đường dẫn ảnh sau khi tải lên.");
+    }
+
+    return uploadedUrl;
+}
+
 export function defaultImagePlaceholder(label = "SP") {
     const safeLabel = encodeURIComponent(String(label || "SP").slice(0, 8));
     return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='100%25' height='100%25' rx='20' fill='%23efe5d8'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='%23765f4a' font-family='Arial' font-size='16'%3E${safeLabel}%3C/text%3E%3C/svg%3E`;

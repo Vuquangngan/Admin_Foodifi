@@ -9,7 +9,8 @@
     resolveMediaUrl,
     saveStoreBranches,
     showToast,
-    state
+    state,
+    uploadImageFile
 } from "./core.js";
 import { loadProducts } from "./data.js";
 import { renderProducts, updateProductWorkspace } from "./products.js";
@@ -17,6 +18,7 @@ import { renderAppIcon } from "./icons.js";
 
 const CITY_OPTIONS = ["TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Hải Phòng", "Bình Dương", "Đồng Nai"];
 const LOW_STOCK_LIMIT = 5;
+let branchImageFile = null;
 
 function defaultBranchImportExpectedDate() {
     const date = new Date();
@@ -427,7 +429,7 @@ function renderBranchListWorkspace() {
                           <div class="branch-identity">
                             <div class="branch-avatar">
                               ${branch.image_url
-                                ? `<img src="${escapeHtml(branch.image_url)}" alt="${escapeHtml(branch.label)}">`
+                                ? `<img src="${escapeHtml(resolveMediaUrl(branch.image_url))}" alt="${escapeHtml(branch.label)}">`
                                 : `<span>${escapeHtml(getBranchInitials(branch))}</span>`}
                             </div>
                             <div>
@@ -848,6 +850,7 @@ export function openBranchModal(branchKey = "") {
     if (!elements.branchModal || !elements.branchForm) return;
     const branch = STORE_BRANCHES.find((item) => item.key === branchKey) || null;
     elements.branchForm.reset();
+    branchImageFile = null;
     state.branchImageDataUrl = branch?.image_url || "";
     if (elements.branchForm.elements.key) elements.branchForm.elements.key.value = branch?.key || "";
     if (elements.branchForm.elements.label) elements.branchForm.elements.label.value = branch?.label || "";
@@ -859,7 +862,7 @@ export function openBranchModal(branchKey = "") {
     if (elements.branchForm.elements.close_time) elements.branchForm.elements.close_time.value = hours.closeTime;
     if (elements.branchImagePreview) {
         if (branch?.image_url) {
-            elements.branchImagePreview.src = branch.image_url;
+            elements.branchImagePreview.src = resolveMediaUrl(branch.image_url);
             elements.branchImagePreview.classList.remove("hidden");
             elements.branchForm.querySelector(".branch-upload-placeholder")?.classList.add("hidden");
         } else {
@@ -885,6 +888,7 @@ export function closeBranchModal() {
 
 export function handleBranchImage(file) {
     if (!file) return;
+    branchImageFile = file;
     const reader = new FileReader();
     reader.addEventListener("load", () => {
         state.branchImageDataUrl = String(reader.result || "");
@@ -897,7 +901,7 @@ export function handleBranchImage(file) {
     reader.readAsDataURL(file);
 }
 
-export function submitBranchForm(raw) {
+export async function submitBranchForm(raw) {
     const key = String(raw.key || "").trim();
     const label = String(raw.label || "").trim();
     const manager = String(raw.manager || "").trim();
@@ -912,6 +916,11 @@ export function submitBranchForm(raw) {
     if (!address) throw new Error("Vui lòng nhập địa chỉ chi tiết.");
     if (!openTime || !closeTime) throw new Error("Vui lòng nhập thời gian làm việc của chi nhánh.");
 
+    let imageUrl = state.branchImageDataUrl;
+    if (branchImageFile) {
+        imageUrl = await uploadImageFile(branchImageFile, "branches");
+    }
+
     const payload = {
         key: key || buildBranchKey(),
         label,
@@ -921,7 +930,7 @@ export function submitBranchForm(raw) {
         city,
         address,
         hours: `${openTime} - ${closeTime}`,
-        image_url: state.branchImageDataUrl
+        image_url: imageUrl
     };
 
     const existingIndex = STORE_BRANCHES.findIndex((branch) => branch.key === key);
@@ -931,6 +940,7 @@ export function submitBranchForm(raw) {
         STORE_BRANCHES.push(payload);
     }
     saveStoreBranches();
+    branchImageFile = null;
     if (!STORE_BRANCHES.some((branch) => branch.key === state.publishStoreFilter)) {
         state.publishStoreFilter = STORE_BRANCHES[0]?.key || "store_1";
     }

@@ -8,7 +8,8 @@
     restoreSession,
     saveSession,
     showToast,
-    state
+    state,
+    uploadImageFile
 } from "./core.js";
 import {
     jumpToView,
@@ -656,10 +657,14 @@ function bindGlobalEvents() {
     elements.categoryForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const raw = collectFormData(elements.categoryForm);
-        const payload = buildCategoryPayload(raw);
         const isEditing = Boolean(raw.id);
 
         await withLoading(event.submitter, async () => {
+            const file = elements.categoryImageFile?.files?.[0];
+            if (file && (!raw.image_url || String(raw.image_url).startsWith("data:"))) {
+                raw.image_url = await uploadImageFile(file, "categories");
+            }
+            const payload = buildCategoryPayload(raw);
             await apiFetch(isEditing ? `/api/categories/${raw.id}` : "/api/categories", {
                 method: isEditing ? "PUT" : "POST",
                 body: JSON.stringify(payload)
@@ -743,7 +748,7 @@ function bindGlobalEvents() {
         event.preventDefault();
         const raw = collectFormData(elements.branchForm);
         await withLoading(event.submitter, async () => {
-            submitBranchForm(raw);
+            await submitBranchForm(raw);
         });
     });
     elements.branchesContent?.addEventListener("click", async (event) => {

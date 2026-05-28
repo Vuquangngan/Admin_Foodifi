@@ -1,4 +1,4 @@
-import { PRODUCT_WORKSPACES, STORE_BRANCHES, WAREHOUSE_ZONES, STORAGE_KEYS, apiFetch, elements, escapeHtml, fillSelectOptions, formatCurrency, formatMoneyInputValue, formatNumber, resolveMediaUrl, saveWarehouseCapacities, showToast, state, statusPill } from "./core.js";
+import { PRODUCT_WORKSPACES, STORE_BRANCHES, WAREHOUSE_ZONES, STORAGE_KEYS, apiFetch, elements, escapeHtml, fillSelectOptions, formatCurrency, formatMoneyInputValue, formatNumber, resolveMediaUrl, saveWarehouseCapacities, showToast, state, statusPill, uploadImageFile } from "./core.js";
 import { loadOverview, loadProducts } from "./data.js";
 import { renderAppIcon } from "./icons.js";
 
@@ -25,7 +25,7 @@ function getProductImageSource(product) {
 function renderProductThumb(product, className = "product-thumb") {
     const fallback = defaultProductThumb();
     const src = resolveMediaUrl(getProductImageSource(product), fallback);
-    return `<img class="${escapeHtml(className)}" src="${escapeHtml(src)}" data-fallback-src="${escapeHtml(fallback)}" alt="${escapeHtml(product?.name || "S?n ph?m")}" loading="lazy">`;
+    return `<img class="${escapeHtml(className)}" src="${escapeHtml(src)}" data-fallback-src="${escapeHtml(fallback)}" alt="${escapeHtml(product?.name || "Sản phẩm")}" loading="lazy" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc;">`;
 }
 
 function getProductById(productId) {
@@ -77,7 +77,7 @@ export async function prepareProductImageUpload(raw, fileInput) {
     };
     const file = fileInput?.files?.[0];
     if (file) {
-        nextRaw.thumbnail_url = await uploadProductImage(file);
+        nextRaw.thumbnail_url = await uploadImageFile(file, "products");
     }
     return nextRaw;
 }
@@ -1459,7 +1459,7 @@ export function updateProductImportPreview(source) {
         elements.productImportPreview.classList.add("hidden");
         return;
     }
-    elements.productImportPreview.src = value;
+    elements.productImportPreview.src = resolveMediaUrl(value, defaultProductThumb());
     elements.productImportPreview.classList.remove("hidden");
 }
 
