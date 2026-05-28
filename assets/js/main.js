@@ -139,7 +139,7 @@ import {
     resetUserForm,
     submitUserForm
 } from "./users.js";
-import { bindProfileEvents } from "./profile.js";
+import { bindProfileEvents, renderProfile } from "./profile.js";
 import {
     handleStaffShiftAction,
     handleStaffShiftFieldChange,
@@ -174,6 +174,21 @@ import {
 } from "./data.js";
 
 let complaintFilterRenderTimer = null;
+
+async function performLogout() {
+    try {
+        if (state.refreshToken) {
+            await apiFetch("/api/auth/logout", {
+                method: "POST",
+                body: JSON.stringify({ refresh_token: state.refreshToken })
+            });
+        }
+    } catch (_error) {
+        // local logout is enough
+    } finally {
+        logout(true);
+    }
+}
 
 function bindGlobalEvents() {
     bindMoneyInputFormatting(document);
@@ -232,6 +247,37 @@ function bindGlobalEvents() {
     });
 
     document.addEventListener("click", (event) => {
+        const accountTrigger = event.target.closest("#adminAccountTrigger");
+        if (accountTrigger) {
+            const isOpen = elements.adminAccountDropdown?.classList.toggle("hidden") === false;
+            accountTrigger.setAttribute("aria-expanded", String(isOpen));
+            return;
+        }
+
+        const accountAction = event.target.closest("[data-admin-account-action]");
+        if (accountAction) {
+            elements.adminAccountDropdown?.classList.add("hidden");
+            elements.adminAccountTrigger?.setAttribute("aria-expanded", "false");
+            if (accountAction.dataset.adminAccountAction === "profile") {
+                state.sidebarSection = "";
+                state.sidebarItem = "";
+                renderSidebarMenu();
+                deactivateChatsPanel();
+                setActivePanel("profile");
+                renderProfile();
+                return;
+            }
+            if (accountAction.dataset.adminAccountAction === "logout") {
+                performLogout();
+                return;
+            }
+        }
+
+        if (!event.target.closest("#adminAccountMenu")) {
+            elements.adminAccountDropdown?.classList.add("hidden");
+            elements.adminAccountTrigger?.setAttribute("aria-expanded", "false");
+        }
+
         const footerSwitch = event.target.closest("#authFooterSwitch");
         if (footerSwitch) {
             setAuthMode(state.authMode === "login" ? "register" : "login");
@@ -263,20 +309,7 @@ function bindGlobalEvents() {
         });
     });
 
-    elements.logoutButton.addEventListener("click", async () => {
-        try {
-            if (state.refreshToken) {
-                await apiFetch("/api/auth/logout", {
-                    method: "POST",
-                    body: JSON.stringify({ refresh_token: state.refreshToken })
-                });
-            }
-        } catch (_error) {
-            // local logout is enough
-        } finally {
-            logout(true);
-        }
-    });
+    elements.logoutButton.addEventListener("click", performLogout);
 
     elements.navCard.addEventListener("click", (event) => {
         const sectionTrigger = event.target.closest("[data-section-toggle]");

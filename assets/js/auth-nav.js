@@ -4,6 +4,7 @@
     elements,
     escapeHtml,
     recordActivityLog,
+    resolveMediaUrl,
     saveSession,
     showToast,
     state
@@ -80,9 +81,22 @@ export function updateSessionUi() {
     const isLoggedIn = Boolean(state.token && state.user);
     elements.sessionCard.classList.toggle("hidden", !isLoggedIn);
     elements.navCard.classList.toggle("hidden", !isLoggedIn);
+    elements.adminQuickbar?.classList.toggle("hidden", !isLoggedIn);
     elements.appShell.classList.toggle("auth-screen", !isLoggedIn);
+    const displayName = state.user?.username || state.user?.full_name || state.user?.name || "Quản lý vườn";
     elements.sessionName.textContent = isLoggedIn ? "Quản lý vườn" : "-";
     elements.sessionMeta.textContent = isLoggedIn ? state.user.email : "-";
+    if (elements.adminQuickName) {
+        elements.adminQuickName.textContent = isLoggedIn ? displayName : "-";
+    }
+    if (elements.adminQuickAvatar && isLoggedIn) {
+        const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='20' fill='%23e2f5e9'/%3E%3Ccircle cx='20' cy='16' r='6' fill='%230d7f42'/%3E%3Cpath d='M9 34c3-8 8-12 11-12s8 4 11 12' fill='%230d7f42'/%3E%3C/svg%3E";
+        elements.adminQuickAvatar.src = resolveMediaUrl(state.user?.avatar_url, fallback);
+    }
+    if (!isLoggedIn) {
+        elements.adminAccountDropdown?.classList.add("hidden");
+        elements.adminAccountTrigger?.setAttribute("aria-expanded", "false");
+    }
 }
 
 export function toggleSidebarSection(sectionKey) {

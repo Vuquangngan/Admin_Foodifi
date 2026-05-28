@@ -1,0 +1,144 @@
+.admin-quickbar {
+    position: fixed;
+    top: 18px;
+    right: 22px;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-quickbar.hidden {
+    display: none;
+}
+
+.admin-notification-button,
+.admin-account-trigger {
+    border: 1px solid rgba(17, 95, 54, 0.12);
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 12px 32px rgba(63, 88, 59, 0.12);
+}
+
+.admin-notification-button {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #0d7f42;
+}
+
+.admin-notification-button svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.admin-notification-button span {
+    position: absolute;
+    top: 3px;
+    right: 5px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: #ee3d32;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 6px 14px rgba(238, 61, 50, 0.28);
+}
+
+.admin-account-menu {
+    position: relative;
+}
+
+.admin-account-trigger {
+    min-height: 48px;
+    padding: 6px 12px 6px 8px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #18452d;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.admin-account-trigger img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #e2f5e9;
+}
+
+.admin-account-chevron {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.75;
+}
+
+.admin-account-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 230px;
+    padding: 8px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(17, 95, 54, 0.1);
+    box-shadow: 0 18px 44px rgba(44, 65, 43, 0.16);
+}
+
+.admin-account-dropdown.hidden {
+    display: none;
+}
+
+.admin-account-dropdown button {
+    width: 100%;
+    border: 0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: transparent;
+    color: #263d30;
+    text-align: left;
+    font-weight: 700;
+}
+
+.admin-account-dropdown button:hover {
+    background: #edf6ea;
+    color: #0d7f42;
+}
+
+.admin-account-dropdown button:last-child {
+    color: #b42f2f;
+}
+
+@media (max-width: 768px) {
+    .admin-quickbar {
+        top: 12px;
+        right: 12px;
+    }
+
+    .admin-account-trigger span {
+        display: none;
+    }
+
+    .admin-account-dropdown {
+        right: -2px;
+        width: 210px;
+    }
+}

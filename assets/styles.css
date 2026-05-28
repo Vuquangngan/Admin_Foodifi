@@ -1,5 +1,6 @@
 ﻿@import url("./styles/modules/base.css");
 @import url("./styles/modules/admin-shell-responsive.css");
+@import url("./styles/modules/admin-quickbar.css");
 @import url("./styles/modules/overview.css");
 @import url("./styles/modules/common-tables.css");
 @import url("./styles/modules/chat.css");
