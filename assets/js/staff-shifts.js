@@ -10,6 +10,7 @@
 
 const SHIFT_STORAGE_KEY = "shopfood_admin_staff_shifts_v2";
 const MAX_STAFF_PER_SHIFT = 3;
+const SHIFT_SYNC_INTERVAL_MS = 5000;
 
 const DEFAULT_SHIFTS = [
     { id: "morning", name: "Ca sáng", start: "06:00", end: "12:00", tone: "morning", enabled: true, appliesToDate: "" },
@@ -25,6 +26,9 @@ const SHIFT_TONES = {
 
 let shiftWorkspaceState = loadShiftWorkspaceState();
 let shiftModalState = null;
+let loadedScheduleKey = "";
+let scheduleFetchPromise = null;
+let shiftSyncTimer = null;
 
 function formatBranchOptionLabel(branch) {
     const label = String(branch.label || branch.name || branch.key || "").trim();
@@ -107,7 +111,8 @@ function normalizeAssignmentRecord(record) {
         confirmedBy: status === "confirmed"
             ? (record?.confirmedBy || record?.confirmed_by || null)
             : null,
-        confirmationSource: status === "confirmed" ? confirmationSource : ""
+        confirmationSource: status === "confirmed" ? confirmationSource : "",
+        user: record?.user || null
     };
 }
 
@@ -260,6 +265,83 @@ function parseWeekInputValue(value) {
     return monday;
 }
 
+function getCurrentWeekStartKey() {
+    return toDateKey(buildWeekDates()[0]);
+}
+
+function getCurrentScheduleKey() {
+    return `${shiftWorkspaceState.branchId}|${getCurrentWeekStartKey()}`;
+}
+
+function getCurrentWeekDateKeys() {
+    return buildWeekDates().map(toDateKey);
+}
+
+function clearLoadedScheduleKey() {
+    loadedScheduleKey = "";
+}
+
+function applySchedulePayload(payload) {
+    if (!payload || typeof payload !== "object") return;
+
+    const branchId = String(payload.branch_id || shiftWorkspaceState.branchId || "");
+    if (branchId && branchId !== shiftWorkspaceState.branchId) return;
+    const weekStart = String(payload.week_start || "");
+    if (weekStart && weekStart !== getCurrentWeekStartKey()) return;
+
+    shiftWorkspaceState = {
+        ...shiftWorkspaceState,
+        shifts: normalizeShifts(payload.shifts),
+        assignments: normalizeAssignments(payload.assignments),
+        holidays: normalizeHolidays(payload.holidays)
+    };
+    loadedScheduleKey = getCurrentScheduleKey();
+    persistShiftWorkspaceState();
+}
+
+async function refreshShiftSchedule({ force = false, renderAfter = false, silent = false } = {}) {
+    const branchId = shiftWorkspaceState.branchId;
+    const weekStart = getCurrentWeekStartKey();
+    if (!branchId || !weekStart) return null;
+
+    const scheduleKey = getCurrentScheduleKey();
+    if (!force && loadedScheduleKey === scheduleKey) return null;
+    if (scheduleFetchPromise) return scheduleFetchPromise;
+
+    scheduleFetchPromise = apiFetch(`/api/staff-shifts/schedule?branch_id=${encodeURIComponent(branchId)}&week_start=${encodeURIComponent(weekStart)}`)
+        .then((payload) => {
+            applySchedulePayload(payload);
+            if (renderAfter) {
+                renderStaffShiftWorkspace();
+            }
+            return payload;
+        })
+        .catch((error) => {
+            if (!silent) {
+                showToast(error.message || "Không tải được lịch ca từ backend.", true);
+            }
+            return null;
+        })
+        .finally(() => {
+            scheduleFetchPromise = null;
+        });
+
+    return scheduleFetchPromise;
+}
+
+function requestShiftScheduleLoad() {
+    window.setTimeout(() => {
+        refreshShiftSchedule({ renderAfter: true, silent: true });
+    }, 0);
+}
+
+function startShiftRealtimeSync() {
+    if (shiftSyncTimer) return;
+    shiftSyncTimer = window.setInterval(() => {
+        refreshShiftSchedule({ force: true, renderAfter: true, silent: true });
+    }, SHIFT_SYNC_INTERVAL_MS);
+}
+
 function assignmentKey(dateKey, shiftId) {
     return `${shiftWorkspaceState.branchId}|${dateKey}|${shiftId}`;
 }
@@ -289,7 +371,7 @@ function getDetailedAssignments(dateKey, shiftId) {
     const userMap = new Map(getStaffMembers().map((user) => [Number(user.id), user]));
     return getAssignmentRecords(dateKey, shiftId)
         .map((record) => {
-            const user = userMap.get(Number(record.userId));
+            const user = userMap.get(Number(record.userId)) || record.user;
             if (!user) return null;
             return { ...record, user };
         })
@@ -454,7 +536,6 @@ function buildShiftModal() {
               <div class="user-modal-header">
                 <div>
                   <h2>${slot ? "Cập nhật ca làm việc" : "Tạo ca mới"}</h2>
-                  <p class="section-copy">Thiết lập tên ca, ngày áp dụng, khung giờ và trạng thái mở đăng ký cho nhân viên.</p>
                 </div>
                 <button class="user-modal-close" type="button" data-shift-action="close-modal">×</button>
               </div>
@@ -510,7 +591,6 @@ function buildShiftModal() {
               <div class="user-modal-header">
                 <div>
                   <h2>Phân công nhân sự</h2>
-                  <p class="section-copy">${escapeHtml(shift?.name || "Ca làm")} • ${escapeHtml(shiftModalState.dateLabel || "")} • Tối đa ${MAX_STAFF_PER_SHIFT} nhân viên/ca</p>
                 </div>
                 <button class="user-modal-close" type="button" data-shift-action="close-modal">×</button>
               </div>
@@ -550,7 +630,6 @@ function buildShiftModal() {
               <div class="user-modal-header">
                 <div>
                   <h2>Chỉnh ngày nghỉ lễ</h2>
-                  <p class="section-copy">Chọn các ngày nghỉ trong tuần này. Ngày nghỉ sẽ khóa đăng ký và phân công ca làm.</p>
                 </div>
                 <button class="user-modal-close" type="button" data-shift-action="close-modal">×</button>
               </div>
@@ -729,11 +808,14 @@ export function renderStaffShiftWorkspace() {
         ${buildShiftModal()}
       </section>
     `;
+    requestShiftScheduleLoad();
+    startShiftRealtimeSync();
 }
 
 export function handleStaffShiftFieldChange(target) {
     if (target?.dataset.shiftField === "branch") {
         shiftWorkspaceState.branchId = normalizeShiftBranchId(target.value);
+        clearLoadedScheduleKey();
         persistShiftWorkspaceState();
         renderStaffShiftWorkspace();
         return;
@@ -746,6 +828,7 @@ export function handleStaffShiftFieldChange(target) {
         const currentWeekStart = startOfWeek(new Date(), 0);
         const diffInWeeks = Math.round((selectedWeekStart.getTime() - currentWeekStart.getTime()) / (7 * 24 * 60 * 60 * 1000));
         shiftWorkspaceState.weekOffset = diffInWeeks;
+        clearLoadedScheduleKey();
         persistShiftWorkspaceState();
         renderStaffShiftWorkspace();
         return;
@@ -765,6 +848,7 @@ export async function handleStaffShiftAction(action, button) {
 
     if (action === "prev-week") {
         shiftWorkspaceState.weekOffset -= 1;
+        clearLoadedScheduleKey();
         persistShiftWorkspaceState();
         renderStaffShiftWorkspace();
         return;
@@ -772,6 +856,7 @@ export async function handleStaffShiftAction(action, button) {
 
     if (action === "next-week") {
         shiftWorkspaceState.weekOffset += 1;
+        clearLoadedScheduleKey();
         persistShiftWorkspaceState();
         renderStaffShiftWorkspace();
         return;
@@ -779,6 +864,7 @@ export async function handleStaffShiftAction(action, button) {
 
     if (action === "reset-week") {
         shiftWorkspaceState.weekOffset = 0;
+        clearLoadedScheduleKey();
         persistShiftWorkspaceState();
         renderStaffShiftWorkspace();
         return;
@@ -824,17 +910,22 @@ export async function handleStaffShiftAction(action, button) {
                 .map((input) => String(input.value || "").trim())
                 .filter(Boolean)
         );
-        const outsideWeekHolidays = normalizeHolidays(shiftWorkspaceState.holidays)
-            .filter((dateKey) => !weekDateKeys.includes(dateKey));
-
-        shiftWorkspaceState.holidays = [
-            ...outsideWeekHolidays,
-            ...weekDateKeys.filter((dateKey) => selectedDateKeys.has(dateKey))
-        ];
-        persistShiftWorkspaceState();
-        shiftModalState = null;
-        renderStaffShiftWorkspace();
-        showToast("Đã cập nhật ngày nghỉ lễ trong tuần.");
+        try {
+            await apiFetch("/api/staff-shifts/holidays", {
+                method: "PUT",
+                body: JSON.stringify({
+                    branch_id: shiftWorkspaceState.branchId,
+                    week_dates: weekDateKeys,
+                    dates: weekDateKeys.filter((dateKey) => selectedDateKeys.has(dateKey))
+                })
+            });
+            shiftModalState = null;
+            clearLoadedScheduleKey();
+            await refreshShiftSchedule({ force: true, renderAfter: true });
+            showToast("Đã cập nhật ngày nghỉ lễ trong tuần.");
+        } catch (error) {
+            showToast(error.message || "Không lưu được ngày nghỉ lễ.", true);
+        }
         return;
     }
 
@@ -852,28 +943,27 @@ export async function handleStaffShiftAction(action, button) {
             return;
         }
 
-        if (slotId) {
-            shiftWorkspaceState.shifts = shiftWorkspaceState.shifts.map((shift) => (
-                shift.id === slotId
-                    ? { ...shift, name, start, end, tone, enabled, appliesToDate }
-                    : shift
-            ));
-        } else {
-            shiftWorkspaceState.shifts.push({
-                id: `shift-${Date.now()}`,
-                name,
-                start,
-                end,
-                tone,
-                enabled,
-                appliesToDate
+        try {
+            await apiFetch(slotId ? `/api/staff-shifts/slots/${encodeURIComponent(slotId)}` : "/api/staff-shifts/slots", {
+                method: slotId ? "PATCH" : "POST",
+                body: JSON.stringify({
+                    branch_id: shiftWorkspaceState.branchId,
+                    id: slotId || `shift-${Date.now()}`,
+                    name,
+                    start,
+                    end,
+                    tone,
+                    enabled,
+                    appliesToDate
+                })
             });
+            shiftModalState = null;
+            clearLoadedScheduleKey();
+            await refreshShiftSchedule({ force: true, renderAfter: true });
+            showToast(slotId ? "Đã cập nhật ca làm việc." : "Đã tạo ca làm việc mới.");
+        } catch (error) {
+            showToast(error.message || "Không lưu được ca làm việc.", true);
         }
-
-        persistShiftWorkspaceState();
-        shiftModalState = null;
-        renderStaffShiftWorkspace();
-        showToast(slotId ? "Đã cập nhật ca làm việc." : "Đã tạo ca làm việc mới.");
         return;
     }
 
@@ -885,16 +975,17 @@ export async function handleStaffShiftAction(action, button) {
             return;
         }
 
-        shiftWorkspaceState.shifts = shiftWorkspaceState.shifts.filter((shift) => shift.id !== slotId);
-        Object.keys(shiftWorkspaceState.assignments).forEach((key) => {
-            if (key.endsWith(`|${slotId}`)) {
-                delete shiftWorkspaceState.assignments[key];
-            }
-        });
-        persistShiftWorkspaceState();
-        shiftModalState = null;
-        renderStaffShiftWorkspace();
-        showToast("Đã xóa ca làm việc.");
+        try {
+            await apiFetch(`/api/staff-shifts/slots/${encodeURIComponent(slotId)}?branch_id=${encodeURIComponent(shiftWorkspaceState.branchId)}`, {
+                method: "DELETE"
+            });
+            shiftModalState = null;
+            clearLoadedScheduleKey();
+            await refreshShiftSchedule({ force: true, renderAfter: true });
+            showToast("Đã xóa ca làm việc.");
+        } catch (error) {
+            showToast(error.message || "Không xóa được ca làm việc.", true);
+        }
         return;
     }
 
@@ -910,26 +1001,23 @@ export async function handleStaffShiftAction(action, button) {
             showToast(`Mỗi ca chỉ được tối đa ${MAX_STAFF_PER_SHIFT} nhân viên.`, true);
             return;
         }
-        const existingMap = new Map(getAssignmentRecords(dateKey, shiftId).map((record) => [Number(record.userId), record]));
-        const nextRecords = checkedIds.map((userId) => {
-            const existing = existingMap.get(Number(userId));
-            if (existing) {
-                return existing;
-            }
-            return {
-                userId,
-                status: "pending",
-                source: "manager",
-                registeredAt: new Date().toISOString(),
-                confirmedAt: null,
-                confirmedBy: null
-            };
-        });
-
-        setAssignmentRecords(dateKey, shiftId, nextRecords);
-        shiftModalState = null;
-        renderStaffShiftWorkspace();
-        showToast("Đã cập nhật nhân sự trong ca. Bấm Xác nhận / gửi lịch tuần để gửi lại lịch mới cho nhân viên.");
+        try {
+            await apiFetch("/api/staff-shifts/assignments", {
+                method: "PUT",
+                body: JSON.stringify({
+                    branch_id: shiftWorkspaceState.branchId,
+                    date: dateKey,
+                    shift_id: shiftId,
+                    employee_ids: checkedIds
+                })
+            });
+            shiftModalState = null;
+            clearLoadedScheduleKey();
+            await refreshShiftSchedule({ force: true, renderAfter: true });
+            showToast("Đã cập nhật nhân sự trong ca. Bấm Xác nhận / gửi lịch tuần để gửi lại lịch mới cho nhân viên.");
+        } catch (error) {
+            showToast(error.message || "Không cập nhật được nhân sự trong ca.", true);
+        }
         return;
     }
 
@@ -951,21 +1039,21 @@ export async function handleStaffShiftAction(action, button) {
             return;
         }
 
-        const nextRecords = [
-            ...currentRecords,
-            {
-                userId: currentUserId,
-                status: "pending",
-                source: "self",
-                registeredAt: new Date().toISOString(),
-                confirmedAt: null,
-                confirmedBy: null
-            }
-        ];
-
-        setAssignmentRecords(dateKey, shiftId, nextRecords);
-        renderStaffShiftWorkspace();
-        showToast("Đã đăng ký ca làm việc. Chờ quản lý xác nhận.");
+        try {
+            await apiFetch("/api/staff-shifts/assignments/self", {
+                method: "POST",
+                body: JSON.stringify({
+                    branch_id: shiftWorkspaceState.branchId,
+                    date: dateKey,
+                    shift_id: shiftId
+                })
+            });
+            clearLoadedScheduleKey();
+            await refreshShiftSchedule({ force: true, renderAfter: true });
+            showToast("Đã đăng ký ca làm việc. Chờ quản lý xác nhận.");
+        } catch (error) {
+            showToast(error.message || "Không đăng ký được ca làm việc.", true);
+        }
         return;
     }
 
@@ -993,19 +1081,23 @@ export async function handleStaffShiftAction(action, button) {
                 const pendingUsers = detailed.filter((item) => item.status === "pending");
                 if (!detailed.length) continue;
 
-                const confirmedRecords = getAssignmentRecords(dateKey, shift.id).map((record) => (
-                    record.status === "pending"
-                        ? {
-                            ...record,
-                            status: "confirmed",
-                            confirmedAt: new Date().toISOString(),
-                            confirmedBy: getCurrentUserId() || null,
-                            confirmationSource: "week"
-                        }
-                        : record
-                ));
-
-                setAssignmentRecords(dateKey, shift.id, confirmedRecords);
+                if (pendingUsers.length) {
+                    try {
+                        await apiFetch("/api/staff-shifts/assignments/confirm", {
+                            method: "PATCH",
+                            body: JSON.stringify({
+                                branch_id: shiftWorkspaceState.branchId,
+                                date: dateKey,
+                                shift_id: shift.id,
+                                employee_ids: pendingUsers.map((item) => Number(item.user.id)).filter(Boolean),
+                                confirmation_source: "week"
+                            })
+                        });
+                    } catch (error) {
+                        showToast(error.message || "Không xác nhận được ca làm việc.", true);
+                        return;
+                    }
+                }
                 confirmedCount += pendingUsers.length;
                 weeklyScheduleItems.push(...detailed.map((item) => ({
                     user: item.user,
@@ -1015,7 +1107,8 @@ export async function handleStaffShiftAction(action, button) {
             }
         }
 
-        renderStaffShiftWorkspace();
+        clearLoadedScheduleKey();
+        await refreshShiftSchedule({ force: true, renderAfter: true });
         if (!weeklyScheduleItems.length) {
             showToast("Tuần này chưa có ca nào để gửi email lịch làm việc.");
             return;
@@ -1059,19 +1152,21 @@ export async function handleStaffShiftAction(action, button) {
             return;
         }
 
-        const confirmedRecords = getAssignmentRecords(dateKey, shiftId).map((record) => (
-            record.status === "pending"
-                ? {
-                    ...record,
-                    status: "confirmed",
-                    confirmedAt: new Date().toISOString(),
-                    confirmedBy: getCurrentUserId() || null,
-                    confirmationSource: "slot"
-                }
-                : record
-        ));
-
-        setAssignmentRecords(dateKey, shiftId, confirmedRecords);
+        try {
+            await apiFetch("/api/staff-shifts/assignments/confirm", {
+                method: "PATCH",
+                body: JSON.stringify({
+                    branch_id: shiftWorkspaceState.branchId,
+                    date: dateKey,
+                    shift_id: shiftId,
+                    employee_ids: pendingUsers.map((item) => Number(item.user.id)).filter(Boolean),
+                    confirmation_source: "slot"
+                })
+            });
+        } catch (error) {
+            showToast(error.message || "Không xác nhận được ca làm việc.", true);
+            return;
+        }
 
         let emailNotice = "";
         try {
@@ -1081,7 +1176,8 @@ export async function handleStaffShiftAction(action, button) {
             emailNotice = ` Tuy nhiên email chưa gửi được: ${error.message || "lỗi không xác định"}.`;
         }
 
-        renderStaffShiftWorkspace();
+        clearLoadedScheduleKey();
+        await refreshShiftSchedule({ force: true, renderAfter: true });
         showToast(`Đã xác nhận ca cho ${pendingUsers.length} nhân viên.${emailNotice}`);
         return;
     }
@@ -1091,8 +1187,21 @@ export async function handleStaffShiftAction(action, button) {
         const dateKey = String(button?.dataset.date || "");
         const userId = Number(button?.dataset.userId || 0);
         if (!shiftId || !dateKey || !userId) return;
-        removeAssignmentRecord(dateKey, shiftId, userId);
-        renderStaffShiftWorkspace();
-        showToast("Đã gỡ nhân sự khỏi ca.");
+        try {
+            const params = new URLSearchParams({
+                branch_id: shiftWorkspaceState.branchId,
+                date: dateKey,
+                shift_id: shiftId,
+                employee_id: String(userId)
+            });
+            await apiFetch(`/api/staff-shifts/assignments?${params.toString()}`, {
+                method: "DELETE"
+            });
+            clearLoadedScheduleKey();
+            await refreshShiftSchedule({ force: true, renderAfter: true });
+            showToast("Đã gỡ nhân sự khỏi ca.");
+        } catch (error) {
+            showToast(error.message || "Không gỡ được nhân sự khỏi ca.", true);
+        }
     }
 }

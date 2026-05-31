@@ -19,6 +19,64 @@ import { renderAppIcon } from "./icons.js";
 const CITY_OPTIONS = ["TP. Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Hải Phòng", "Bình Dương", "Đồng Nai"];
 const LOW_STOCK_LIMIT = 5;
 let branchImageFile = null;
+let branchesLoadedFromApi = false;
+let branchesLoadPromise = null;
+
+function normalizeBranch(branch, index = 0) {
+    return {
+        key: String(branch.key || `store_${index + 1}`),
+        code: String(branch.code || `CN-${String(index + 1).padStart(3, "0")}`),
+        label: String(branch.label || branch.name || `Chi nhánh ${index + 1}`),
+        name: String(branch.name || branch.label || `Chi nhánh ${index + 1}`),
+        manager: String(branch.manager || ""),
+        phone: String(branch.phone || ""),
+        city: String(branch.city || ""),
+        address: String(branch.address || ""),
+        hours: String(branch.hours || ""),
+        image_url: String(branch.image_url || ""),
+        status: String(branch.status || "active")
+    };
+}
+
+function syncBranches(branches = []) {
+    STORE_BRANCHES.splice(0, STORE_BRANCHES.length, ...branches.map(normalizeBranch));
+    saveStoreBranches();
+}
+
+async function loadBranchesFromApi({ silent = false, renderAfter = false } = {}) {
+    if (branchesLoadPromise) return branchesLoadPromise;
+
+    branchesLoadPromise = apiFetch("/api/branches")
+        .then((payload) => {
+            if (Array.isArray(payload?.branches)) {
+                syncBranches(payload.branches);
+            }
+            branchesLoadedFromApi = true;
+            if (renderAfter) {
+                renderBranches();
+            }
+            return payload;
+        })
+        .catch((error) => {
+            branchesLoadedFromApi = true;
+            if (!silent) {
+                showToast(error.message || "Không tải được danh sách chi nhánh từ CSDL.", true);
+            }
+            return null;
+        })
+        .finally(() => {
+            branchesLoadPromise = null;
+        });
+
+    return branchesLoadPromise;
+}
+
+function ensureBranchesLoadedFromApi() {
+    if (branchesLoadedFromApi || branchesLoadPromise) return;
+    window.setTimeout(() => {
+        loadBranchesFromApi({ silent: true, renderAfter: true });
+    }, 0);
+}
 
 function defaultBranchImportExpectedDate() {
     const date = new Date();
@@ -508,7 +566,6 @@ function renderBranchImportWorkspace() {
         <div class="branch-import-topbar">
           <div>
             <h3>Yêu cầu nhập hàng theo chi nhánh</h3>
-            <p>Gửi yêu cầu nhập hàng từ chi nhánh tới kho tổng để bổ sung sản phẩm sắp hết.</p>
           </div>
           <label class="branch-import-select">
             <span>Chi nhánh</span>
@@ -821,6 +878,7 @@ function renderBranchShipmentWorkspace() {
 }
 
 export function renderBranches() {
+    ensureBranchesLoadedFromApi();
     if (!elements.branchesContent) return;
     const isImportWorkspace = state.branchWorkspace === "importRequests";
     const isShipmentWorkspace = state.branchWorkspace === "shipments";
@@ -923,6 +981,7 @@ export async function submitBranchForm(raw) {
 
     const payload = {
         key: key || buildBranchKey(),
+        code: key ? (STORE_BRANCHES.find((branch) => branch.key === key)?.code || "") : "",
         label,
         name: label,
         manager,
@@ -934,10 +993,16 @@ export async function submitBranchForm(raw) {
     };
 
     const existingIndex = STORE_BRANCHES.findIndex((branch) => branch.key === key);
+    const response = await apiFetch(existingIndex >= 0 ? `/api/branches/${encodeURIComponent(key)}` : "/api/branches", {
+        method: existingIndex >= 0 ? "PATCH" : "POST",
+        body: JSON.stringify(payload)
+    });
+    const savedBranch = normalizeBranch(response?.branch || payload, existingIndex >= 0 ? existingIndex : STORE_BRANCHES.length);
+
     if (existingIndex >= 0) {
-        STORE_BRANCHES.splice(existingIndex, 1, { ...STORE_BRANCHES[existingIndex], ...payload });
+        STORE_BRANCHES.splice(existingIndex, 1, { ...STORE_BRANCHES[existingIndex], ...savedBranch });
     } else {
-        STORE_BRANCHES.push(payload);
+        STORE_BRANCHES.push(savedBranch);
     }
     saveStoreBranches();
     branchImageFile = null;
@@ -953,7 +1018,7 @@ export async function submitBranchForm(raw) {
     showToast(existingIndex >= 0 ? "Đã cập nhật chi nhánh." : "Đã thêm chi nhánh mới.");
 }
 
-export function handleBranchAction(action, branchKey) {
+export async function handleBranchAction(action, branchKey) {
     const branch = STORE_BRANCHES.find((item) => item.key === branchKey);
     if (!branch) return;
     if (action === "edit") {
@@ -962,6 +1027,14 @@ export function handleBranchAction(action, branchKey) {
     }
     if (action === "delete") {
         if (!window.confirm(`Bạn chắc chắn muốn xóa chi nhánh "${branch.label || branch.name}"?`)) return;
+        try {
+            await apiFetch(`/api/branches/${encodeURIComponent(branchKey)}`, {
+                method: "DELETE"
+            });
+        } catch (error) {
+            showToast(error.message || "Không xóa được chi nhánh.", true);
+            return;
+        }
         const index = STORE_BRANCHES.findIndex((item) => item.key === branchKey);
         if (index < 0) return;
         STORE_BRANCHES.splice(index, 1);
@@ -983,7 +1056,19 @@ export function handleBranchAction(action, branchKey) {
             ? `Tạm ngưng chi nhánh "${branch.label || branch.name}"?`
             : `Mở lại chi nhánh "${branch.label || branch.name}"?`;
         if (!window.confirm(message)) return;
-        branch.status = nextStatus;
+        try {
+            const response = await apiFetch(`/api/branches/${encodeURIComponent(branchKey)}`, {
+                method: "PATCH",
+                body: JSON.stringify({
+                    ...branch,
+                    status: nextStatus
+                })
+            });
+            Object.assign(branch, normalizeBranch(response?.branch || { ...branch, status: nextStatus }));
+        } catch (error) {
+            showToast(error.message || "Không cập nhật được trạng thái chi nhánh.", true);
+            return;
+        }
         saveStoreBranches();
         renderBranches();
         if (!elements.panels.products?.classList.contains("hidden")) {
