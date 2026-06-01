@@ -1,0 +1,358 @@
+html,
+body {
+  font-size: 16px;
+  line-height: 1.48;
+}
+
+:root {
+  --bg: #f7fbf2;
+  --bg-deep: #edf7e7;
+  --panel: rgba(255, 255, 255, 0.96);
+  --panel-strong: rgba(255, 255, 255, 0.98);
+  --border: rgba(17, 95, 54, 0.14);
+  --accent: #11934f;
+  --accent-strong: #08783d;
+  --teal: #0d7f68;
+  --danger: #d92d2d;
+  --success: #12a257;
+  --shadow: 0 18px 36px rgba(52, 91, 48, 0.1);
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 248, 0.96), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(32, 141, 82, 0.07), transparent 28%),
+    linear-gradient(135deg, #fbfff7 0%, #f7fbf2 52%, #edf7e7 100%);
+}
+
+.surface,
+.sidebar,
+.brand-card,
+.session-card,
+.nav-card,
+.tips-card,
+.panel-card,
+.filter-card,
+.form-card,
+.metric-card,
+.stat-card,
+.voucher-stat-card,
+.stack-card,
+.overview-table-card,
+.branch-table-card,
+.categories-table-card,
+.users-table-card,
+.orders-table-card,
+.warehouse-table-card,
+.publish-table-card,
+.low-stock-table-card,
+.recipes-table-card,
+.activity-table-card,
+.menu-manager-table-card,
+.suppliers-table-wrap,
+.table-wrap,
+.categories-table-wrap,
+.suppliers-table-wrap,
+.users-table-wrap,
+.customer-history-table-wrap,
+.voucher-table-wrap,
+.orders-table-scroll,
+.warehouse-table-scroll,
+.publish-table-scroll,
+.branch-table-wrap,
+.shift-board-table-wrap,
+.recipes-table-scroll,
+.activity-table-wrap,
+.menu-manager-table-wrap {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.surface,
+.panel > article,
+.panel > section,
+.panel > div:not(.hidden),
+.voucher-stat-card,
+.overview-table-card,
+.orders-table-card,
+.warehouse-table-card,
+.publish-table-card {
+  box-shadow: 0 18px 36px rgba(52, 91, 48, 0.1);
+}
+
+.brand-title {
+  font-size: 1.85rem;
+}
+
+.panel-head h2,
+.section-head h2 {
+  font-size: clamp(2rem, 2.4vw, 2.75rem);
+}
+
+.section-head h3,
+.surface h3,
+.voucher-stat-card span,
+label,
+.nav-link,
+.nav-section-trigger,
+.nav-sublink {
+  font-size: 1.05rem;
+}
+
+.section-copy,
+.brand-copy,
+.voucher-program-cell span,
+.voucher-value-stack span,
+.status-pill,
+.card-label,
+input,
+select,
+textarea,
+button {
+  font-size: 1rem;
+}
+
+.nav-link,
+.nav-section-trigger,
+.nav-sublink,
+.primary-button,
+.secondary-button,
+.ghost-button,
+.chip-button,
+.action-button,
+.danger-button,
+.status-pill,
+.badge,
+.pill,
+button {
+  font-weight: 700;
+}
+
+.nav-link,
+.nav-section-trigger {
+  background: rgba(231, 242, 225, 0.9);
+}
+
+.nav-link:hover,
+.nav-section-trigger:hover,
+.nav-sublink:hover {
+  background: rgba(211, 231, 202, 0.95);
+}
+
+.nav-link.active,
+.nav-section-trigger.active,
+.nav-sublink.active {
+  background: linear-gradient(135deg, rgba(18, 162, 87, 0.18), rgba(39, 201, 111, 0.12));
+  border-color: rgba(18, 162, 87, 0.18);
+}
+
+.nav-sublink {
+  background: rgba(239, 247, 235, 0.96);
+}
+
+input,
+select,
+textarea {
+  background: rgba(255, 255, 255, 0.98);
+  font-weight: 600;
+}
+
+.list-table th,
+.categories-table th,
+.suppliers-table th,
+.users-table th,
+.customer-history-table th,
+.orders-table th,
+.warehouse-table th,
+.publish-table th,
+.branch-table th,
+.shift-board-table thead th,
+table th {
+  background: linear-gradient(180deg, #e5f2df 0%, #d7e9cf 100%);
+  font-size: 0.98rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.list-table td,
+.categories-table td,
+.suppliers-table td,
+.users-table td,
+.customer-history-table td,
+.orders-table td,
+.warehouse-table td,
+.publish-table td,
+.branch-table td,
+.shift-board-table td,
+table td {
+  background: rgba(255, 255, 255, 0.96);
+  font-size: 1rem;
+}
+
+.voucher-stat-card strong {
+  font-size: 2.35rem;
+}
+
+body,
+body * {
+  color: #111 !important;
+}
+
+svg,
+svg * {
+  color: inherit !important;
+}
+
+.nav-section-trigger.active,
+.nav-section-trigger.active *,
+.nav-sublink.active,
+.nav-sublink.active * {
+  color: #0f7442 !important;
+}
+
+.primary-button,
+.chat-send-button,
+.order-product-picker-confirm,
+.revenue-apply-button,
+.email-marketing-actions .primary-button,
+.stats-filter-grid .primary-button,
+.categories-filter-card .primary-button,
+.profile-actions .primary-button,
+.low-stock-actions .primary-button,
+.refund-amount-modal-actions .primary-button {
+  background: linear-gradient(135deg, #0c8d46 0%, #1fc76f 100%) !important;
+  color: #ffffff !important;
+  border: 0 !important;
+  box-shadow: 0 14px 28px rgba(18, 162, 87, 0.22) !important;
+}
+
+.primary-button:hover,
+.chat-send-button:hover,
+.order-product-picker-confirm:hover,
+.revenue-apply-button:hover,
+.email-marketing-actions .primary-button:hover,
+.stats-filter-grid .primary-button:hover,
+.categories-filter-card .primary-button:hover {
+  background: linear-gradient(135deg, #08783d 0%, #18b863 100%) !important;
+  transform: translateY(-1px);
+}
+
+.primary-button *,
+.chat-send-button *,
+.order-product-picker-confirm *,
+.revenue-apply-button * {
+  color: #ffffff !important;
+}
+
+.secondary-button,
+.ghost-button,
+.chip-button {
+  border: 1px solid rgba(17, 120, 66, 0.1) !important;
+}
+
+.secondary-button {
+  background: #e4f7ec !important;
+  color: #08783d !important;
+}
+
+.ghost-button,
+.chip-button {
+  background: #f1f6ef !important;
+  color: #274636 !important;
+}
+
+.chip-button[data-tone="accent"],
+.chip-button[data-action="edit-product"],
+.chip-button[data-action="open-publish-editor"],
+.branch-actions button[data-branch-action="edit"],
+.branch-actions button[data-branch-action="toggle-status"],
+.icon-action-button,
+.action-button {
+  background: #e4f7ec !important;
+  color: #08783d !important;
+}
+
+.danger-button,
+.ghost-button.danger,
+.chip-button[data-tone="danger"],
+.chip-button[data-action="delete-product"],
+.chip-button[data-user-action="delete"],
+.chip-button[data-voucher-action="delete"],
+.chip-button[data-supplier-action="delete"],
+.branch-actions button[data-branch-action="delete"],
+.promotion-campaign-actions .ghost-button.danger,
+.shift-delete-button,
+button[data-action*="delete"],
+button[data-recipe-action*="delete"],
+button[data-settings-menu-action="delete"] {
+  background: #fff1f1 !important;
+  color: #d92d2d !important;
+  border-color: rgba(217, 45, 45, 0.16) !important;
+  box-shadow: none !important;
+}
+
+.danger-button:hover,
+.ghost-button.danger:hover,
+.chip-button[data-tone="danger"]:hover,
+.chip-button[data-action="delete-product"]:hover,
+.branch-actions button[data-branch-action="delete"]:hover,
+button[data-action*="delete"]:hover,
+button[data-recipe-action*="delete"]:hover,
+button[data-settings-menu-action="delete"]:hover {
+  background: #ffe4e4 !important;
+  color: #b42323 !important;
+}
+
+.app-icon,
+.nav-section-trigger svg,
+.nav-link svg,
+.nav-sublink svg,
+.icon-action-button svg,
+button svg {
+  width: 1.15em;
+  height: 1.15em;
+  stroke-width: 2.25;
+  opacity: 1 !important;
+}
+
+.icon-action-button,
+.branch-actions button,
+.action-row .chip-button,
+.promotion-campaign-actions .ghost-button,
+.recipe-action-button,
+.settings-menu-action-button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.modal-backdrop,
+.settings-menu-modal-backdrop,
+.shift-modal-backdrop,
+.refund-modal-backdrop,
+.supplier-return-backdrop,
+.warehouse-capacity-modal-backdrop {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px !important;
+}
+
+.modal-backdrop.hidden,
+.settings-menu-modal-backdrop.hidden,
+.shift-modal-backdrop.hidden,
+.refund-modal-backdrop.hidden,
+.supplier-return-backdrop.hidden,
+.warehouse-capacity-modal-backdrop.hidden {
+  display: none !important;
+}
+
+.modal-card,
+.settings-menu-modal,
+.shift-modal-card,
+.refund-amount-modal,
+.supplier-return-modal,
+.warehouse-capacity-modal {
+  margin: auto !important;
+}

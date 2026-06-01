@@ -21,6 +21,8 @@ const LOW_STOCK_LIMIT = 5;
 let branchImageFile = null;
 let branchesLoadedFromApi = false;
 let branchesLoadPromise = null;
+let branchImportRequestsLoadedFromApi = false;
+let branchImportRequestsLoadPromise = null;
 
 function normalizeBranch(branch, index = 0) {
     return {
@@ -78,6 +80,58 @@ function ensureBranchesLoadedFromApi() {
     }, 0);
 }
 
+function normalizeBranchImportRequest(request) {
+    return {
+        ...request,
+        id: String(request.id || ""),
+        branch_key: String(request.branch_key || ""),
+        branch_name: String(request.branch_name || ""),
+        status: String(request.status || "pending"),
+        items: Array.isArray(request.items)
+            ? request.items.map((item) => ({
+                ...item,
+                product_id: item.product_id,
+                quantity: Number(item.quantity || 0)
+            }))
+            : []
+    };
+}
+
+async function loadBranchImportRequestsFromApi({ silent = false, renderAfter = false } = {}) {
+    if (branchImportRequestsLoadPromise) return branchImportRequestsLoadPromise;
+
+    branchImportRequestsLoadPromise = apiFetch("/api/branch-import-requests")
+        .then((payload) => {
+            state.branchImportRequests = Array.isArray(payload?.requests)
+                ? payload.requests.map(normalizeBranchImportRequest)
+                : [];
+            branchImportRequestsLoadedFromApi = true;
+            if (renderAfter) {
+                renderBranches();
+            }
+            return payload;
+        })
+        .catch((error) => {
+            branchImportRequestsLoadedFromApi = true;
+            if (!silent) {
+                showToast(error.message || "Không tải được phiếu yêu cầu gửi hàng từ CSDL.", true);
+            }
+            return null;
+        })
+        .finally(() => {
+            branchImportRequestsLoadPromise = null;
+        });
+
+    return branchImportRequestsLoadPromise;
+}
+
+function ensureBranchImportRequestsLoadedFromApi() {
+    if (branchImportRequestsLoadedFromApi || branchImportRequestsLoadPromise) return;
+    window.setTimeout(() => {
+        loadBranchImportRequestsFromApi({ silent: true, renderAfter: true });
+    }, 0);
+}
+
 function defaultBranchImportExpectedDate() {
     const date = new Date();
     date.setDate(date.getDate() + 2);
@@ -96,17 +150,11 @@ function defaultProductThumb() {
 }
 
 function readBranchImportRequests() {
-    try {
-        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEYS.branchImportRequests) || "[]");
-        return Array.isArray(parsed) ? parsed : [];
-    } catch (_error) {
-        localStorage.removeItem(STORAGE_KEYS.branchImportRequests);
-        return [];
-    }
+    return Array.isArray(state.branchImportRequests) ? state.branchImportRequests : [];
 }
 
 function saveBranchImportRequests(requests) {
-    localStorage.setItem(STORAGE_KEYS.branchImportRequests, JSON.stringify(requests));
+    state.branchImportRequests = Array.isArray(requests) ? requests : [];
 }
 
 function getBranchLabel(branch) {
@@ -273,19 +321,15 @@ function buildBranchRequestCode(branch) {
     return `REQ-CN${String(branchIndex + 1).padStart(2, "0")}-${String(sequence).padStart(4, "0")}`;
 }
 
-function submitBranchImportRequest({ asDraft = false } = {}) {
+async function submitBranchImportRequest({ asDraft = false } = {}) {
     const branch = getCurrentBranch();
     const items = getBranchDraftItems();
     if (!branch) throw new Error("Chưa có chi nhánh để tạo yêu cầu nhập hàng.");
     if (!items.length) throw new Error("Vui lòng thêm ít nhất một sản phẩm vào phiếu yêu cầu.");
 
-    const requests = readBranchImportRequests();
-    const request = {
-        id: `branch-request-${Date.now()}`,
-        code: buildBranchRequestCode(branch),
+    const payload = {
         branch_key: branch.key,
         branch_name: getBranchLabel(branch),
-        created_at: new Date().toISOString(),
         expected_date: state.branchImportExpectedDate || defaultBranchImportExpectedDate(),
         note: state.branchImportNote || "",
         status: asDraft ? "draft" : "pending",
@@ -299,7 +343,16 @@ function submitBranchImportRequest({ asDraft = false } = {}) {
         }))
     };
 
-    saveBranchImportRequests([request, ...requests]);
+    const response = await apiFetch("/api/branch-import-requests", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
+    const savedRequest = response?.request ? normalizeBranchImportRequest(response.request) : null;
+    if (savedRequest) {
+        saveBranchImportRequests([savedRequest, ...readBranchImportRequests()]);
+    } else {
+        await loadBranchImportRequestsFromApi({ silent: true });
+    }
     state.branchImportDraftItems = [];
     state.branchImportNote = "";
     state.branchImportExpectedDate = defaultBranchImportExpectedDate();
@@ -314,11 +367,14 @@ function getRequestBranch(request) {
     return STORE_BRANCHES.find((branch) => String(branch.key) === String(request?.branch_key)) || null;
 }
 
-function updateBranchImportRequest(requestId, patcher) {
+async function updateBranchImportRequest(requestId, patcher) {
     const requests = readBranchImportRequests();
+    const currentRequest = requests.find((request) => String(request.id) === String(requestId));
+    if (!currentRequest) return null;
+    const patch = typeof patcher === "function" ? patcher(currentRequest) : patcher;
+
     const nextRequests = requests.map((request) => {
         if (String(request.id) !== String(requestId)) return request;
-        const patch = typeof patcher === "function" ? patcher(request) : patcher;
         return {
             ...request,
             ...patch,
@@ -326,6 +382,18 @@ function updateBranchImportRequest(requestId, patcher) {
         };
     });
     saveBranchImportRequests(nextRequests);
+
+    const response = await apiFetch(`/api/branch-import-requests/${encodeURIComponent(requestId)}`, {
+        method: "PATCH",
+        body: JSON.stringify(patch)
+    });
+    const savedRequest = response?.request ? normalizeBranchImportRequest(response.request) : null;
+    if (savedRequest) {
+        saveBranchImportRequests(readBranchImportRequests().map((request) => (
+            String(request.id) === String(requestId) ? savedRequest : request
+        )));
+    }
+    return savedRequest;
 }
 
 function getVisibleShipmentRequests() {
@@ -357,14 +425,14 @@ function getShipmentDetailRequest(requests = getVisibleShipmentRequests()) {
     return selected || fallback;
 }
 
-function changeShipmentRequestStatus(requestId, status) {
+async function changeShipmentRequestStatus(requestId, status) {
     const statusMessages = {
         approved: "Đã duyệt yêu cầu nhập hàng.",
         receiving: "Đã chuyển sang trạng thái đang gửi hàng.",
         completed: "Đã hoàn tất gửi hàng cho chi nhánh.",
         rejected: "Đã từ chối yêu cầu nhập hàng."
     };
-    updateBranchImportRequest(requestId, {
+    await updateBranchImportRequest(requestId, {
         status,
         status_note: statusMessages[status] || "",
         ...(status === "approved" ? { approved_at: new Date().toISOString() } : {}),
@@ -375,14 +443,42 @@ function changeShipmentRequestStatus(requestId, status) {
     showToast(statusMessages[status] || "Đã cập nhật yêu cầu.");
 }
 
-function updateShipmentItemQuantity(requestId, productId, quantity) {
-    updateBranchImportRequest(requestId, (request) => ({
+async function updateShipmentItemQuantity(requestId, productId, quantity) {
+    const nextQuantity = Math.max(1, Number(quantity || 1));
+    saveBranchImportRequests(readBranchImportRequests().map((request) => (
+        String(request.id) === String(requestId)
+            ? {
+                ...request,
+                items: (request.items || []).map((item) => (
+                    String(item.product_id) === String(productId)
+                        ? { ...item, quantity: nextQuantity }
+                        : item
+                ))
+            }
+            : request
+    )));
+    const response = await apiFetch(`/api/branch-import-requests/${encodeURIComponent(requestId)}/items/${encodeURIComponent(productId)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ quantity: nextQuantity })
+    });
+    const savedRequest = response?.request ? normalizeBranchImportRequest(response.request) : null;
+    if (savedRequest) {
+        saveBranchImportRequests(readBranchImportRequests().map((request) => (
+            String(request.id) === String(requestId) ? savedRequest : request
+        )));
+    }
+    return savedRequest;
+}
+
+function patchShipmentItemQuantityLocal(requestId, productId, quantity) {
+    saveBranchImportRequests(readBranchImportRequests().map((request) => ({
+        ...request,
         items: (request.items || []).map((item) => (
-            String(item.product_id) === String(productId)
+            String(request.id) === String(requestId) && String(item.product_id) === String(productId)
                 ? { ...item, quantity: Math.max(1, Number(quantity || 1)) }
                 : item
         ))
-    }));
+    })));
 }
 
 async function completeShipmentRequest(requestId) {
@@ -419,7 +515,7 @@ async function completeShipmentRequest(requestId) {
         });
     }
 
-    changeShipmentRequestStatus(requestId, "completed");
+    await changeShipmentRequestStatus(requestId, "completed");
     await loadProducts();
     if (!elements.panels.products?.classList.contains("hidden")) {
         updateProductWorkspace();
@@ -879,6 +975,7 @@ function renderBranchShipmentWorkspace() {
 
 export function renderBranches() {
     ensureBranchesLoadedFromApi();
+    ensureBranchImportRequestsLoadedFromApi();
     if (!elements.branchesContent) return;
     const isImportWorkspace = state.branchWorkspace === "importRequests";
     const isShipmentWorkspace = state.branchWorkspace === "shipments";
@@ -911,13 +1008,20 @@ export function openBranchModal(branchKey = "") {
     branchImageFile = null;
     state.branchImageDataUrl = branch?.image_url || "";
     if (elements.branchForm.elements.key) elements.branchForm.elements.key.value = branch?.key || "";
-    if (elements.branchForm.elements.label) elements.branchForm.elements.label.value = branch?.label || "";
-    if (elements.branchForm.elements.manager) elements.branchForm.elements.manager.value = branch?.manager || "";
-    if (elements.branchForm.elements.phone) elements.branchForm.elements.phone.value = branch?.phone || "";
-    if (elements.branchForm.elements.address) elements.branchForm.elements.address.value = branch?.address || "";
+    const labelInput = elements.branchForm.elements.branch_label || elements.branchForm.elements.label;
+    const managerInput = elements.branchForm.elements.branch_manager || elements.branchForm.elements.manager;
+    const phoneInput = elements.branchForm.elements.branch_contact_number || elements.branchForm.elements.phone;
+    const addressInput = elements.branchForm.elements.branch_location_detail || elements.branchForm.elements.address;
+    const cityInput = elements.branchForm.elements.branch_city_code || elements.branchForm.elements.city;
+    const openTimeInput = elements.branchForm.elements.branch_open_time || elements.branchForm.elements.open_time;
+    const closeTimeInput = elements.branchForm.elements.branch_close_time || elements.branchForm.elements.close_time;
+    if (labelInput) labelInput.value = branch?.label || "";
+    if (managerInput) managerInput.value = branch?.manager || "";
+    if (phoneInput) phoneInput.value = branch?.phone || "";
+    if (addressInput) addressInput.value = branch?.address || "";
     const hours = parseBranchHours(branch?.hours);
-    if (elements.branchForm.elements.open_time) elements.branchForm.elements.open_time.value = hours.openTime;
-    if (elements.branchForm.elements.close_time) elements.branchForm.elements.close_time.value = hours.closeTime;
+    if (openTimeInput) openTimeInput.value = hours.openTime;
+    if (closeTimeInput) closeTimeInput.value = hours.closeTime;
     if (elements.branchImagePreview) {
         if (branch?.image_url) {
             elements.branchImagePreview.src = resolveMediaUrl(branch.image_url);
@@ -929,9 +1033,9 @@ export function openBranchModal(branchKey = "") {
             elements.branchForm.querySelector(".branch-upload-placeholder")?.classList.remove("hidden");
         }
     }
-    if (elements.branchForm.elements.city) {
-        elements.branchForm.elements.city.innerHTML = `<option value="">Chọn thành phố</option>${CITY_OPTIONS.map((city) => `<option value="${escapeHtml(city)}">${escapeHtml(city)}</option>`).join("")}`;
-        elements.branchForm.elements.city.value = branch?.city || "";
+    if (cityInput) {
+        cityInput.innerHTML = `<option value="">Chọn thành phố</option>${CITY_OPTIONS.map((city) => `<option value="${escapeHtml(city)}">${escapeHtml(city)}</option>`).join("")}`;
+        cityInput.value = branch?.city || "";
     }
     const title = elements.branchModal.querySelector(".branch-modal-header h2");
     if (title) title.textContent = branch ? "Sửa chi nhánh" : "Thêm chi nhánh mới";
@@ -961,13 +1065,13 @@ export function handleBranchImage(file) {
 
 export async function submitBranchForm(raw) {
     const key = String(raw.key || "").trim();
-    const label = String(raw.label || "").trim();
-    const manager = String(raw.manager || "").trim();
-    const phone = String(raw.phone || "").trim();
-    const city = String(raw.city || "").trim();
-    const address = String(raw.address || "").trim();
-    const openTime = String(raw.open_time || "").trim();
-    const closeTime = String(raw.close_time || "").trim();
+    const label = String(raw.branch_label || raw.label || "").trim();
+    const manager = String(raw.branch_manager || raw.manager || "").trim();
+    const phone = String(raw.branch_contact_number || raw.phone || "").trim();
+    const city = String(raw.branch_city_code || raw.city || "").trim();
+    const address = String(raw.branch_location_detail || raw.address || "").trim();
+    const openTime = String(raw.branch_open_time || raw.open_time || "").trim();
+    const closeTime = String(raw.branch_close_time || raw.close_time || "").trim();
     if (!label) throw new Error("Vui lòng nhập tên chi nhánh.");
     if (!phone) throw new Error("Vui lòng nhập số điện thoại chi nhánh.");
     if (!city) throw new Error("Vui lòng chọn thành phố.");
@@ -1106,13 +1210,13 @@ export async function handleBranchImportClick(event) {
         }
 
         if (action === "approve-request") {
-            changeShipmentRequestStatus(requestId, "approved");
+            await changeShipmentRequestStatus(requestId, "approved");
             renderBranches();
             return true;
         }
 
         if (action === "start-shipping") {
-            changeShipmentRequestStatus(requestId, "receiving");
+            await changeShipmentRequestStatus(requestId, "receiving");
             renderBranches();
             return true;
         }
@@ -1125,7 +1229,7 @@ export async function handleBranchImportClick(event) {
 
         if (action === "reject-request") {
             if (!window.confirm("Bạn chắc chắn muốn từ chối yêu cầu nhập hàng này?")) return true;
-            changeShipmentRequestStatus(requestId, "rejected");
+            await changeShipmentRequestStatus(requestId, "rejected");
             renderBranches();
             return true;
         }
@@ -1159,7 +1263,11 @@ export async function handleBranchImportClick(event) {
     }
 
     if (action === "save-draft" || action === "submit-request") {
-        submitBranchImportRequest({ asDraft: action === "save-draft" });
+        try {
+            await submitBranchImportRequest({ asDraft: action === "save-draft" });
+        } catch (error) {
+            showToast(error.message || "Không lưu được phiếu yêu cầu nhập hàng.", true);
+        }
         renderBranches();
         return true;
     }
@@ -1186,7 +1294,9 @@ export function handleBranchImportInput(event) {
         return true;
     }
     if (target?.dataset.branchShipmentQuantity) {
-        updateShipmentItemQuantity(target.dataset.requestId, target.dataset.branchShipmentQuantity, target.value);
+        patchShipmentItemQuantityLocal(target.dataset.requestId, target.dataset.branchShipmentQuantity, target.value);
+        updateShipmentItemQuantity(target.dataset.requestId, target.dataset.branchShipmentQuantity, target.value)
+            .catch((error) => showToast(error.message || "Không cập nhật được số lượng trong phiếu.", true));
         return true;
     }
     if (target?.dataset.branchImportField === "note") {
