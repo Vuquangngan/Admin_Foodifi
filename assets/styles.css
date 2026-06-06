@@ -114,3 +114,71 @@
   }
 }
 
+.shift-board-table-wrap {
+  width: 100%;
+  overflow-x: hidden !important;
+}
+
+.shift-board-table {
+  width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed;
+}
+
+.shift-time-head,
+.shift-time-cell {
+  width: 170px !important;
+  min-width: 0 !important;
+}
+
+.shift-board-table thead th {
+  padding: 16px 8px !important;
+}
+
+.shift-board-table thead th strong {
+  font-size: 1.55rem !important;
+}
+
+.shift-time-cell {
+  padding: 18px 12px !important;
+  gap: 8px !important;
+}
+
+.shift-time-cell strong {
+  font-size: 1.25rem !important;
+  line-height: 1.2;
+}
+
+.shift-day-cell {
+  width: calc((100% - 170px) / 7) !important;
+  min-width: 0 !important;
+  padding: 12px !important;
+}
+
+.shift-cell-card {
+  min-height: 158px !important;
+  padding: 12px !important;
+  gap: 10px !important;
+  border-radius: 18px !important;
+}
+
+.shift-cell-actions {
+  gap: 8px !important;
+}
+
+.shift-cell-actions .chip-button {
+  min-height: 34px !important;
+  padding: 8px 10px !important;
+  font-size: 0.86rem !important;
+  white-space: normal;
+}
+
+.shift-status-pill {
+  padding: 5px 10px !important;
+  font-size: 0.74rem !important;
+}
+
+.shift-cell-empty-copy {
+  font-size: 0.9rem !important;
+}
+
