@@ -316,3 +316,102 @@
   }
 }
 
+#productImportCard,
+.product-excel-import-card,
+.product-intake-section,
+.product-intake-side,
+.category-modal-surface,
+.supplier-form-section,
+.branch-form-section,
+.recipe-form-card,
+.recipe-upload-card,
+.recipe-repeat-card,
+.voucher-builder-section,
+.voucher-preview-card,
+.voucher-note-card,
+.product-editor-preview,
+.product-editor-fields,
+.publish-editor-surface,
+.settings-card,
+.profile-panel {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.product-excel-import-card,
+.product-intake-section,
+.product-intake-side,
+.category-modal-surface,
+.supplier-form-section,
+.branch-form-section,
+.recipe-form-card,
+.recipe-upload-card,
+.recipe-repeat-card,
+.voucher-builder-section,
+.voucher-preview-card,
+.voucher-note-card,
+.product-editor-preview,
+.product-editor-fields,
+.publish-editor-surface,
+.settings-card,
+.profile-panel {
+  padding: 10px 0 !important;
+}
+
+.product-excel-import-card,
+.product-intake-main,
+.product-intake-form,
+.recipe-form-section,
+.supplier-modal-body,
+.branch-modal-form,
+.voucher-builder-grid,
+.product-editor-grid,
+.publish-editor-grid {
+  gap: 12px !important;
+}
+
+.product-excel-import-card .section-head,
+.product-intake-section .section-head,
+.product-intake-side .section-head,
+.category-modal-surface .section-head,
+.supplier-form-section .section-head,
+.branch-form-section .section-head,
+.recipe-form-card .section-head,
+.recipe-upload-card .section-head,
+.voucher-builder-section .section-head {
+  margin-bottom: 8px !important;
+}
+
+.product-intake-section + .product-intake-section,
+.supplier-form-section + .supplier-form-section,
+.branch-form-section + .branch-form-section,
+.recipe-form-section + .recipe-form-section,
+.voucher-builder-section + .voucher-builder-section {
+  border-top: 1px solid rgba(17, 95, 54, 0.1);
+  padding-top: 16px !important;
+}
+
+.product-intake-side {
+  border-left: 1px solid rgba(17, 95, 54, 0.1);
+  padding-left: 18px !important;
+}
+
+.product-excel-import-card {
+  border-bottom: 1px solid rgba(17, 95, 54, 0.1) !important;
+  margin-bottom: 10px !important;
+  padding-bottom: 14px !important;
+}
+
+.product-excel-import-result,
+.upload-dropzone,
+.recipe-upload-zone,
+.recipe-category-upload,
+.supplier-logo-dropzone,
+.category-upload-dropzone,
+.branch-upload-box {
+  background: rgba(238, 245, 234, 0.72) !important;
+  border-color: rgba(17, 115, 66, 0.18) !important;
+}
+
