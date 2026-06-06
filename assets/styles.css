@@ -88,8 +88,9 @@
 }
 
 .app-shell:not(.auth-screen) .admin-page-header {
-  padding: 0 260px 16px 6px;
-  margin-bottom: 18px;
+  min-height: auto !important;
+  padding: 0 260px 8px 6px;
+  margin-bottom: 8px;
   background: transparent;
   border-bottom: none;
   box-shadow: none;
@@ -191,6 +192,18 @@
 
 .product-intake-card {
   overflow: visible !important;
+}
+
+#productsPanel {
+  gap: 6px !important;
+}
+
+#productsPanel .products-workspace-grid {
+  gap: 10px !important;
+}
+
+#productImportCard {
+  margin-top: 0 !important;
 }
 
 .product-excel-import-card {
