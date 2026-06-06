@@ -195,11 +195,11 @@
 }
 
 #productsPanel {
-  gap: 6px !important;
+  gap: 4px !important;
 }
 
 #productsPanel .products-workspace-grid {
-  gap: 10px !important;
+  gap: 8px !important;
 }
 
 #productImportCard {
@@ -207,14 +207,15 @@
 }
 
 .product-excel-import-card {
-  padding: 16px 20px !important;
-  margin-bottom: 14px !important;
-  gap: 10px !important;
+  padding: 14px 20px !important;
+  margin-bottom: 8px !important;
+  gap: 8px !important;
 }
 
 .product-excel-import-card .section-head {
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  margin-bottom: 0;
 }
 
 .product-excel-import-card .section-copy {
@@ -238,14 +239,14 @@
 
 .product-intake-form {
   grid-template-columns: minmax(0, 2.1fr) minmax(260px, 0.85fr) !important;
-  gap: 14px !important;
+  gap: 10px !important;
   align-items: start;
 }
 
 .product-intake-main {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   display: grid;
-  gap: 14px !important;
+  gap: 10px !important;
 }
 
 .product-intake-section {
