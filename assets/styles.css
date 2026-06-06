@@ -207,15 +207,19 @@
 }
 
 .product-excel-import-card {
-  padding: 14px 20px !important;
+  padding: 6px 8px !important;
   margin-bottom: 8px !important;
-  gap: 8px !important;
+  gap: 4px !important;
 }
 
 .product-excel-import-card .section-head {
   align-items: center;
   gap: 12px;
   margin-bottom: 0;
+}
+
+.product-excel-import-card h3 {
+  margin: 0 !important;
 }
 
 .product-excel-import-card .section-copy {
@@ -225,7 +229,7 @@
 
 .product-excel-import-row {
   grid-template-columns: minmax(260px, 1fr) 150px !important;
-  gap: 10px !important;
+  gap: 8px !important;
 }
 
 .product-excel-file input {
@@ -405,7 +409,7 @@
 .product-excel-import-card {
   border-bottom: 1px solid rgba(17, 95, 54, 0.1) !important;
   margin-bottom: 2px !important;
-  padding-bottom: 8px !important;
+  padding-bottom: 6px !important;
 }
 
 .product-excel-import-result,
