@@ -89,12 +89,16 @@
 
 .app-shell:not(.auth-screen) .admin-page-header {
   min-height: auto !important;
-  padding: 0 260px 8px 6px;
-  margin-bottom: 8px;
+  padding: 0 260px 0 6px;
+  margin-bottom: 0;
   background: transparent;
   border-bottom: none;
   box-shadow: none;
   backdrop-filter: none;
+}
+
+#productsPanel .panel-head {
+  margin-bottom: -6px !important;
 }
 
 .app-shell:not(.auth-screen) .admin-page-content {
