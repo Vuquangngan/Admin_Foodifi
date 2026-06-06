@@ -182,3 +182,123 @@
   font-size: 0.9rem !important;
 }
 
+.app-shell:not(.auth-screen) .main-panel,
+.app-shell:not(.auth-screen) .admin-page-content,
+.products-workspace-grid,
+.product-intake-card {
+  min-height: 0;
+}
+
+.product-intake-card {
+  overflow: visible !important;
+}
+
+.product-excel-import-card {
+  padding: 16px 20px !important;
+  margin-bottom: 14px !important;
+  gap: 10px !important;
+}
+
+.product-excel-import-card .section-head {
+  align-items: center;
+  gap: 16px;
+}
+
+.product-excel-import-card .section-copy {
+  margin: 4px 0 0;
+  line-height: 1.35;
+}
+
+.product-excel-import-row {
+  grid-template-columns: minmax(260px, 1fr) 150px !important;
+  gap: 10px !important;
+}
+
+.product-excel-file input {
+  min-height: 38px !important;
+  padding: 8px 12px !important;
+}
+
+.product-excel-import-result {
+  padding: 10px 14px !important;
+}
+
+.product-intake-form {
+  grid-template-columns: minmax(0, 2.1fr) minmax(260px, 0.85fr) !important;
+  gap: 14px !important;
+  align-items: start;
+}
+
+.product-intake-main {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: grid;
+  gap: 14px !important;
+}
+
+.product-intake-section {
+  padding: 16px !important;
+}
+
+.product-intake-section:first-child {
+  grid-column: 1 / -1;
+}
+
+.product-intake-section .section-head {
+  margin-bottom: 8px;
+}
+
+.product-intake-section .compact-grid {
+  gap: 10px 12px !important;
+}
+
+.product-intake-section textarea {
+  min-height: 76px !important;
+}
+
+.product-intake-side {
+  padding: 16px !important;
+  gap: 12px !important;
+  position: sticky;
+  top: 6px;
+}
+
+.product-intake-side .section-head {
+  margin-bottom: 4px;
+}
+
+.product-intake-side .upload-dropzone {
+  min-height: 150px !important;
+  padding: 16px !important;
+  border-radius: 18px !important;
+}
+
+.product-intake-side .upload-dropzone-icon {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 14px !important;
+}
+
+.product-import-preview-wrap {
+  min-height: 0 !important;
+}
+
+.product-import-preview {
+  max-height: 150px !important;
+  border-radius: 16px !important;
+}
+
+.product-intake-actions {
+  margin-top: 0 !important;
+}
+
+@media (max-width: 1180px) {
+  .product-intake-form,
+  .product-intake-main {
+    grid-template-columns: 1fr !important;
+  }
+
+  .product-intake-side {
+    position: static;
+  }
+}
+
