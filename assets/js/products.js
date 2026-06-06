@@ -229,7 +229,7 @@ function buildGroupedCategoryOptions(selectedValue = "") {
 
 function getParentCategoryOptions(selectedValue = "") {
     const categories = Array.isArray(state.categories) ? state.categories : [];
-    return `<option value="">Tất cả danh mục cha</option>${categories
+    return `<option value="">Tất cả</option>${categories
         .filter((category) => !isChildCategory(category))
         .sort((left, right) => String(left.name || "").localeCompare(String(right.name || ""), "vi"))
         .map((category) => `<option value="${escapeHtml(String(category.id))}" ${String(selectedValue) === String(category.id) ? "selected" : ""}>${escapeHtml(category.name || category.label || category.id)}</option>`)
@@ -244,7 +244,7 @@ function getChildCategoryOptions(parentId = "", selectedValue = "") {
         .filter((category) => !parentValue || Number(category.parent_id || 0) === parentValue)
         .sort((left, right) => String(left.name || "").localeCompare(String(right.name || ""), "vi"));
 
-    return `<option value="">Tất cả danh mục con</option>${children
+    return `<option value="">Tất cả</option>${children
         .map((category) => `<option value="${escapeHtml(String(category.id))}" ${String(selectedValue) === String(category.id) ? "selected" : ""}>${escapeHtml(category.name || category.label || category.id)}</option>`)
         .join("")}`;
 }
