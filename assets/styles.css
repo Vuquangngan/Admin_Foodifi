@@ -24,3 +24,14 @@
 @import url("./styles/modules/ui-contrast.css");
 @import url("./styles/modules/density-100.css");
 
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
