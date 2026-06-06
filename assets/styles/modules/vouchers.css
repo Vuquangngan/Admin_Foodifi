@@ -254,7 +254,7 @@
 .promotion-form-modal {
   position: fixed;
   inset: 0;
-  z-index: 120;
+  z-index: 3000;
   overflow: auto;
   padding: 28px;
   background: rgba(13, 33, 20, 0.36);
@@ -509,12 +509,12 @@
 
 .promotion-combobox-menu {
   position: absolute;
-  z-index: 2000;
+  z-index: 3200;
   top: calc(100% + 6px);
   left: 0;
   right: 0;
   display: none;
-  max-height: 206px;
+  max-height: 184px;
   overflow: auto;
   padding: 8px;
   border-radius: 16px;
@@ -533,6 +533,7 @@
   align-items: center;
   width: 100%;
   min-height: 38px;
+  max-height: 38px;
   border: 0;
   border-radius: 12px;
   background: transparent;

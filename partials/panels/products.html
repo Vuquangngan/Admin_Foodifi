@@ -3,7 +3,6 @@
           <div>
             <p class="eyebrow" id="productsPanelEyebrow"></p>
             <h2 id="productsPanelTitle">Kho hàng</h2>
-            <p class="section-copy" id="productsPanelDescription">Theo dõi tồn kho, SKU và mức sẵn sàng bán của từng sản phẩm.</p>
           </div>
           <div class="products-panel-actions">
             <article class="publish-branch-card hidden" id="publishBranchCard">
@@ -12,7 +11,6 @@
               <small id="publishBranchCount">Tổng số chi nhánh: 0</small>
               <i></i>
             </article>
-            <button class="secondary-button" id="refreshProductsButton" type="button">Làm mới</button>
           </div>
         </div>
 
@@ -77,7 +75,7 @@
               </label>
               <label>
                 <span>Tồn kho</span>
-                <input name="stock_quantity" type="number" min="0" step="0.001" value="0">
+                <input name="stock_quantity" type="text" inputmode="decimal" data-stock-input value="0">
               </label>
               <label>
                 <span>Trạng thái</span>
@@ -100,7 +98,7 @@
                 <span>Tỷ lệ kho / đơn vị bán</span>
                 <input name="stock_per_sale_unit" type="number" min="0.001" step="0.001" value="1">
               </label>
-              <label>
+              <label class="admin-hidden-field">
                 <span>Ảnh đại diện URL</span>
                 <input name="thumbnail_url" placeholder="https://...">
               </label>
@@ -125,6 +123,23 @@
           </article>
 
           <article class="surface hidden product-intake-card" id="productImportCard">
+            <section class="surface product-excel-import-card">
+              <div class="section-head">
+                <div>
+                  <h3>Nhập sản phẩm bằng Excel</h3>
+                  <p class="section-copy">Hỗ trợ file .xlsx, .xls hoặc .csv. Danh mục và nhà cung cấp có thể nhập bằng ID hoặc đúng tên trong hệ thống.</p>
+                </div>
+                <button class="ghost-button" id="downloadProductImportTemplateButton" type="button">Tải file mẫu</button>
+              </div>
+              <div class="product-excel-import-row">
+                <label class="product-excel-file">
+                  <input id="productImportExcelFile" type="file" accept=".xlsx,.xls,.csv">
+                </label>
+                <button class="primary-button" id="submitProductImportExcelButton" type="button" disabled>Nhập từ Excel</button>
+              </div>
+              <div class="product-excel-import-result" id="productImportExcelResult">Chưa chọn file Excel.</div>
+            </section>
+
             <form id="productImportForm" class="product-intake-form">
               <input type="hidden" name="id">
               <section class="product-intake-main">
@@ -133,6 +148,7 @@
                     <div>
                       <h3>Thông tin cơ bản</h3>
                     </div>
+                    <button class="secondary-button product-intake-refresh" id="refreshProductsButton" type="button">Làm mới</button>
                   </div>
                   <div class="compact-grid">
                     <label class="span-2">
@@ -165,7 +181,6 @@
                       <span>Giá nhập (VND)</span>
                       <input name="import_cost" type="text" inputmode="numeric" data-money-input value="0">
                     </label>
-                    <input name="price" type="hidden" value="0">
                     <label>
                       <span>Đơn vị tính</span>
                       <input name="sale_unit" list="productUnitOptions" placeholder="Ví dụ: kg, hộp, chai, gói, quả..." value="kg">
@@ -182,7 +197,7 @@
                   <div class="compact-grid">
                     <label>
                       <span>Số lượng nhập kho</span>
-                      <input name="stock_quantity" type="number" min="0" step="0.001" value="0" required>
+                      <input name="stock_quantity" type="text" inputmode="decimal" data-stock-input value="0" required>
                     </label>
                     <label>
                       <span>Ngưỡng cảnh báo hết hàng</span>
@@ -199,7 +214,7 @@
                     <label class="span-2">
                       <span>Nhà cung cấp</span>
                       <select name="supplier_id" id="productImportSupplierSelect">
-                        <option value="">Chọn nhà cung cấp trong kho</option>
+                        <option value="">Chọn nhà cung cấp</option>
                       </select>
                     </label>
                   </div>
@@ -210,7 +225,6 @@
                 <div class="section-head">
                   <div>
                     <h3>Hình ảnh</h3>
-                    <p class="section-copy">Có thể chọn ảnh trực tiếp hoặc dán URL để dùng làm ảnh đại diện.</p>
                   </div>
                 </div>
                 <label class="upload-dropzone">
@@ -222,7 +236,7 @@
                 <div class="product-import-preview-wrap">
                   <img id="productImportPreview" class="product-import-preview hidden" alt="preview">
                 </div>
-                <label>
+                <label class="admin-hidden-field">
                   <span>Hoặc dán URL ảnh</span>
                   <input id="productImportImageUrl" name="thumbnail_url" placeholder="https://...">
                 </label>
@@ -259,7 +273,6 @@
             <div class="product-editor-header">
               <div>
                 <h2 id="productEditorTitle">Cập nhật sản phẩm</h2>
-                <p>Chỉnh nhanh tên, mã, ảnh và các thông tin hiển thị của sản phẩm ngay trong popup.</p>
               </div>
               <button class="ghost-button" id="closeProductEditorButton" type="button">Đóng</button>
             </div>
@@ -308,7 +321,7 @@
                     </label>
                     <label>
                       <span>Tồn kho</span>
-                      <input name="stock_quantity" type="number" min="0" step="0.001" value="0">
+                      <input name="stock_quantity" type="text" inputmode="decimal" data-stock-input value="0">
                     </label>
                     <label>
                       <span>Trạng thái</span>
@@ -373,7 +386,6 @@
             <div class="publish-editor-header">
               <div>
                 <h2 id="publishEditorTitle">Thiết lập niêm yết sản phẩm</h2>
-                <p>Chuyển hàng từ kho tổng sang từng cửa hàng, sau đó chọn có đưa lên bán ngay hay chỉ lưu tồn cửa hàng.</p>
               </div>
               <button class="ghost-button" id="closePublishEditorButton" type="button">Đóng</button>
             </div>
@@ -444,9 +456,6 @@
                   <article class="surface publish-editor-surface">
                     <h3>Ghi chú vận hành</h3>
                     <div class="publish-editor-note-list">
-                      <p>Mỗi cửa hàng có một lượng phân bổ riêng, lấy trực tiếp từ kho tổng.</p>
-                      <p>Nếu tăng số lượng cho cửa hàng, hệ thống sẽ kiểm tra kho tổng trước khi cấp thêm.</p>
-                      <p>Nếu gỡ cửa hàng khỏi sàn, lượng đã phân bổ sẽ tự hoàn về kho tổng.</p>
                     </div>
                   </article>
                 </section>

@@ -16,6 +16,25 @@
     recipeCategories: "garden_fresh_admin_recipe_categories"
 };
 
+const DEFAULT_LOCAL_API_BASE = "http://localhost:3000";
+const DEFAULT_PRODUCTION_API_BASE = "https://backend-shopfood.onrender.com";
+
+function isLocalFrontendHost() {
+    const hostname = window.location.hostname;
+    return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "";
+}
+
+function getRuntimeApiBase() {
+    const config = window.SHOPFOOD_ADMIN_CONFIG || {};
+    const configuredApiBase = isLocalFrontendHost()
+        ? config.localApiBase
+        : config.productionApiBase;
+
+    return normalizeApiBase(configuredApiBase || config.apiBase || (
+        isLocalFrontendHost() ? DEFAULT_LOCAL_API_BASE : DEFAULT_PRODUCTION_API_BASE
+    ));
+}
+
 export const VOUCHER_META_PREFIX = "[[VOUCHER_META]]";
 
 export const SIDEBAR_MENU = [
@@ -151,7 +170,7 @@ export const PRODUCT_WORKSPACES = {
     catalog: {
         eyebrow: "Catalog",
         title: "Danh sách sản phẩm",
-        description: "Quản lý toàn bộ sản phẩm, giá bán và thông tin hiển thị.",
+        description: "",
         listTitle: "Danh sách sản phẩm",
         showFilter: true,
         showCreate: true,
@@ -177,7 +196,7 @@ export const PRODUCT_WORKSPACES = {
     lowStock: {
         eyebrow: "",
         title: "Sản phẩm sắp hết",
-        description: "Theo dõi và bổ sung nguồn hàng kịp thời để đảm bảo vận hành ổn định.",
+        description: "",
         listTitle: "",
         showFilter: false,
         showCreate: false,
@@ -186,7 +205,7 @@ export const PRODUCT_WORKSPACES = {
     publish: {
         eyebrow: "Chi nhánh",
         title: "Kho chi nhánh",
-        description: "Quản lý tồn kho riêng và trạng thái bán hàng của từng chi nhánh.",
+        description: "",
         showFilter: true,
         showCreate: false,
         showImport: false
@@ -227,7 +246,42 @@ export const WAREHOUSE_ZONES = [
 ];
 
 const DEFAULT_STORE_BRANCHES = [
-   
+    {
+        key: "store_1",
+        code: "CN-001",
+        label: "Garden Fresh 1",
+        name: "Garden Fresh 1",
+        manager: "Trần Văn Lý",
+        phone: "0906572167",
+        city: "Hà Nội",
+        address: "113 Cầu Giấy, Quận Cầu Giấy, Hà Nội",
+        image_url: "",
+        status: "active"
+    },
+    {
+        key: "store_2",
+        code: "CN-002",
+        label: "Garden Fresh 2",
+        name: "Garden Fresh 2",
+        manager: "Vũ Quang Ngân",
+        phone: "0916837759",
+        city: "Hà Nội",
+        address: "80 Trần Phú, Quận Hà Đông, Hà Nội",
+        image_url: "",
+        status: "active"
+    },
+    {
+        key: "store_3",
+        code: "CN-003",
+        label: "Garden Fresh 3",
+        name: "Garden Fresh 3",
+        manager: "",
+        phone: "",
+        city: "Hà Nội",
+        address: "",
+        image_url: "",
+        status: "active"
+    }
 ];
 
 function loadStoreBranches() {
@@ -236,6 +290,7 @@ function loadStoreBranches() {
         if (Array.isArray(parsed) && parsed.length) {
             return parsed.map((branch, index) => ({
                 key: String(branch.key || `store_${index + 1}`),
+                code: String(branch.code || `CN-${String(index + 1).padStart(3, "0")}`),
                 label: String(branch.label || `Cửa hàng ${index + 1}`),
                 name: String(branch.name || branch.label || `Chi nhánh ${index + 1}`),
                 manager: String(branch.manager || ""),
@@ -298,7 +353,7 @@ function loadActivityWarningNotes() {
 }
 
 export const state = {
-    apiBase: "https://backend-shopfood.onrender.com",
+    apiBase: getRuntimeApiBase(),
     token: "",
     refreshToken: "",
     user: null,
@@ -347,6 +402,7 @@ export const state = {
     inventoryZone: "frozen",
     inventorySearch: "",
     productImportSourceId: "",
+    productImportExcelRows: [],
     recipes: [],
     recipesHydrated: false,
     recipeCategories: [],
@@ -435,6 +491,9 @@ export const elements = {
     adminAccountDropdown: document.querySelector("#adminAccountDropdown"),
     adminQuickAvatar: document.querySelector("#adminQuickAvatar"),
     adminQuickName: document.querySelector("#adminQuickName"),
+    adminPageHeader: document.querySelector("#adminPageHeader"),
+    adminPageTitle: document.querySelector("#adminPageTitle"),
+    adminPageContent: document.querySelector("#adminPageContent"),
     sessionCard: document.querySelector("#sessionCard"),
     sessionName: document.querySelector("#sessionName"),
     sessionMeta: document.querySelector("#sessionMeta"),
@@ -476,6 +535,10 @@ export const elements = {
     productImportImageFile: document.querySelector("#productImportImageFile"),
     productImportImageUrl: document.querySelector("#productImportImageUrl"),
     productImportPreview: document.querySelector("#productImportPreview"),
+    productImportExcelFile: document.querySelector("#productImportExcelFile"),
+    productImportExcelResult: document.querySelector("#productImportExcelResult"),
+    submitProductImportExcelButton: document.querySelector("#submitProductImportExcelButton"),
+    downloadProductImportTemplateButton: document.querySelector("#downloadProductImportTemplateButton"),
     resetProductImportButton: document.querySelector("#resetProductImportButton"),
     productsListCard: document.querySelector("#productsListCard"),
     productsListTitle: document.querySelector("#productsListTitle"),
@@ -698,7 +761,8 @@ export function showToast(message, isError = false) {
     if (!elements.toast) return;
     elements.toast.textContent = message;
     elements.toast.classList.remove("hidden");
-    elements.toast.style.background = isError ? "rgba(180, 55, 55, 0.94)" : "rgba(46, 32, 20, 0.92)";
+    elements.toast.style.background = isError ? "#f9d8d5" : "#dff1d8";
+    elements.toast.style.color = isError ? "#7c2525" : "#111b14";
     elements.toast.style.zIndex = "10000";
     window.clearTimeout(showToast.timerId);
     showToast.timerId = window.setTimeout(() => elements.toast?.classList.add("hidden"), 3200);
@@ -724,6 +788,9 @@ export function saveSession() {
 }
 
 export function restoreSession() {
+    const savedApiBase = normalizeApiBase(localStorage.getItem(STORAGE_KEYS.apiBase) || "");
+    state.apiBase = savedApiBase || getRuntimeApiBase();
+
     if (elements.apiBaseInput) {
         elements.apiBaseInput.value = state.apiBase;
     }

@@ -18,8 +18,10 @@
               <button class="user-modal-close" id="closeBranchModalButton" type="button" aria-label="Đóng popup thêm chi nhánh">×</button>
             </div>
 
-            <form id="branchForm" class="branch-form" autocomplete="off">
-              <input type="hidden" name="key">
+            <form id="branchForm" class="branch-form" autocomplete="off" data-form-type="other">
+              <input type="hidden" name="key" autocomplete="off">
+              <input type="text" name="fake_username" autocomplete="username" tabindex="-1" aria-hidden="true" class="hidden">
+              <input type="password" name="fake_password" autocomplete="new-password" tabindex="-1" aria-hidden="true" class="hidden">
               <section class="branch-form-section">
                 <h3>▣ Thông tin chung</h3>
                 <div class="branch-upload-label">
@@ -37,11 +39,11 @@
                 <div class="compact-grid">
                   <label>
                     <span>Tên chi nhánh</span>
-                    <input name="label" placeholder="VD: Garden Fresh Quận 1" autocomplete="off" required>
+                    <input name="branch_label" placeholder="VD: Garden Fresh Quận 1" autocomplete="new-password" required>
                   </label>
                   <label>
                     <span>Người quản lý</span>
-                    <input name="manager" placeholder="Tên quản lý" autocomplete="off">
+                    <input name="branch_manager" placeholder="Tên quản lý" autocomplete="new-password">
                   </label>
                 </div>
               </section>
@@ -51,17 +53,17 @@
                 <div class="compact-grid">
                   <label>
                     <span>Số điện thoại</span>
-                    <input name="phone" placeholder="0901 234 567" autocomplete="off" inputmode="tel" required>
+                    <input name="branch_contact_number" placeholder="0901 234 567" autocomplete="new-password" inputmode="tel" required>
                   </label>
                   <label>
                     <span>Thành phố</span>
-                    <select name="city" autocomplete="off" required>
+                    <select name="branch_city_code" autocomplete="new-password" required>
                       <option value="">Chọn thành phố</option>
                     </select>
                   </label>
                   <label class="span-2">
                     <span>Địa chỉ chi tiết</span>
-                    <input name="address" placeholder="Số nhà, Tên đường, Phường/Xã..." autocomplete="off" required>
+                    <input name="branch_location_detail" placeholder="Số nhà, Tên đường, Phường/Xã..." autocomplete="new-password" required>
                   </label>
                 </div>
               </section>
@@ -71,11 +73,11 @@
                 <div class="compact-grid branch-hours-grid">
                   <label>
                     <span>Giờ mở cửa</span>
-                    <input name="open_time" type="time" autocomplete="off" value="07:00" required>
+                    <input name="branch_open_time" type="time" autocomplete="off" value="07:00" required>
                   </label>
                   <label>
                     <span>Giờ đóng cửa</span>
-                    <input name="close_time" type="time" autocomplete="off" value="21:00" required>
+                    <input name="branch_close_time" type="time" autocomplete="off" value="21:00" required>
                   </label>
                 </div>
               </section>

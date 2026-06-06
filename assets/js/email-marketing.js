@@ -207,7 +207,6 @@ export function renderEmailMarketing() {
           <div>
             <p class="eyebrow">Email Marketing</p>
             <h2>Tạo chiến dịch Email</h2>
-            <p class="section-copy">Thiết kế và gửi email chăm sóc khách hàng từ dữ liệu khách trong hệ thống.</p>
           </div>
           <div class="email-marketing-actions">
             <button class="secondary-button" type="button" data-email-action="save-draft">Lưu nháp</button>

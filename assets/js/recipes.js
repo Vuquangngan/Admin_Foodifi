@@ -302,7 +302,7 @@ function renderStepRow(step = {}, index = 0) {
               <input type="file" accept="image/*" data-recipe-step-image-file hidden>
               + Ảnh bước
             </label>
-            <input data-recipe-step-image-url value="${escapeHtml(imageUrl)}" placeholder="Link ảnh bước thực hiện">
+            <input class="admin-hidden-field" data-recipe-step-image-url value="${escapeHtml(imageUrl)}" placeholder="Link ảnh bước thực hiện">
             ${imageUrl ? `<img src="${escapeHtml(resolveMediaUrl(imageUrl, ""))}" alt="">` : ""}
           </div>
         </div>
@@ -391,7 +391,6 @@ function renderRecipeLoading() {
 function renderRecipeListWorkspace() {
     const recipes = getVisibleRecipes();
     if (elements.recipesPanelTitle) elements.recipesPanelTitle.textContent = "Quản lý công thức nấu ăn";
-    if (elements.recipesPanelDescription) elements.recipesPanelDescription.textContent = "Tạo và quản lý công thức món ăn, nguyên liệu và hướng dẫn chế biến cho Garden Fresh.";
     if (elements.openRecipeModalButton) elements.openRecipeModalButton.textContent = "+ Thêm công thức mới";
     if (elements.recipeCategorySummary) elements.recipeCategorySummary.classList.add("hidden");
     if (elements.recipeSearchInput) {
@@ -453,7 +452,6 @@ function renderRecipeCategoryWorkspace() {
     const popular = [...allCategories].sort((left, right) => getRecipeCountByCategory(right) - getRecipeCountByCategory(left))[0];
 
     if (elements.recipesPanelTitle) elements.recipesPanelTitle.textContent = "Quản lý danh mục công thức";
-    if (elements.recipesPanelDescription) elements.recipesPanelDescription.textContent = "Phân loại công thức nấu ăn theo nhóm món, mùa vụ và nhu cầu sử dụng.";
     if (elements.openRecipeModalButton) elements.openRecipeModalButton.textContent = "+ Thêm danh mục mới";
     if (elements.recipeSearchInput) {
         elements.recipeSearchInput.value = state.recipeCategoryFilters?.keyword || "";

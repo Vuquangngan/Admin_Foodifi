@@ -169,12 +169,10 @@ function syncRoleOptions(selectedRole = "staff") {
 }
 
 function setPanelHeadings() {
-    if (!elements.usersPanelTitle || !elements.usersPanelCopy || !elements.openUserFormButton) return;
+    if (!elements.usersPanelTitle || !elements.openUserFormButton) return;
 
     if (isShiftWorkspace()) {
         elements.usersPanelTitle.textContent = "Qu\u1ea3n l\u00fd ca l\u00e0m vi\u1ec7c";
-        elements.usersPanelCopy.textContent = "S\u1eafp x\u1ebfp l\u1ecbch ca, \u0111\u0103ng k\u00fd nh\u00e2n s\u1ef1 v\u00e0 \u0111i\u1ec1u ph\u1ed1i l\u00e0m vi\u1ec7c theo t\u1eebng chi nh\u00e1nh.";
-        elements.usersPanelCopy.classList.remove("hidden");
         if (elements.usersListTitle) elements.usersListTitle.textContent = "L\u1ecbch ca l\u00e0m vi\u1ec7c";
         elements.openUserFormButton.classList.add("hidden");
         return;
@@ -184,16 +182,12 @@ function setPanelHeadings() {
 
     if (isCustomerWorkspace()) {
         elements.usersPanelTitle.textContent = "Quản lý khách hàng";
-        elements.usersPanelCopy.textContent = "";
-        elements.usersPanelCopy.classList.add("hidden");
         if (elements.usersListTitle) elements.usersListTitle.textContent = "Danh sách khách hàng";
         elements.openUserFormButton.textContent = "Thêm khách hàng";
         return;
     }
 
     elements.usersPanelTitle.textContent = "Quản lý admin và nhân viên";
-    elements.usersPanelCopy.textContent = "Quản lý tài khoản nội bộ, vai trò truy cập và trạng thái làm việc trong hệ thống.";
-    elements.usersPanelCopy.classList.remove("hidden");
     if (elements.usersListTitle) elements.usersListTitle.textContent = "Danh sách tài khoản nội bộ";
     elements.openUserFormButton.textContent = "Tạo tài khoản mới";
 }
@@ -474,10 +468,6 @@ function renderCustomerProfileModal() {
     if (elements.customerProfileTitle) {
         elements.customerProfileTitle.textContent = customer.username || "Hồ sơ khách hàng";
     }
-    if (elements.customerProfileSubtitle) {
-        elements.customerProfileSubtitle.textContent = customer.email || "Thông tin tài khoản và lịch sử mua hàng.";
-    }
-
     elements.customerProfileContent.innerHTML = `
       <div class="customer-profile-top">
         <article class="customer-profile-card">
@@ -592,17 +582,15 @@ function buildPagination() {
 }
 
 function setUserFormHeadings(isEditing) {
-    if (!elements.userFormTitle || !elements.userFormSubtitle || !elements.userFormSubmitButton) return;
+    if (!elements.userFormTitle || !elements.userFormSubmitButton) return;
 
     if (isCustomerWorkspace()) {
         elements.userFormTitle.textContent = isEditing ? "Cập nhật thông tin khách hàng" : "Tạo khách hàng mới";
-        elements.userFormSubtitle.textContent = "Tài khoản khách hàng mới sẽ bắt đầu ở hạng Đồng với 0 điểm tích lũy.";
         elements.userFormSubmitButton.textContent = isEditing ? "Lưu khách hàng" : "Tạo khách hàng";
         return;
     }
 
     elements.userFormTitle.textContent = isEditing ? "Cập nhật tài khoản nhân viên" : "Tạo tài khoản nhân viên mới";
-    elements.userFormSubtitle.textContent = "Thiết lập hồ sơ nhân sự, avatar và vai trò truy cập ngay trong popup này.";
     elements.userFormSubmitButton.textContent = isEditing ? "Lưu tài khoản" : "Tạo tài khoản";
 }
 

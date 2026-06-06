@@ -159,11 +159,30 @@
 }
 
 .chip-button[data-tone="danger"] {
-  color: var(--danger);
+  background: #f9d8d5;
+  color: #9d2f2f;
 }
 
 .chip-button[data-tone="accent"] {
-  color: var(--accent-strong);
+  background: #dff1d8;
+  color: #236b33;
+}
+
+.chip-button[data-action="edit-product"] {
+  background: #e8f0df;
+  color: #2f5131;
+}
+
+.chip-button[data-action="open-publish-editor"] {
+  background: #dff1d8;
+  color: #236b33;
+}
+
+.chip-button[data-action="unpublish-product"],
+.chip-button[data-action="hide-store-product"],
+.chip-button[data-action="delete-product"] {
+  background: #f9d8d5;
+  color: #9d2f2f;
 }
 
 .chip-button:disabled {

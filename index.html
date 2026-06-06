@@ -67,6 +67,10 @@
     </aside>
 
     <main class="main-panel">
+      <header class="admin-page-header hidden" id="adminPageHeader">
+        <h1 id="adminPageTitle">Tổng quan</h1>
+      </header>
+      <div class="admin-page-content" id="adminPageContent">
       <div data-partial="./partials/panels/login.html"></div>
       <div data-partial="./partials/panels/overview.html"></div>
       <div data-partial="./partials/panels/chats.html"></div>
@@ -84,6 +88,7 @@
       <div data-partial="./partials/panels/vouchers.html"></div>
       <div data-partial="./partials/panels/activity-history.html"></div>
       <div data-partial="./partials/panels/settings.html"></div>
+      </div>
     </main>
   </div>
 
@@ -135,6 +140,8 @@
     <option value="túi"></option>
     <option value="lon"></option>
   </datalist>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="./assets/config.js"></script>
   <script type="module" src="./assets/app.js"></script>
 </body>
 </html>

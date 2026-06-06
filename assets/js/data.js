@@ -44,6 +44,7 @@ export async function loadProducts() {
     const params = new URLSearchParams();
     Object.entries(state.filters.products).forEach(([key, value]) => {
         if (key === "visibility") return;
+        if (key === "inventory_zone") return;
         if (value) params.set(key, value);
     });
     params.set("limit", "1000");

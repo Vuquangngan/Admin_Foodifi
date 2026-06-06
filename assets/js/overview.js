@@ -78,7 +78,6 @@ export function renderOverview() {
       <section class="overview-hero">
         <div>
           <h1 class="overview-title">Tổng quan</h1>
-          <p class="overview-subtitle">Các chỉ số đo lường cho khu vườn kỹ thuật số của bạn hôm nay.</p>
         </div>
         <div class="overview-actions">
           <div class="range-switcher">

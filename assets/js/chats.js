@@ -481,7 +481,6 @@ export function renderChats() {
             <div>
               <p class="eyebrow">Support</p>
               <h2>Chat khách hàng</h2>
-              <p class="section-copy">Theo dõi hội thoại đang mở và phản hồi khách hàng ngay trong admin.</p>
             </div>
             <button class="secondary-button" type="button" data-chat-action="refresh-conversations">Làm mới</button>
           </div>
@@ -1124,7 +1123,6 @@ renderChats = function renderChatsPatched() {
             <div>
               <p class="eyebrow">Support</p>
               <h2>Chat khách hàng</h2>
-              <p class="section-copy">Theo dõi hội thoại đang mở và phản hồi khách hàng ngay trong admin.</p>
             </div>
             <button class="secondary-button" type="button" data-chat-action="refresh-conversations">Làm mới</button>
           </div>
@@ -1736,13 +1734,94 @@ function normalizeAiSupportMessages() {
     }
 }
 
+function renderAiInlineText(text = "") {
+    return escapeHtml(text)
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/__(.+?)__/g, "<strong>$1</strong>")
+        .replace(/(^|[^*])\*(?!\s)(.+?)(?!\s)\*/g, "$1<em>$2</em>");
+}
+
+function normalizeAiHeading(line = "") {
+    return String(line || "")
+        .replace(/^[#>\s*_`-]+|[*_`:\s-]+$/g, "")
+        .trim();
+}
+
+function isAiSectionHeading(line = "") {
+    const normalized = normalizeAiHeading(line)
+        .replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s]+/u, "")
+        .trim();
+    return /^(THONG TIN|THÔNG TIN|MO TA|MÔ TẢ|NGUYEN LIEU|NGUYÊN LIỆU|CACH LAM|CÁCH LÀM|HUONG DAN|HƯỚNG DẪN|BUOC|BƯỚC|VOUCHER|DON HANG|ĐƠN HÀNG|SAN PHAM|SẢN PHẨM)/i.test(normalized)
+        || /^[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(String(line || "").trim());
+}
+
+function renderAiSupportContent(content = "") {
+    const lines = String(content || "")
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+    if (!lines.length) return "<p></p>";
+
+    const html = [];
+    let listType = "";
+
+    const closeList = () => {
+        if (!listType) return;
+        html.push(`</${listType}>`);
+        listType = "";
+    };
+
+    const openList = (type) => {
+        if (listType === type) return;
+        closeList();
+        html.push(`<${type}>`);
+        listType = type;
+    };
+
+    lines.forEach((line) => {
+        if (/^[-_—=]{5,}$/.test(line)) {
+            closeList();
+            html.push('<hr class="ai-support-rule">');
+            return;
+        }
+
+        const bulletMatch = line.match(/^[•*-]\s+(.+)$/);
+        if (bulletMatch) {
+            openList("ul");
+            html.push(`<li>${renderAiInlineText(bulletMatch[1])}</li>`);
+            return;
+        }
+
+        const numberMatch = line.match(/^\d+[.)]\s+(.+)$/);
+        if (numberMatch) {
+            openList("ol");
+            html.push(`<li>${renderAiInlineText(numberMatch[1])}</li>`);
+            return;
+        }
+
+        closeList();
+
+        if (isAiSectionHeading(line)) {
+            html.push(`<div class="ai-support-section-title">${renderAiInlineText(normalizeAiHeading(line))}</div>`);
+            return;
+        }
+
+        html.push(`<p>${renderAiInlineText(line)}</p>`);
+    });
+
+    closeList();
+    return html.join("");
+}
+
 function buildAiSupportMessage(message) {
     const isUser = message.role === "user";
     return `
       <article class="ai-support-message ${isUser ? "is-user" : "is-assistant"}">
         <div class="ai-support-avatar">${isUser ? "AD" : "AI"}</div>
         <div class="ai-support-bubble">
-          <p>${escapeHtml(message.content || "").replace(/\n/g, "<br>")}</p>
+          <div class="ai-support-richtext">
+            ${isUser ? `<p>${escapeHtml(message.content || "").replace(/\n/g, "<br>")}</p>` : renderAiSupportContent(message.content || "")}
+          </div>
           <span>${escapeHtml(formatChatListTime(message.createdAt || new Date().toISOString()))}</span>
         </div>
       </article>
@@ -1765,7 +1844,6 @@ function renderAiSupportWorkspace() {
           <div>
             <p class="eyebrow">Tin nhắn / Hỏi đáp AI</p>
             <h2>Hỏi đáp AI nội bộ</h2>
-            <p class="section-copy">Trợ lý dùng dữ liệu backend Garden Fresh để hỗ trợ admin trả lời khách nhanh hơn. API key Gemini chỉ đặt ở backend.</p>
           </div>
           <button class="secondary-button" type="button" data-chat-action="ai-clear">Xóa hội thoại</button>
         </header>
@@ -1773,7 +1851,6 @@ function renderAiSupportWorkspace() {
         <div class="ai-support-layout">
           <aside class="ai-support-guide">
             <h3>Gợi ý câu hỏi</h3>
-            <p>Chọn nhanh một mẫu hoặc nhập câu hỏi riêng ở khung bên phải.</p>
             <div class="ai-support-suggestions">
               ${AI_SUPPORT_SUGGESTIONS.map((prompt) => `
                 <button type="button" data-chat-action="ai-suggest" data-prompt="${escapeHtml(prompt)}">${escapeHtml(prompt)}</button>

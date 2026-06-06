@@ -251,7 +251,6 @@ function renderSupplierReturnModal() {
             <div>
               <p class="eyebrow">Phiếu trả hàng</p>
               <h2>Tạo phiếu trả nhà cung cấp</h2>
-              <p class="section-copy">Áp dụng cho hàng gần hết hạn hoặc hàng dập nát cần hoàn trả.</p>
             </div>
             <button class="ghost-button" type="button" data-supplier-action="close-return-modal">Đóng</button>
           </div>

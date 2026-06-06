@@ -1,0 +1,673 @@
+/* Desktop density pass: the admin UI was designed while the browser sat at 67% zoom.
+   These overrides make the same screens comfortable at the normal 100% zoom. */
+@media (min-width: 769px) {
+  :root {
+    --radius-xl: 22px;
+    --radius-lg: 14px;
+    --shadow: 0 16px 38px rgba(84, 54, 24, 0.1);
+  }
+
+  html {
+    font-size: 13px;
+  }
+
+  body {
+    padding: 12px;
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    grid-template-columns: 300px minmax(0, 1fr) !important;
+    gap: 8px;
+    min-height: calc(100vh - 24px);
+  }
+
+  .app-shell.auth-screen {
+    grid-template-columns: 1fr !important;
+    min-height: calc(100vh - 24px);
+  }
+
+  .app-shell.auth-screen .main-panel {
+    width: 100%;
+    height: calc(100vh - 24px);
+    min-height: calc(100vh - 24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .app-shell.auth-screen .admin-page-content,
+  .app-shell.auth-screen .auth-panel,
+  .app-shell.auth-screen .auth-stage {
+    width: 100%;
+    min-height: calc(100vh - 24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .app-shell:not(.auth-screen) {
+    width: 100%;
+    min-height: calc(100vh - 24px);
+  }
+
+  .app-shell:not(.auth-screen) .main-panel {
+    height: calc(100vh - 24px);
+    scroll-padding-top: 76px;
+  }
+
+  .sidebar {
+    width: 300px !important;
+    min-width: 0 !important;
+    max-width: 300px !important;
+    top: 12px;
+    max-height: calc(100vh - 24px);
+    padding: 12px 6px;
+    border-radius: 16px;
+    gap: 10px;
+    box-sizing: border-box;
+  }
+
+  .brand-card,
+  .session-card,
+  .tips-card {
+    padding-inline: 2px;
+  }
+
+  .brand-title {
+    font-size: 1.35rem;
+    margin-top: 2px;
+  }
+
+  .session-card {
+    gap: 6px;
+  }
+
+  .session-card-top {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .session-avatar {
+    width: 42px;
+    height: 42px;
+    border-width: 2px;
+  }
+
+  .session-copy h2 {
+    font-size: 0.9rem;
+  }
+
+  .session-copy p {
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  .session-badge {
+    padding: 3px 7px;
+    font-size: 0.72rem;
+  }
+
+  .session-logout {
+    padding: 5px 9px;
+    font-size: 0.82rem;
+  }
+
+  .nav-card {
+    gap: 5px;
+    padding-top: 6px;
+  }
+
+  .nav-link {
+    gap: 6px;
+    min-height: 32px;
+    padding: 7px 8px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+  }
+
+  .nav-icon {
+    width: 14px;
+    font-size: 0.88rem;
+  }
+
+  .nav-sublink {
+    min-height: 30px !important;
+    padding: 7px 7px !important;
+    border-radius: 9px !important;
+    font-size: 0.84rem !important;
+  }
+
+  .admin-page-header {
+    min-height: 64px;
+    padding: 6px 210px 6px 0;
+    box-shadow: 0 8px 20px rgba(44, 89, 48, 0.06);
+  }
+
+  .admin-page-header h1 {
+    font-size: clamp(1.65rem, 2.2vw, 2.1rem);
+    line-height: 1.05;
+  }
+
+  .admin-page-content,
+  .panel {
+    gap: 8px;
+  }
+
+  .admin-page-content {
+    padding-top: 2px;
+  }
+
+  .panel-head {
+    gap: 8px;
+    margin-bottom: 0;
+  }
+
+  .panel-head h2 {
+    font-size: clamp(1.6rem, 2.2vw, 2.25rem);
+    line-height: 1.08;
+  }
+
+  .panel-head p,
+  .section-copy,
+  .brand-copy {
+    font-size: 0.9rem;
+    line-height: 1.45;
+  }
+
+  .surface,
+  .form-card,
+  .product-excel-import-card,
+  .product-intake-form,
+  .category-modal-surface,
+  .recipe-form-card,
+  .recipe-form-section,
+  .supplier-form-section,
+  .branch-form-section,
+  .settings-card,
+  .profile-panel {
+    border-radius: 20px !important;
+    padding: 16px !important;
+  }
+
+  .surface h3,
+  .form-card h3,
+  .product-excel-import-card h3,
+  .recipe-form-card h3,
+  .settings-card h3 {
+    font-size: 1.05rem;
+    line-height: 1.2;
+  }
+
+  input,
+  select,
+  textarea,
+  .input-shell {
+    min-height: 40px !important;
+    border-radius: 12px !important;
+    font-size: 0.92rem !important;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 10px 12px !important;
+  }
+
+  textarea {
+    min-height: 92px !important;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .ghost-button,
+  .chip-button,
+  .outline-button,
+  .text-button {
+    min-height: 40px;
+    padding: 9px 15px !important;
+    border-radius: 999px;
+    font-size: 0.9rem;
+  }
+
+  .admin-quickbar {
+    top: 12px;
+    right: 14px;
+    gap: 8px;
+  }
+
+  .admin-notification-button {
+    width: 42px;
+    height: 42px;
+  }
+
+  .admin-notification-button svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .admin-account-trigger {
+    min-height: 42px;
+    padding: 5px 10px 5px 7px;
+    gap: 8px;
+  }
+
+  .admin-account-trigger img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .admin-account-dropdown {
+    width: 210px;
+    border-radius: 14px;
+  }
+
+  .product-excel-import-row {
+    gap: 10px;
+  }
+
+  .product-excel-import-result {
+    min-height: 42px;
+    padding: 10px 12px;
+  }
+
+  .product-intake-form {
+    gap: 16px;
+  }
+
+  .product-editor-form,
+  .recipe-form,
+  .settings-form,
+  .profile-form,
+  .branch-form {
+    gap: 14px;
+  }
+
+  .surface-grid,
+  .stats-card-grid,
+  .overview-grid {
+    gap: 12px;
+  }
+
+  .two-columns,
+  .surface-grid,
+  .summary-grid,
+  .overview-main-grid,
+  .stats-chart-grid,
+  .revenue-chart-grid,
+  .email-layout,
+  .chat-layout,
+  .supplier-return-layout,
+  .customer-profile-layout {
+    gap: 14px !important;
+  }
+
+  .overview-metric-grid,
+  .stats-metric-grid,
+  .stats-order-metrics,
+  .revenue-summary-grid,
+  .voucher-stat-grid,
+  .users-summary-grid,
+  .supplier-stats-grid,
+  .warehouse-metric-grid,
+  .orders-summary-grid,
+  .categories-summary {
+    gap: 12px !important;
+  }
+
+  .overview-main-grid {
+    grid-template-columns: minmax(0, 1.8fr) minmax(260px, 0.75fr) !important;
+  }
+
+  .overview-chart-card,
+  .overview-alert-card {
+    min-height: 390px !important;
+  }
+
+  .overview-chart {
+    height: 260px !important;
+    gap: 10px !important;
+  }
+
+  .overview-chart-card,
+  .overview-alert-card,
+  .overview-table-card,
+  .overview-metric-card,
+  .stats-metric-card,
+  .revenue-metric-card,
+  .voucher-stat-card,
+  .user-stat-card,
+  .supplier-stat-card,
+  .summary-card {
+    padding: 16px !important;
+    border-radius: 20px !important;
+  }
+
+  .overview-alert-card .section-head h3,
+  .overview-chart-card .section-head h3,
+  .overview-table-card .section-head h3 {
+    font-size: 1.45rem !important;
+  }
+
+  .overview-card-value,
+  .stats-metric-card strong,
+  .revenue-metric-card strong,
+  .voucher-stat-card strong,
+  .user-stat-card strong,
+  .supplier-stat-card strong,
+  .summary-card strong {
+    font-size: clamp(1.55rem, 1.8vw, 2rem) !important;
+  }
+
+  .overview-icon,
+  .revenue-metric-icon,
+  .stats-metric-icon {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 14px !important;
+  }
+
+  .overview-stock-thumb,
+  .product-thumb,
+  .table-product-thumb,
+  .category-icon-image,
+  .supplier-logo-thumb {
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 13px !important;
+  }
+
+  .filter-card,
+  .inventory-filter-card,
+  .categories-filter-card,
+  .orders-filter-card,
+  .stats-filter-card,
+  .revenue-filter-card,
+  .activity-filter-card,
+  .menu-manager-filter,
+  .warehouse-filter-card,
+  .low-stock-filter-card,
+  .publish-filter-card,
+  .recipes-filter-card,
+  .complaint-filter-card {
+    padding: 14px 16px !important;
+    border-radius: 18px !important;
+    margin-top: 0 !important;
+    margin-bottom: 8px !important;
+    background: linear-gradient(135deg, #ffffff 0%, #ffffff 68%, #fbfef9 100%) !important;
+    border: 1px solid #ffffff !important;
+    box-shadow:
+      0 12px 28px rgba(44, 89, 48, 0.07),
+      0 0 0 1px rgba(255, 255, 255, 0.96),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.98) !important;
+    position: relative;
+    overflow: visible;
+  }
+
+  .filter-card::before,
+  .inventory-filter-card::before,
+  .categories-filter-card::before,
+  .orders-filter-card::before,
+  .stats-filter-card::before,
+  .revenue-filter-card::before,
+  .activity-filter-card::before,
+  .menu-manager-filter::before,
+  .warehouse-filter-card::before,
+  .low-stock-filter-card::before,
+  .publish-filter-card::before,
+  .recipes-filter-card::before,
+  .complaint-filter-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 3px;
+    border-radius: 0 999px 999px 0;
+    background: linear-gradient(180deg, rgba(15, 143, 78, 0.9), rgba(36, 200, 117, 0.9));
+  }
+
+  .filter-card > strong,
+  .inventory-filter-card > strong,
+  .categories-filter-card > strong,
+  .orders-filter-card > strong,
+  .stats-filter-card > strong,
+  .revenue-filter-card > strong,
+  .activity-filter-card > strong,
+  .warehouse-filter-card > strong,
+  .low-stock-filter-card > strong,
+  .publish-filter-card > strong,
+  .recipes-filter-card > strong,
+  .complaint-filter-card > strong {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(15, 143, 78, 0.08);
+    color: #0b6f3b;
+    font-weight: 800;
+  }
+
+  .inventory-filter-card {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .inventory-filter-form {
+    grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(132px, 0.8fr)) auto !important;
+    gap: 10px !important;
+    align-items: end !important;
+    width: 100%;
+  }
+
+  .inventory-filter-form label {
+    min-width: 0;
+  }
+
+  .inventory-filter-form input,
+  .inventory-filter-form select {
+    width: 100%;
+  }
+
+  .inventory-filter-form button {
+    width: auto !important;
+    min-width: 112px !important;
+    min-height: 40px !important;
+    padding-inline: 18px !important;
+    justify-self: end;
+  }
+
+  .app-shell:not(.auth-screen) .panel > .filter-card:first-child,
+  .app-shell:not(.auth-screen) .panel > .inventory-filter-card:first-child,
+  .app-shell:not(.auth-screen) .panel > .categories-filter-card:first-child,
+  .app-shell:not(.auth-screen) .panel > .orders-filter-card:first-child,
+  .app-shell:not(.auth-screen) .panel > .stats-filter-card:first-child,
+  .app-shell:not(.auth-screen) .panel > .revenue-filter-card:first-child,
+  .app-shell:not(.auth-screen) .panel > .activity-filter-card:first-child,
+  .app-shell:not(.auth-screen) .panel > .warehouse-filter-card:first-child,
+  .app-shell:not(.auth-screen) .panel > .low-stock-filter-card:first-child,
+  .app-shell:not(.auth-screen) .panel > .publish-filter-card:first-child,
+  .app-shell:not(.auth-screen) .panel > .recipes-filter-card:first-child,
+  .app-shell:not(.auth-screen) .panel > .complaint-filter-card:first-child {
+    margin-top: -6px !important;
+  }
+
+  .table-scroll,
+  .list-table-wrap {
+    border-radius: 18px;
+  }
+
+  .list-table th,
+  .list-table td,
+  table th,
+  table td {
+    padding: 11px 12px;
+    font-size: 0.88rem;
+  }
+
+  .list-table th,
+  table th {
+    letter-spacing: 0.09em;
+  }
+
+  .orders-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .orders-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    table-layout: fixed;
+  }
+
+  .orders-table th,
+  .orders-table td {
+    padding: 10px 8px !important;
+    font-size: 0.78rem !important;
+    line-height: 1.42;
+  }
+
+  .orders-table th {
+    letter-spacing: 0.07em;
+    white-space: normal;
+  }
+
+  .orders-table th:nth-child(1),
+  .orders-table td:nth-child(1) {
+    width: 9%;
+  }
+
+  .orders-table th:nth-child(2),
+  .orders-table td:nth-child(2) {
+    width: 10%;
+  }
+
+  .orders-table th:nth-child(3),
+  .orders-table td:nth-child(3) {
+    width: 14%;
+  }
+
+  .orders-table th:nth-child(4),
+  .orders-table td:nth-child(4) {
+    width: 11%;
+  }
+
+  .orders-table th:nth-child(5),
+  .orders-table td:nth-child(5) {
+    width: 8%;
+  }
+
+  .orders-table th:nth-child(6),
+  .orders-table td:nth-child(6) {
+    width: 10%;
+  }
+
+  .orders-table th:nth-child(7),
+  .orders-table td:nth-child(7) {
+    width: 11%;
+  }
+
+  .orders-table th:nth-child(8),
+  .orders-table td:nth-child(8) {
+    width: 14%;
+  }
+
+  .orders-table th:nth-child(9),
+  .orders-table td:nth-child(9) {
+    width: 13%;
+  }
+
+  .orders-code-cell,
+  .orders-customer-cell,
+  .orders-address-cell,
+  .orders-date-cell,
+  .orders-payment-cell,
+  .orders-shipping-cell,
+  .orders-status-cell {
+    gap: 4px !important;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .orders-code-cell strong,
+  .orders-customer-cell strong,
+  .orders-address-cell strong,
+  .orders-date-cell strong,
+  .orders-table td > strong {
+    font-size: 0.82rem;
+  }
+
+  .orders-table .section-copy {
+    font-size: 0.76rem;
+    line-height: 1.4;
+  }
+
+  .orders-table .status-pill {
+    max-width: 100%;
+    padding: 7px 9px;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.35;
+  }
+
+  .orders-action-stack {
+    min-width: 0 !important;
+    gap: 6px !important;
+  }
+
+  .orders-action-stack .chip-button,
+  .orders-action-stack button {
+    width: 100%;
+    min-height: 32px;
+    padding: 7px 9px !important;
+    font-size: 0.76rem !important;
+    line-height: 1.25;
+    white-space: normal;
+  }
+
+  .modal-card,
+  .category-modal-dialog,
+  .promotion-form-dialog,
+  .voucher-form-dialog,
+  .user-form-layout,
+  .recipe-form-modal-dialog,
+  .supplier-return-dialog,
+  .supplier-return-modal,
+  .settings-menu-modal,
+  .shift-modal-card,
+  .refund-amount-modal,
+  .warehouse-capacity-modal {
+    border-radius: 22px !important;
+    max-width: min(94vw, 1120px) !important;
+  }
+
+  .modal-head,
+  .user-modal-header,
+  .supplier-return-modal-head,
+  .settings-menu-modal h2 {
+    padding-block: 12px !important;
+  }
+
+  .modal-actions,
+  .user-modal-actions,
+  .supplier-return-modal-actions,
+  .settings-menu-modal-actions {
+    gap: 10px !important;
+  }
+}
+
+@media (min-width: 1440px) {
+  .app-shell {
+    grid-template-columns: 320px minmax(0, 1fr) !important;
+  }
+
+  .sidebar {
+    width: 320px !important;
+    max-width: 320px !important;
+  }
+}

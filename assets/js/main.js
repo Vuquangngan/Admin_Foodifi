@@ -19,6 +19,7 @@ import {
     renderSidebarMenu,
     selectSidebarItem,
     setActivePanel,
+    setAdminPageTitle,
     setAuthMode,
     toggleSidebarSection,
     updateSessionUi
@@ -40,11 +41,14 @@ import {
     resetProductImportForm,
     adjustWarehouseCapacity,
     closeWarehouseCapacityEditor,
+    downloadProductImportTemplate,
+    handleProductImportExcelFile,
     openWarehouseCapacityEditor,
     prepareProductImportFromLowStock,
     recordProductImportSupplier,
     setWarehouseCapacity,
     syncProductEditorPreview,
+    submitProductImportExcel,
     submitProductEditor,
     submitPublishEditor,
     updateProductWorkspace
@@ -263,6 +267,7 @@ function bindGlobalEvents() {
                 state.sidebarItem = "";
                 renderSidebarMenu();
                 deactivateChatsPanel();
+                setAdminPageTitle("Thông tin cá nhân");
                 setActivePanel("profile");
                 renderProfile();
                 return;
@@ -325,6 +330,12 @@ function bindGlobalEvents() {
     });
 
     elements.refreshProductsButton.addEventListener("click", (event) => withLoading(event.currentTarget, async () => {
+        if (state.productWorkspace === "import") {
+            resetProductImportForm();
+            showToast("Đã làm mới form nhập sản phẩm.");
+            return;
+        }
+
         await Promise.all([loadProducts(), loadOverview()]);
     }));
     elements.refreshCategoriesButton.addEventListener("click", (event) => withLoading(event.currentTarget, async () => {
@@ -414,7 +425,12 @@ function bindGlobalEvents() {
 
     elements.productFilterForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        state.filters.products = collectFormData(elements.productFilterForm);
+        const filters = collectFormData(elements.productFilterForm);
+        if (filters.inventory_zone) {
+            state.inventoryZone = filters.inventory_zone;
+            delete filters.inventory_zone;
+        }
+        state.filters.products = filters;
         await withLoading(event.submitter, loadProducts);
     });
 
@@ -543,6 +559,32 @@ function bindGlobalEvents() {
     if (elements.resetProductImportButton) {
         elements.resetProductImportButton.addEventListener("click", resetProductImportForm);
     }
+
+    elements.productImportExcelFile?.addEventListener("change", async (event) => {
+        try {
+            await handleProductImportExcelFile(event.target.files?.[0]);
+        } catch (error) {
+            showToast(error.message || "Không đọc được file Excel.", true);
+        }
+    });
+
+    elements.submitProductImportExcelButton?.addEventListener("click", async (event) => {
+        const button = event.currentTarget;
+        const original = button.textContent;
+        button.disabled = true;
+        button.textContent = "Đang nhập...";
+        try {
+            await submitProductImportExcel();
+        } catch (error) {
+            showToast(error.message || "Không nhập được sản phẩm từ Excel.", true);
+            button.disabled = false;
+        } finally {
+            button.textContent = original;
+            if (!state.productImportExcelRows?.length) button.disabled = true;
+        }
+    });
+
+    elements.downloadProductImportTemplateButton?.addEventListener("click", downloadProductImportTemplate);
 
     if (elements.productEditorForm) {
         elements.productEditorForm.addEventListener("submit", async (event) => {
@@ -1102,6 +1144,12 @@ function bindGlobalEvents() {
         if (elements.promotionProductsList) elements.promotionProductsList.innerHTML = "";
         handlePromotionAction("refresh-selects");
     });
+    document.addEventListener("pointerdown", (event) => {
+        if (!elements.promotionFormView || elements.promotionFormView.classList.contains("hidden")) return;
+        if (event.target.closest(".promotion-combobox")) return;
+        if (event.target.closest(".promotion-combobox-menu")) return;
+        handlePromotionAction("close-comboboxes");
+    }, true);
     document.addEventListener("click", (event) => {
         const optionButton = event.target.closest("[data-promotion-select-value]");
         if (optionButton) {
@@ -1114,6 +1162,13 @@ function bindGlobalEvents() {
         if (event.target.closest(".promotion-combobox-menu")) return;
         handlePromotionAction("close-comboboxes");
     });
+    document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        handlePromotionAction("close-comboboxes");
+    });
+    elements.promotionFormView?.addEventListener("scroll", () => {
+        handlePromotionAction("close-comboboxes");
+    }, true);
     elements.promotionForm?.addEventListener("submit", (event) => {
         event.preventDefault();
         const raw = collectFormData(elements.promotionForm);

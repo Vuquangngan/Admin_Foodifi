@@ -46,6 +46,23 @@ function normalizeProductImageUrl(value) {
     return text;
 }
 
+function parseStockInputValue(value) {
+    const normalized = String(value || "0")
+        .trim()
+        .replace(/\s+/g, "")
+        .replace(",", ".");
+    const number = Number(normalized || 0);
+    return Number.isFinite(number) && number >= 0 ? number : 0;
+}
+
+function formatStockInputValue(value) {
+    const number = Number(value || 0);
+    if (!Number.isFinite(number)) return "0";
+    return Number.isInteger(number)
+        ? String(number)
+        : String(Number(number.toFixed(3))).replace(",", ".");
+}
+
 async function uploadProductImage(file) {
     if (!file || !file.size) return "";
     if (!String(file.type || "").startsWith("image/")) {
@@ -535,11 +552,6 @@ function renderWarehouseWorkspace() {
         <div class="warehouse-copy warehouse-copy-top">
           <h3>Quản lý kho hàng</h3>
         </div>
-        <div class="warehouse-toolbar">
-          <div class="warehouse-zone-tabs">
-            ${WAREHOUSE_ZONES.map((zone) => `<button class="warehouse-zone-tab ${zone.key === activeZone.key ? "active" : ""}" type="button" data-inventory-zone="${zone.key}">${escapeHtml(zone.label)}</button>`).join("")}
-          </div>
-        </div>
         <div class="warehouse-copy warehouse-copy-inline">
           <h3>Quản lý kho hàng</h3>
         </div>
@@ -838,7 +850,7 @@ export function syncProductCategorySelects() {
     fillSelectOptions(elements.productCategorySelect, state.categories);
     fillSelectOptions(elements.productEditorCategorySelect, state.categories);
     fillSelectOptions(elements.productImportCategory, state.categories);
-    fillSelectOptions(elements.productImportSupplierSelect, state.suppliers || [], { includeBlank: true, blankLabel: "Chọn nhà cung cấp trong kho" });
+    fillSelectOptions(elements.productImportSupplierSelect, state.suppliers || [], { includeBlank: true, blankLabel: "Chọn nhà cung cấp" });
 }
 
 export function getRenderableProducts() {
@@ -890,6 +902,7 @@ export function renderProducts() {
 
 function renderProductFilterForm(isPublishWorkspace) {
     const filters = state.filters.products || {};
+    const isInventoryWorkspace = state.productWorkspace === "inventory";
     const activeStore = getStoreBranch();
     const storeCounts = (state.products || []).reduce((counts, product) => {
         const stage = getStoreProductStage(product, activeStore.key);
@@ -921,6 +934,14 @@ function renderProductFilterForm(isPublishWorkspace) {
           ${getChildCategoryOptions(filters.parent_category_id || "", filters.category_id || "")}
         </select>
       </label>
+      ${isInventoryWorkspace ? `
+      <label>
+        <span>Kho hàng</span>
+        <select name="inventory_zone" data-inventory-zone-select>
+          ${WAREHOUSE_ZONES.map((zone) => `<option value="${escapeHtml(zone.key)}" ${zone.key === state.inventoryZone ? "selected" : ""}>${escapeHtml(zone.label)} - ${escapeHtml(zone.name)}</option>`).join("")}
+        </select>
+      </label>
+      ` : ""}
       ${isPublishWorkspace ? `
       <label>
         <span>Tại cửa hàng</span>
@@ -965,7 +986,6 @@ export function updateProductWorkspace() {
     elements.productsPanelEyebrow.textContent = workspace.eyebrow;
     elements.productsPanelEyebrow.classList.toggle("hidden", !workspace.eyebrow);
     elements.productsPanelTitle.textContent = workspace.title;
-    elements.productsPanelDescription.textContent = workspace.description;
     updatePublishBranchCard(isPublishWorkspace);
     elements.productsListTitle.textContent = workspace.listTitle;
     elements.productsListTitle.classList.toggle("hidden", !workspace.listTitle);
@@ -1093,7 +1113,11 @@ export function prepareProductImportFromLowStock(productId) {
     Object.entries(fields).forEach(([key, value]) => {
         const field = elements.productImportForm.elements[key];
         if (!field) return;
-        field.value = key === "import_cost" ? formatMoneyInputValue(value) : value;
+        field.value = key === "import_cost"
+            ? formatMoneyInputValue(value)
+            : key === "stock_quantity"
+                ? formatStockInputValue(value)
+                : value;
     });
 
     if (elements.productImportForm.elements.is_featured) {
@@ -1115,7 +1139,9 @@ export function hydrateProductForm(productId) {
         if (elements.productForm.elements[key]) {
             elements.productForm.elements[key].value = ["price", "sale_price"].includes(key)
                 ? formatMoneyInputValue(value)
-                : value;
+                : key === "stock_quantity"
+                    ? formatStockInputValue(value)
+                    : value;
         }
     });
     elements.productForm.elements.is_published.checked = Boolean(product.is_published);
@@ -1154,7 +1180,9 @@ export function openProductEditor(productId) {
         if (elements.productEditorForm.elements[key]) {
             elements.productEditorForm.elements[key].value = ["price", "sale_price"].includes(key)
                 ? formatMoneyInputValue(value)
-                : value;
+                : key === "stock_quantity"
+                    ? formatStockInputValue(value)
+                    : value;
         }
     });
 
@@ -1311,7 +1339,7 @@ async function hidePublishedStoreProduct(product, storeKey) {
 }
 
 export function buildProductPayload(raw) {
-    const payload = { category_id: Number(raw.category_id), name: String(raw.name || "").trim(), price: Number(raw.price || 0), sale_price: raw.sale_price ? Number(raw.sale_price) : null, stock_quantity: raw.stock_quantity ? Number(raw.stock_quantity) : 0, stock_unit: String(raw.stock_unit || "").trim(), sale_unit: String(raw.sale_unit || "").trim(), stock_per_sale_unit: raw.stock_per_sale_unit ? Number(raw.stock_per_sale_unit) : 1, production_date: String(raw.production_date || "").trim() || null, expiration_date: String(raw.expiration_date || "").trim() || null, thumbnail_url: normalizeProductImageUrl(raw.thumbnail_url), short_description: String(raw.short_description || "").trim(), description: String(raw.description || "").trim(), status: raw.status, is_published: Boolean(raw.is_published), is_featured: Boolean(raw.is_featured) };
+    const payload = { category_id: Number(raw.category_id), name: String(raw.name || "").trim(), price: Number(raw.price || 0), sale_price: raw.sale_price ? Number(raw.sale_price) : null, stock_quantity: parseStockInputValue(raw.stock_quantity), stock_unit: String(raw.stock_unit || "").trim(), sale_unit: String(raw.sale_unit || "").trim(), stock_per_sale_unit: raw.stock_per_sale_unit ? Number(raw.stock_per_sale_unit) : 1, production_date: String(raw.production_date || "").trim() || null, expiration_date: String(raw.expiration_date || "").trim() || null, thumbnail_url: normalizeProductImageUrl(raw.thumbnail_url), short_description: String(raw.short_description || "").trim(), description: String(raw.description || "").trim(), status: raw.status, is_published: Boolean(raw.is_published), is_featured: Boolean(raw.is_featured) };
     if (String(raw.slug || "").trim()) payload.slug = String(raw.slug).trim();
     if (String(raw.sku || "").trim()) payload.sku = String(raw.sku).trim();
     return payload;
@@ -1324,7 +1352,7 @@ export function buildInventoryImportPayload(raw) {
     const expirationDate = String(raw.expiration_date || "").trim();
     const dateDetailLines = [productionDate ? `Ngày sản xuất: ${productionDate}` : "", expirationDate ? `Ngày hết hạn: ${expirationDate}` : ""].filter(Boolean);
     const detailLines = [raw.origin ? `Xuất xứ: ${String(raw.origin).trim()}` : "", supplierName ? `Nhà cung cấp: ${supplierName}` : "", raw.reorder_level ? `Ngưỡng cảnh báo hết hàng: ${String(raw.reorder_level).trim()}` : "", raw.import_cost ? `Giá nhập tham chiếu: ${formatCurrency(raw.import_cost)}` : ""].filter(Boolean);
-    return { category_id: Number(raw.category_id), name: String(raw.name || "").trim(), price: Number(raw.import_cost || 0), sale_price: null, stock_quantity: raw.stock_quantity ? Number(raw.stock_quantity) : 0, stock_unit: String(raw.sale_unit || "kg").trim(), sale_unit: String(raw.sale_unit || "kg").trim(), stock_per_sale_unit: 1, thumbnail_url: normalizeProductImageUrl(raw.thumbnail_url), short_description: String(raw.short_description || "").trim(), description: detailLines.concat(dateDetailLines).join("\n"), production_date: productionDate || null, expiration_date: expirationDate || null, status: raw.status || "draft", is_published: false, is_featured: Boolean(raw.is_featured) };
+    return { category_id: Number(raw.category_id), name: String(raw.name || "").trim(), price: Number(raw.import_cost || 0), sale_price: null, stock_quantity: parseStockInputValue(raw.stock_quantity), stock_unit: String(raw.sale_unit || "kg").trim(), sale_unit: String(raw.sale_unit || "kg").trim(), stock_per_sale_unit: 1, thumbnail_url: normalizeProductImageUrl(raw.thumbnail_url), short_description: String(raw.short_description || "").trim(), description: detailLines.concat(dateDetailLines).join("\n"), production_date: productionDate || null, expiration_date: expirationDate || null, status: raw.status || "draft", is_published: false, is_featured: Boolean(raw.is_featured) };
 }
 
 export function buildInventoryRestockPayload(raw) {
@@ -1449,6 +1477,305 @@ export async function handleProductAction(action, productId, extra = {}) {
         showToast(action === "publish-product" ? "Đã đưa sản phẩm lên sàn." : "Đã gỡ sản phẩm khỏi sàn.");
         await Promise.all([loadProducts(), loadOverview()]);
     }
+}
+
+const PRODUCT_IMPORT_TEMPLATE_COLUMNS = [
+    "Tên sản phẩm",
+    "Danh mục",
+    "Thương hiệu / Xuất xứ",
+    "Mô tả ngắn",
+    "Giá nhập (VND)",
+    "Đơn vị tính",
+    "Số lượng nhập kho",
+    "Ngưỡng cảnh báo hết hàng",
+    "Ngày sản xuất",
+    "Ngày hết hạn",
+    "Nhà cung cấp",
+    "URL ảnh",
+    "Trạng thái",
+    "Nổi bật"
+];
+
+const PRODUCT_IMPORT_COLUMN_ALIASES = {
+    name: ["ten san pham", "san pham", "name", "product name"],
+    category: ["danh muc", "category", "category id", "category_id", "ma danh muc", "ten danh muc"],
+    origin: ["thuong hieu xuat xu", "thuong hieu / xuat xu", "xuat xu", "origin", "brand"],
+    short_description: ["mo ta ngan", "short description", "tom tat"],
+    import_cost: ["gia nhap vnd", "gia nhap", "import cost", "cost", "price", "gia"],
+    sale_unit: ["don vi tinh", "don vi", "sale unit", "unit"],
+    stock_quantity: ["so luong nhap kho", "so luong", "ton kho", "stock quantity", "quantity"],
+    reorder_level: ["nguong canh bao het hang", "nguong canh bao", "reorder level"],
+    production_date: ["ngay san xuat", "production date", "nsx"],
+    expiration_date: ["ngay het han", "han su dung", "expiration date", "hsd"],
+    supplier: ["nha cung cap", "supplier", "supplier id", "ma nha cung cap", "ten nha cung cap"],
+    thumbnail_url: ["url anh", "anh", "hinh anh", "thumbnail url", "image url"],
+    status: ["trang thai", "status"],
+    is_featured: ["noi bat", "featured", "is featured"]
+};
+
+function normalizeImportKey(value) {
+    return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "d")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+}
+
+function resolveImportColumnKey(header) {
+    const normalized = normalizeImportKey(header);
+    return Object.entries(PRODUCT_IMPORT_COLUMN_ALIASES)
+        .find(([, aliases]) => aliases.some((alias) => normalizeImportKey(alias) === normalized))?.[0] || "";
+}
+
+function parseImportNumber(value) {
+    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+    let text = String(value || "").trim().replace(/[^\d,.-]/g, "");
+    if (!text) return 0;
+    const commaIndex = text.lastIndexOf(",");
+    const dotIndex = text.lastIndexOf(".");
+    if (commaIndex >= 0 && dotIndex >= 0) {
+        text = commaIndex > dotIndex ? text.replace(/\./g, "").replace(",", ".") : text.replace(/,/g, "");
+    } else if (commaIndex >= 0) {
+        const decimals = text.length - commaIndex - 1;
+        text = decimals === 3 ? text.replace(/,/g, "") : text.replace(",", ".");
+    } else if (dotIndex >= 0) {
+        const decimals = text.length - dotIndex - 1;
+        if (decimals === 3) text = text.replace(/\./g, "");
+    }
+    const number = Number(text);
+    return Number.isFinite(number) ? number : 0;
+}
+
+function toExcelDateInput(value) {
+    if (!value) return "";
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+        return value.toISOString().slice(0, 10);
+    }
+    if (typeof value === "number" && window.XLSX?.SSF?.parse_date_code) {
+        const parsed = window.XLSX.SSF.parse_date_code(value);
+        if (parsed?.y && parsed?.m && parsed?.d) {
+            return `${parsed.y}-${String(parsed.m).padStart(2, "0")}-${String(parsed.d).padStart(2, "0")}`;
+        }
+    }
+    const text = String(value || "").trim();
+    const slashMatch = text.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+    if (slashMatch) {
+        return `${slashMatch[3]}-${slashMatch[2].padStart(2, "0")}-${slashMatch[1].padStart(2, "0")}`;
+    }
+    const isoMatch = text.match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$/);
+    if (isoMatch) {
+        return `${isoMatch[1]}-${isoMatch[2].padStart(2, "0")}-${isoMatch[3].padStart(2, "0")}`;
+    }
+    return "";
+}
+
+function parseImportBoolean(value) {
+    const text = normalizeImportKey(value);
+    return ["1", "co", "yes", "true", "noi bat", "x"].includes(text);
+}
+
+function normalizeImportStatus(value) {
+    const text = normalizeImportKey(value);
+    if (["active", "dang ban", "san sang ban", "ban"].includes(text)) return "active";
+    if (["out of stock", "het hang"].includes(text)) return "out_of_stock";
+    if (["archived", "luu tru", "an"].includes(text)) return "archived";
+    return "draft";
+}
+
+function findImportRecord(items, value) {
+    const text = String(value || "").trim();
+    if (!text) return null;
+    const numericId = Number(text);
+    if (Number.isInteger(numericId) && numericId > 0) {
+        return items.find((item) => Number(item.id) === numericId) || null;
+    }
+    const normalized = normalizeImportKey(text);
+    return items.find((item) => normalizeImportKey(item.name || item.label) === normalized) || null;
+}
+
+function mapProductImportRow(row, rowNumber) {
+    const mapped = {};
+    Object.entries(row || {}).forEach(([header, value]) => {
+        const key = resolveImportColumnKey(header);
+        if (key) mapped[key] = value;
+    });
+
+    const category = findImportRecord(state.categories || [], mapped.category);
+    const supplier = findImportRecord(state.suppliers || [], mapped.supplier);
+    const errors = [];
+    const name = String(mapped.name || "").trim();
+    const categoryText = String(mapped.category || "").trim();
+
+    if (!name) errors.push("thiếu tên sản phẩm");
+    if (!categoryText) errors.push("thiếu danh mục");
+    if (categoryText && !category) errors.push(`không tìm thấy danh mục "${categoryText}"`);
+
+    const supplierText = String(mapped.supplier || "").trim();
+    if (supplierText && !supplier) errors.push(`không tìm thấy nhà cung cấp "${supplierText}"`);
+
+    const raw = {
+        name,
+        category_id: category?.id || "",
+        origin: String(mapped.origin || "").trim(),
+        short_description: String(mapped.short_description || "").trim(),
+        import_cost: parseImportNumber(mapped.import_cost),
+        sale_unit: String(mapped.sale_unit || "kg").trim() || "kg",
+        stock_quantity: parseImportNumber(mapped.stock_quantity),
+        reorder_level: parseImportNumber(mapped.reorder_level) || "",
+        production_date: toExcelDateInput(mapped.production_date),
+        expiration_date: toExcelDateInput(mapped.expiration_date),
+        supplier_id: supplier?.id || "",
+        thumbnail_url: normalizeProductImageUrl(mapped.thumbnail_url),
+        status: normalizeImportStatus(mapped.status),
+        is_featured: parseImportBoolean(mapped.is_featured)
+    };
+
+    return { rowNumber, raw, errors };
+}
+
+function readProductImportWorkbook(file) {
+    return new Promise((resolve, reject) => {
+        if (!window.XLSX) {
+            reject(new Error("Chưa tải được thư viện đọc Excel. Hãy kiểm tra kết nối mạng rồi tải lại trang."));
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const workbook = window.XLSX.read(reader.result, { type: "array", cellDates: true });
+                const firstSheet = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheet];
+                resolve(window.XLSX.utils.sheet_to_json(worksheet, { defval: "", raw: true }));
+            } catch (error) {
+                reject(error);
+            }
+        };
+        reader.onerror = () => reject(new Error("Không đọc được file Excel."));
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+function setProductImportExcelResult(message, canSubmit = false) {
+    if (elements.productImportExcelResult) {
+        elements.productImportExcelResult.textContent = message;
+    }
+    if (elements.submitProductImportExcelButton) {
+        elements.submitProductImportExcelButton.disabled = !canSubmit;
+    }
+}
+
+export async function handleProductImportExcelFile(file) {
+    state.productImportExcelRows = [];
+    if (!file) {
+        setProductImportExcelResult("Chưa chọn file Excel.", false);
+        return;
+    }
+    let rows = [];
+    try {
+        rows = await readProductImportWorkbook(file);
+    } catch (error) {
+        setProductImportExcelResult(error.message || "Không đọc được file Excel.", false);
+        throw error;
+    }
+    const mappedRows = rows.map((row, index) => mapProductImportRow(row, index + 2));
+    const validRows = mappedRows.filter((row) => row.errors.length === 0);
+    const invalidRows = mappedRows.filter((row) => row.errors.length > 0);
+    state.productImportExcelRows = validRows.map((row) => row.raw);
+
+    const errorPreview = invalidRows.slice(0, 3)
+        .map((row) => `Dòng ${row.rowNumber}: ${row.errors.join(", ")}`)
+        .join(" | ");
+    const message = [
+        `Đã đọc ${validRows.length} dòng hợp lệ`,
+        invalidRows.length ? `${invalidRows.length} dòng lỗi. ${errorPreview}` : "không có lỗi."
+    ].join(", ");
+    setProductImportExcelResult(message, validRows.length > 0);
+}
+
+export async function submitProductImportExcel() {
+    const rows = Array.isArray(state.productImportExcelRows) ? state.productImportExcelRows : [];
+    if (!rows.length) {
+        showToast("Vui lòng chọn file Excel có dữ liệu hợp lệ.", true);
+        return;
+    }
+
+    let successCount = 0;
+    const failedRows = [];
+    for (const [index, raw] of rows.entries()) {
+        try {
+            const payload = buildInventoryImportPayload(raw);
+            const savedProduct = await apiFetch("/api/products", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+            recordProductImportSupplier(raw, savedProduct);
+            successCount += 1;
+        } catch (error) {
+            failedRows.push(`Dòng ${index + 2}: ${error.message || "không nhập được"}`);
+        }
+    }
+
+    await Promise.all([loadProducts(), loadOverview()]);
+    state.productImportExcelRows = [];
+    if (elements.productImportExcelFile) elements.productImportExcelFile.value = "";
+    setProductImportExcelResult(
+        failedRows.length
+            ? `Đã nhập ${successCount}/${rows.length} sản phẩm. Lỗi: ${failedRows.slice(0, 3).join(" | ")}`
+            : `Đã nhập thành công ${successCount} sản phẩm từ Excel.`,
+        false
+    );
+    showToast(failedRows.length ? `Đã nhập ${successCount}/${rows.length} sản phẩm, còn dòng lỗi.` : "Đã nhập sản phẩm từ Excel.");
+}
+
+function downloadProductImportBlob(content, filename, type) {
+    const blob = content instanceof Blob ? content : new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
+
+export function downloadProductImportTemplate() {
+    const category = (state.categories || [])[0];
+    const supplier = (state.suppliers || [])[0];
+    const sample = [
+        PRODUCT_IMPORT_TEMPLATE_COLUMNS,
+        [
+            "Bưởi da xanh loại 1",
+            category?.name || category?.id || "",
+            "Hợp tác xã Bến Tre",
+            "Bưởi tươi, vỏ xanh, ruột hồng.",
+            12000,
+            "kg",
+            50,
+            10,
+            "01/06/2026",
+            "30/06/2026",
+            supplier?.name || supplier?.id || "",
+            "https://example.com/buoi.jpg",
+            "active",
+            "Không"
+        ]
+    ];
+
+    if (window.XLSX) {
+        const worksheet = window.XLSX.utils.aoa_to_sheet(sample);
+        const workbook = window.XLSX.utils.book_new();
+        window.XLSX.utils.book_append_sheet(workbook, worksheet, "Nhap san pham");
+        const array = window.XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+        downloadProductImportBlob(new Blob([array], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), "mau-nhap-san-pham.xlsx");
+        return;
+    }
+
+    const csv = sample.map((row) => row.map((cell) => `"${String(cell ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    downloadProductImportBlob(csv, "mau-nhap-san-pham.csv", "text/csv;charset=utf-8");
 }
 
 export function updateProductImportPreview(source) {

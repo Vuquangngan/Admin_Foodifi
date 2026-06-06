@@ -592,7 +592,6 @@ function renderComplaintsTable(orders) {
         <div class="complaints-toolbar">
           <div>
             <h3>Danh sách khiếu nại</h3>
-            <p class="section-copy">Quản lý các yêu cầu hoàn hàng, hoàn tiền và vấn đề phát sinh từ đơn đã giao.</p>
           </div>
           <button class="primary-button" type="button" data-action="export-complaints">Xuất báo cáo</button>
         </div>
@@ -792,7 +791,6 @@ function openRefundAmountModal({ order, defaultAmount = 0, defaultReason = "" })
               <div>
                 <span>Hoàn tiền khiếu nại</span>
                 <h2>Nhập số tiền hoàn</h2>
-                <p>Tiền sẽ được hoàn về ví của người dùng trên mobile sau khi xác nhận.</p>
               </div>
               <button class="order-product-picker-close" type="button" data-refund-modal-action="close" aria-label="Đóng popup">&times;</button>
             </div>
@@ -998,7 +996,6 @@ function renderComplaintsTableClean(orders) {
         <div class="complaints-toolbar">
           <div>
             <h3>Danh s\u00e1ch khi\u1ebfu n\u1ea1i</h3>
-            <p class="section-copy">Qu\u1ea3n l\u00fd c\u00e1c y\u00eau c\u1ea7u ho\u00e0n h\u00e0ng, ho\u00e0n ti\u1ec1n v\u00e0 v\u1ea5n \u0111\u1ec1 ph\u00e1t sinh t\u1eeb \u0111\u01a1n \u0111\u00e3 giao.</p>
           </div>
           <button class="primary-button" type="button" data-action="export-complaints">Xu\u1ea5t b\u00e1o c\u00e1o</button>
         </div>
@@ -2244,7 +2241,6 @@ function renderOrderProductPickerModalLegacy() {
           <div class="order-product-picker-header">
             <div>
               <h2>Chọn sản phẩm trong kho</h2>
-              <p>Chọn nhanh các sản phẩm đang bán và điều chỉnh số lượng trước khi đưa vào đơn hàng.</p>
             </div>
             <div class="order-product-picker-header-actions">
               <span class="status-pill tone-neutral">${formatNumber(selectedCount)} sản phẩm</span>
@@ -2323,7 +2319,6 @@ function renderOrderProductPickerModal() {
           <div class="order-product-picker-header">
             <div>
               <h2>Chọn sản phẩm</h2>
-              <p>Chọn sản phẩm để thêm vào đơn hàng hoặc chiến dịch.</p>
             </div>
             <button class="order-product-picker-close" type="button" data-create-order-action="close-product-picker" aria-label="Đóng popup">&times;</button>
           </div>

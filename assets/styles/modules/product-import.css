@@ -12,6 +12,36 @@
   gap: 18px;
 }
 
+.product-excel-import-card {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 22px 24px;
+}
+
+.product-excel-import-row {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.product-excel-file input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(17, 115, 66, 0.14);
+  border-radius: 14px;
+  background: #fffdfa;
+}
+
+.product-excel-import-result {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #eef5ea;
+  color: #25382d;
+  font-weight: 700;
+}
+
 .product-intake-main {
   display: grid;
   gap: 18px;
@@ -21,6 +51,16 @@
 .product-intake-side {
   padding: 24px;
 }
+
+.product-intake-section .section-head {
+  align-items: center;
+}
+
+.product-intake-refresh {
+  flex: 0 0 auto;
+  padding: 10px 18px;
+}
+
 
 .product-intake-side {
   display: grid;
@@ -76,5 +116,12 @@
   justify-content: flex-end;
   gap: 12px;
   margin-top: 6px;
+}
+
+@media (max-width: 1180px) {
+  .product-excel-import-row,
+  .product-intake-form {
+    grid-template-columns: 1fr;
+  }
 }
 

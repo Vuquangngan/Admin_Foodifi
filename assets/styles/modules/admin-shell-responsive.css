@@ -122,7 +122,76 @@
 }
 
 .main-panel {
-  padding-top: 10px;
+  height: calc(100vh - 48px);
+  min-height: 0;
+  overflow-y: auto;
+  padding-top: 0;
+  scroll-padding-top: 104px;
+}
+
+.admin-page-header {
+  position: sticky;
+  top: 0;
+  z-index: 650;
+  min-height: 82px;
+  display: flex;
+  align-items: center;
+  padding: 14px 280px 14px 0;
+  background: rgba(248, 253, 244, 0.94);
+  border-bottom: 1px solid rgba(17, 95, 54, 0.08);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 12px 30px rgba(44, 89, 48, 0.08);
+}
+
+.admin-page-header.hidden {
+  display: none;
+}
+
+.admin-page-header h1 {
+  margin: 0;
+  color: #090f0c;
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.admin-page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 18px;
+}
+
+.app-shell.auth-screen .admin-page-content {
+  width: 100%;
+  padding-top: 0;
+}
+
+.app-shell:not(.auth-screen) .panel > .panel-head > div:first-child {
+  display: none;
+}
+
+.app-shell:not(.auth-screen) .panel > .panel-head:has(> div:first-child:last-child) {
+  display: none;
+}
+
+.app-shell:not(.auth-screen) .overview-title,
+.app-shell:not(.auth-screen) .categories-title {
+  display: none;
+}
+
+.app-shell:not(.auth-screen) .stats-page-head,
+.app-shell:not(.auth-screen) .settings-head,
+.app-shell:not(.auth-screen) .profile-page-head {
+  display: none;
+}
+
+.app-shell:not(.auth-screen) .activity-history-head > div:first-child {
+  display: none;
+}
+
+.app-shell:not(.auth-screen) .activity-history-head {
+  justify-content: flex-end;
 }
 
 .overview-hero {

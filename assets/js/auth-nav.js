@@ -77,11 +77,17 @@ export function setActivePanel(view) {
     });
 }
 
+export function setAdminPageTitle(title) {
+    if (!elements.adminPageTitle) return;
+    elements.adminPageTitle.textContent = title || "Tổng quan";
+}
+
 export function updateSessionUi() {
     const isLoggedIn = Boolean(state.token && state.user);
     elements.sessionCard.classList.toggle("hidden", !isLoggedIn);
     elements.navCard.classList.toggle("hidden", !isLoggedIn);
     elements.adminQuickbar?.classList.toggle("hidden", !isLoggedIn);
+    elements.adminPageHeader?.classList.toggle("hidden", !isLoggedIn);
     elements.appShell.classList.toggle("auth-screen", !isLoggedIn);
     const displayName = state.user?.username || state.user?.full_name || state.user?.name || "Quản lý vườn";
     elements.sessionName.textContent = isLoggedIn ? "Quản lý vườn" : "-";
@@ -96,6 +102,7 @@ export function updateSessionUi() {
     if (!isLoggedIn) {
         elements.adminAccountDropdown?.classList.add("hidden");
         elements.adminAccountTrigger?.setAttribute("aria-expanded", "false");
+        setAdminPageTitle("Đăng nhập hệ thống");
     }
 }
 
@@ -171,6 +178,7 @@ export function selectSidebarItem(itemKey) {
     }
 
     renderSidebarMenu();
+    setAdminPageTitle(item.label);
     updateProductWorkspace();
     setActivePanel(item.panel || "overview");
 

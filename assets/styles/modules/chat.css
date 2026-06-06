@@ -147,7 +147,7 @@
 }
 
 .chat-conversation-top strong {
-  font-size: 1.22rem;
+  font-size: 1.34rem;
   color: #193126;
 }
 
@@ -155,6 +155,7 @@
 .chat-conversation-meta,
 .chat-conversation-preview {
   color: #66796b;
+  font-size: 1.02rem;
 }
 
 .chat-conversation-preview {
@@ -250,6 +251,7 @@
 .chat-detail-copy p {
   margin: 6px 0 0;
   color: #14894a;
+  font-size: 1.04rem;
   font-weight: 700;
 }
 
@@ -267,6 +269,7 @@
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
+  font-size: 1rem;
   font-weight: 800;
 }
 
@@ -333,6 +336,7 @@
   max-width: min(72%, 720px);
   padding: 18px 20px;
   border-radius: 24px;
+  font-size: 1.08rem;
   box-shadow: 0 10px 22px rgba(30, 61, 37, 0.06);
 }
 
@@ -351,7 +355,7 @@
 .chat-message-bubble p {
   margin: 0;
   white-space: pre-wrap;
-  line-height: 1.55;
+  line-height: 1.62;
 }
 
 .chat-message-image {
@@ -395,16 +399,16 @@
 }
 
 .chat-product-card-copy strong {
-  font-size: 0.98rem;
+  font-size: 1.06rem;
 }
 
 .chat-product-card-copy span {
-  font-size: 0.82rem;
+  font-size: 0.94rem;
   opacity: 0.82;
 }
 
 .chat-product-card-copy b {
-  font-size: 1rem;
+  font-size: 1.08rem;
   font-weight: 900;
 }
 
@@ -420,7 +424,7 @@
   gap: 8px;
   margin: -4px 44px 12px;
   color: #718374;
-  font-size: 0.8rem;
+  font-size: 0.92rem;
 }
 
 .chat-message-meta.is-outgoing {
@@ -455,6 +459,7 @@
   border-radius: 999px;
   background: #e6efe2;
   color: #315241;
+  font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
 }
@@ -485,6 +490,8 @@
   border-radius: 20px;
   background: #eef5ea;
   border: 1px solid rgba(17, 95, 54, 0.08);
+  font-size: 1.08rem;
+  line-height: 1.5;
   resize: vertical;
 }
 
@@ -517,6 +524,7 @@
   background: rgba(250, 253, 249, 0.9);
   border: 1px dashed rgba(17, 115, 66, 0.18);
   color: #5f7264;
+  font-size: 1.04rem;
 }
 
 .chat-product-picker-overlay {
@@ -785,12 +793,61 @@
 
 .ai-support-bubble p {
   margin: 0;
+  font-size: 1.06rem;
   line-height: 1.6;
+}
+
+.ai-support-richtext {
+  display: grid;
+  gap: 10px;
+  font-size: 1.06rem;
+  line-height: 1.65;
+}
+
+.ai-support-richtext p,
+.ai-support-richtext ul,
+.ai-support-richtext ol {
+  margin: 0;
+}
+
+.ai-support-richtext ul,
+.ai-support-richtext ol {
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+}
+
+.ai-support-richtext li {
+  padding-left: 2px;
+}
+
+.ai-support-richtext strong {
+  font-weight: 800;
+  color: #132a18;
+}
+
+.ai-support-richtext em {
+  font-style: italic;
+}
+
+.ai-support-section-title {
+  margin-top: 4px;
+  color: #132a18;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.ai-support-rule {
+  width: 110px;
+  margin: 2px 0;
+  border: 0;
+  border-top: 2px solid rgba(19, 42, 24, 0.78);
 }
 
 .ai-support-bubble span {
   color: rgba(82, 103, 88, 0.78);
-  font-size: 0.86rem;
+  font-size: 0.94rem;
 }
 
 .ai-support-message.is-user .ai-support-bubble span {
@@ -812,6 +869,8 @@
 
 .ai-support-form textarea {
   min-height: 70px;
+  font-size: 1.06rem;
+  line-height: 1.5;
   resize: none;
 }
 

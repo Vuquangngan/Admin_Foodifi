@@ -356,3 +356,7 @@ button svg {
 .warehouse-capacity-modal {
   margin: auto !important;
 }
+
+.admin-hidden-field {
+  display: none !important;
+}

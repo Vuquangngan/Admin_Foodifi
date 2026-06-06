@@ -3,7 +3,6 @@
           <div>
             <p class="eyebrow">Ẩm thực</p>
             <h2 id="recipesPanelTitle">Quản lý công thức nấu ăn</h2>
-            <p class="section-copy" id="recipesPanelDescription">Tạo và quản lý công thức món ăn, nguyên liệu và hướng dẫn chế biến cho Garden Fresh.</p>
           </div>
           <button class="primary-button recipes-create-button" id="openRecipeModalButton" type="button">+ Thêm công thức mới</button>
         </div>
@@ -41,7 +40,6 @@
               <section class="recipe-form-section">
                 <div class="recipe-section-copy">
                   <h3>Thông tin cơ bản</h3>
-                  <p>Xác định tên món, phân loại, thời gian chuẩn bị và trạng thái hiển thị.</p>
                 </div>
                 <div class="surface recipe-form-card">
                   <label class="span-2">
@@ -81,7 +79,6 @@
               <section class="recipe-form-section">
                 <div class="recipe-section-copy">
                   <h3>Hình ảnh</h3>
-                  <p>Chọn ảnh trực tiếp hoặc dán link ảnh bìa cho công thức.</p>
                 </div>
                 <div class="surface recipe-upload-card">
                   <label class="recipe-upload-zone">
@@ -89,7 +86,7 @@
                     <img id="recipeImagePreview" alt="">
                     <span>+ Chọn ảnh bìa</span>
                   </label>
-                  <label>
+                  <label class="admin-hidden-field">
                     <span>Hoặc dán link ảnh</span>
                     <input id="recipeImageUrl" name="image_url" placeholder="https://...">
                   </label>
@@ -99,7 +96,6 @@
               <section class="recipe-form-section">
                 <div class="recipe-section-copy">
                   <h3>Nguyên liệu</h3>
-                  <p>Liên kết nguyên liệu trực tiếp với sản phẩm trong kho để dễ mua sắm.</p>
                 </div>
                 <div class="surface recipe-repeat-card">
                   <div id="recipeIngredients" class="recipe-repeat-list"></div>
@@ -110,7 +106,6 @@
               <section class="recipe-form-section">
                 <div class="recipe-section-copy">
                   <h3>Hướng dẫn thực hiện</h3>
-                  <p>Chia nhỏ quy trình nấu ăn thành từng bước dễ hiểu.</p>
                 </div>
                 <div class="surface recipe-repeat-card">
                   <div id="recipeSteps" class="recipe-repeat-list"></div>
@@ -132,7 +127,6 @@
               <div>
                 <p class="eyebrow">Danh mục</p>
                 <h2 id="recipeCategoryModalTitle">Thêm danh mục công thức</h2>
-                <p class="section-copy">Tạo nhóm phân loại để quản lý công thức nấu ăn gọn hơn.</p>
               </div>
               <button class="ghost-button" id="closeRecipeCategoryModalButton" type="button">Đóng</button>
             </div>
@@ -149,7 +143,7 @@
                     <span>Mô tả chi tiết</span>
                     <textarea name="description" rows="5" placeholder="Ghi chú về nguồn gốc, đặc điểm hoặc tiêu chuẩn của danh mục này..."></textarea>
                   </label>
-                  <label>
+                  <label class="admin-hidden-field">
                     <span>Màu nhận diện</span>
                     <input name="icon" placeholder="#0d8d48">
                   </label>
@@ -167,7 +161,7 @@
                     <input id="recipeCategoryImageFile" type="file" accept="image/*" hidden>
                     <span>+ Chọn ảnh đại diện</span>
                   </label>
-                  <label>
+                  <label class="admin-hidden-field">
                     <span>Hoặc dán link ảnh</span>
                     <input id="recipeCategoryImageUrl" name="image_url" placeholder="https://...">
                   </label>

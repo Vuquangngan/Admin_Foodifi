@@ -680,7 +680,7 @@ export function renderSettings() {
         return;
     }
 
-    setSettingsHeading("Thiết lập chung", "Quản lý thông tin cơ bản và cấu hình vận hành của cửa hàng.");
+    setSettingsHeading("Thiết lập chung", "");
 
     const settings = readSettings();
     container.innerHTML = `
@@ -862,7 +862,6 @@ function renderMenuModal(item = null) {
         <div class="modal-card settings-menu-modal">
           <button class="modal-close-button" type="button" data-settings-menu-action="close-modal">×</button>
           <h2>${isEditing ? "Sửa menu chức năng" : "Thêm menu chức năng"}</h2>
-          <p>Tạo mục điều hướng mới cho hệ thống quản trị.</p>
           <form id="settingsMenuForm" class="settings-menu-form">
             <input type="hidden" name="id" value="${escapeHtml(item?.id || "")}">
             <label class="span-2">

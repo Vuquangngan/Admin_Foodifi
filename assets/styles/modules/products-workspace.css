@@ -84,6 +84,7 @@
 }
 
 .inventory-filter-card {
+  width: 100%;
   padding: 22px 22px 20px;
 }
 
@@ -97,8 +98,9 @@
 }
 
 .inventory-filter-form {
-  grid-template-columns: minmax(360px, 3fr) minmax(180px, 1fr) minmax(180px, 1fr) minmax(150px, 0.85fr);
+  grid-template-columns: minmax(260px, 1.6fr) repeat(4, minmax(150px, 0.82fr)) auto;
   align-items: end;
+  gap: 14px;
 }
 
 .publish-filter-form {
@@ -136,8 +138,11 @@
 }
 
 .inventory-filter-form button {
-  width: 100%;
-  min-height: 52px;
+  width: auto;
+  min-width: 128px;
+  min-height: 44px;
+  padding-inline: 22px;
+  justify-self: end;
 }
 
 .publish-filter-form button {

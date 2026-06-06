@@ -620,6 +620,10 @@ function positionPromotionComboboxMenu(root) {
     if (!searchInput || !menu) return;
 
     const rect = searchInput.getBoundingClientRect();
+    const availableBelow = window.innerHeight - rect.bottom - 12;
+    const availableAbove = rect.top - 12;
+    const maxHeight = Math.min(184, Math.max(88, Math.max(availableBelow, availableAbove)));
+    const shouldOpenAbove = availableBelow < 140 && availableAbove > availableBelow;
     const ownerId = ensurePromotionComboboxId(root);
     menu.dataset.portalOwner = ownerId;
     if (menu.parentElement !== document.body) {
@@ -627,9 +631,12 @@ function positionPromotionComboboxMenu(root) {
     }
     menu.style.position = "fixed";
     menu.style.left = `${rect.left}px`;
-    menu.style.top = `${rect.bottom + 6}px`;
+    menu.style.top = shouldOpenAbove
+        ? `${Math.max(8, rect.top - maxHeight - 6)}px`
+        : `${Math.min(window.innerHeight - maxHeight - 8, rect.bottom + 6)}px`;
     menu.style.width = `${rect.width}px`;
-    menu.style.zIndex = "2000";
+    menu.style.maxHeight = `${maxHeight}px`;
+    menu.style.zIndex = "3200";
     menu.style.display = "grid";
     menu.style.gap = "6px";
 }
@@ -718,6 +725,7 @@ function openPromotionForm() {
 }
 
 function closePromotionForm() {
+    closePromotionComboboxes();
     elements.promotionFormView?.classList.add("hidden");
 }
 
