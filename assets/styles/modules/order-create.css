@@ -235,8 +235,8 @@
 }
 
 #orderCreateCard .order-create-shell {
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 310px);
+  gap: 14px;
   align-items: start;
 }
 
@@ -246,15 +246,15 @@
 }
 
 #orderCreateCard .order-create-party-grid {
-  grid-template-columns: minmax(400px, 0.9fr) minmax(520px, 1.1fr);
-  gap: 16px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 14px;
 }
 
 #orderCreateCard .order-create-section,
 #orderCreateCard .order-create-products,
 #orderCreateCard .order-create-summary {
   border-radius: 12px;
-  padding: 20px;
+  padding: 18px;
   min-width: 0;
 }
 
@@ -263,16 +263,16 @@
 }
 
 #orderCreateCard .order-create-section .compact-grid {
-  gap: 14px 16px;
+  gap: 12px 14px;
 }
 
 #orderCreateCard .order-create-seller-section .compact-grid {
-  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 #orderCreateCard .order-create-customer-section .compact-grid,
 #orderCreateCard .order-create-payment-section .compact-grid {
-  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 #orderCreateCard .order-create-section label,
@@ -291,6 +291,21 @@
 #orderCreateCard .order-create-summary {
   position: sticky;
   top: 18px;
+}
+
+#orderCreateCard .order-create-summary-grid {
+  gap: 10px;
+}
+
+#orderCreateCard .order-create-summary-grid div {
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+#orderCreateCard .order-create-summary-grid span,
+#orderCreateCard .order-create-summary-grid strong {
+  font-size: 0.95rem;
 }
 
 @media (max-width: 1280px) {
