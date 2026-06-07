@@ -365,7 +365,7 @@ function bindGlobalEvents() {
         }
         renderStaffShiftWorkspace();
     }));
-    elements.refreshOrdersButton.addEventListener("click", (event) => withLoading(event.currentTarget, async () => {
+    elements.refreshOrdersButton?.addEventListener("click", (event) => withLoading(event.currentTarget, async () => {
         if (state.orderWorkspace === "create") {
             resetCreateOrderDraft();
             await Promise.all([loadCoupons(), loadProducts(), loadOrders(), loadOverview()]);
