@@ -1144,3 +1144,121 @@ textarea,
   border-radius: 999px !important;
 }
 
+/* Order detail modal: improve contrast and separation from the page overlay. */
+.order-detail-modal {
+  width: min(1180px, calc(100vw - 48px)) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(18, 95, 54, 0.22) !important;
+  box-shadow: 0 28px 72px rgba(20, 60, 35, 0.24) !important;
+}
+
+.order-detail-modal-header {
+  padding: 26px 34px !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(18, 95, 54, 0.18) !important;
+}
+
+.order-detail-modal-header h2 {
+  color: #101915 !important;
+  line-height: 1.12 !important;
+}
+
+.order-detail-modal-header p {
+  color: #30463a !important;
+  font-weight: 600 !important;
+}
+
+.order-detail-content {
+  padding: 30px 34px !important;
+  background: #f3f8f0 !important;
+}
+
+.order-detail-summary-grid {
+  grid-template-columns: repeat(4, minmax(190px, 1fr)) !important;
+  gap: 16px !important;
+}
+
+.order-detail-meta-card,
+.order-shipping-card,
+.invoice-preview-sheet {
+  background: #ffffff !important;
+  border: 1px solid rgba(18, 95, 54, 0.18) !important;
+  box-shadow: 0 10px 24px rgba(33, 75, 44, 0.08) !important;
+}
+
+.order-detail-meta-card {
+  padding: 20px 22px !important;
+}
+
+.order-detail-meta-card span:first-child,
+.order-shipping-card span,
+.order-shipping-code span,
+.order-branch-routing-head span,
+.order-branch-routing-info span {
+  color: #1f3b2d !important;
+}
+
+.order-detail-meta-card strong,
+.order-shipping-card strong,
+.order-branch-routing-info strong {
+  color: #0d1712 !important;
+}
+
+.order-detail-meta-card small,
+.order-shipping-card p,
+.order-shipping-card small,
+.order-branch-routing-info small,
+.order-branch-routing-card p {
+  color: #263a2f !important;
+  font-weight: 600 !important;
+}
+
+.order-branch-routing-card {
+  background: #f7fbf4 !important;
+  border: 1px solid rgba(13, 127, 66, 0.24) !important;
+  border-left: 4px solid #16a65b !important;
+  box-shadow: 0 12px 30px rgba(29, 88, 45, 0.09) !important;
+}
+
+.order-branch-routing-card label,
+.order-branch-routing-info {
+  background: #ffffff !important;
+  border: 1px solid rgba(18, 95, 54, 0.14) !important;
+  box-shadow: 0 8px 18px rgba(33, 75, 44, 0.06) !important;
+}
+
+.order-branch-routing-head em {
+  border-radius: 10px !important;
+  background: #d9efe3 !important;
+  color: #0a6b38 !important;
+}
+
+@media (max-width: 1100px) {
+  .order-detail-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .order-branch-routing-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .order-detail-modal {
+    width: calc(100vw - 24px) !important;
+  }
+
+  .order-detail-modal-header {
+    display: grid !important;
+    padding: 22px !important;
+  }
+
+  .order-detail-content {
+    padding: 22px !important;
+  }
+
+  .order-detail-summary-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
