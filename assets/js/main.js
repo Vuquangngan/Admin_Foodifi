@@ -1169,10 +1169,14 @@ function bindGlobalEvents() {
     elements.promotionFormView?.addEventListener("scroll", () => {
         handlePromotionAction("close-comboboxes");
     }, true);
-    elements.promotionForm?.addEventListener("submit", (event) => {
+    elements.promotionForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
         const raw = collectFormData(elements.promotionForm);
-        submitPromotionForm(raw);
+        try {
+            await withLoading(event.submitter, async () => submitPromotionForm(raw));
+        } catch (error) {
+            showToast(error.message || "Không lưu được chiến dịch khuyến mãi.", true);
+        }
     });
     [elements.promotionStatusFilter, elements.promotionTypeFilter].forEach((filter) => {
         filter?.addEventListener("change", () => handlePromotionAction("refresh-list"));

@@ -917,13 +917,6 @@ function renderShipmentDetail(request) {
 function renderBranchShipmentWorkspace() {
     const requests = getVisibleShipmentRequests();
     const detailRequest = getShipmentDetailRequest(requests);
-    const allRequests = readBranchImportRequests().filter((request) => String(request.status || "") !== "draft");
-    const pendingCount = allRequests.filter((request) => request.status === "pending").length;
-    const approvedCount = allRequests.filter((request) => request.status === "approved").length;
-    const receivingCount = allRequests.filter((request) => request.status === "receiving").length;
-    const expectedQuantity = allRequests
-        .filter((request) => ["approved", "receiving"].includes(String(request.status)))
-        .reduce((sum, request) => sum + getRequestTotalQuantity(request), 0);
 
     elements.branchesMeta.textContent = `${formatNumber(requests.length)} yêu cầu cần xử lý`;
     elements.branchesContent.innerHTML = `
@@ -937,13 +930,6 @@ function renderBranchShipmentWorkspace() {
                 ${STORE_BRANCHES.map((branch) => `<option value="${escapeHtml(branch.key)}" ${String(state.branchShipmentBranchFilter) === String(branch.key) ? "selected" : ""}>${escapeHtml(getBranchLabel(branch))}</option>`).join("")}
               </select>
             </label>
-
-            <div class="branch-import-stats branch-shipment-stats">
-              ${renderBranchImportSummaryCard("warning", "Sản phẩm sắp hết", formatNumber(getLowStockProducts().length), "sản phẩm", "danger")}
-              ${renderBranchImportSummaryCard("receipt", "Yêu cầu đang chờ duyệt", formatNumber(pendingCount), "yêu cầu", "pending")}
-              ${renderBranchImportSummaryCard("shield", "Yêu cầu đã duyệt hôm nay", formatNumber(approvedCount), "yêu cầu", "active")}
-              ${renderBranchImportSummaryCard("package", "Dự kiến cần nhập", formatNumber(expectedQuantity), "sản phẩm", "active")}
-            </div>
 
             <section class="branch-shipment-list-card surface">
               <div class="branch-shipment-tabs">

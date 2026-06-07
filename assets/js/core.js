@@ -1201,6 +1201,7 @@ function getApiTargetType(path) {
     if (normalized.includes("/inventory/suppliers")) return "Nhà cung cấp";
     if (normalized.includes("/users")) return "Tài khoản";
     if (normalized.includes("/coupons")) return "Voucher";
+    if (normalized.includes("/promotions")) return "Chiến dịch khuyến mãi";
     if (normalized.includes("/recipes")) return "Công thức";
     if (normalized.includes("/recipe-categories")) return "Danh mục công thức";
     if (normalized.includes("/branch")) return "Chi nhánh";

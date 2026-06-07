@@ -19,7 +19,7 @@
               <select id="promotionTypeFilter">
                 <option value="">Tất cả loại</option>
                 <option value="buy_x_get_y">Mua X tặng Y</option>
-                <option value="golden_hour">Giảm giá theo giờ</option>
+                <option value="discount">Giảm giá</option>
               </select>
               <input id="promotionDateFilter" type="text" value="01/06/2024 - 30/06/2024" aria-label="Thời gian lọc khuyến mãi">
               <label class="promotion-search">
@@ -82,10 +82,10 @@
                         </div>
                       </label>
                       <label class="promotion-type-card">
-                        <input name="type" type="radio" value="golden_hour">
+                        <input name="type" type="radio" value="discount">
                         <span class="promo-icon">◷</span>
-                        <strong>Giảm giá theo giờ</strong>
-                        <small>Tự động áp dụng chiết khấu trong các khung giờ đặc biệt.</small>
+                        <strong>Giảm giá</strong>
+                        <small>Tự động áp dụng chiết khấu cho sản phẩm hoặc danh mục đã chọn.</small>
                       </label>
                     </div>
 
@@ -130,7 +130,7 @@
                       </label>
                     </div>
                     <div class="promotion-hour-box">
-                      <strong>Thiết lập giờ vàng</strong>
+                      <strong>Thiết lập khung giờ áp dụng</strong>
                       <div class="promotion-hour-list">
                         <button class="active" type="button" data-promotion-time="20:00 - 22:00">20:00 - 22:00</button>
                         <button type="button" data-promotion-time="06:00 - 08:00">06:00 - 08:00</button>

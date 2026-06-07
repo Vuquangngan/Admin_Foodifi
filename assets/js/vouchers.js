@@ -15,6 +15,8 @@
 } from "./core.js";
 
 let promotionComboboxUid = 0;
+let promotionRulesLoaded = false;
+let promotionRulesLoading = null;
 
 function getVoucherById(id) {
     return (state.vouchers || []).find((coupon) => Number(coupon.id) === Number(id))
@@ -524,6 +526,33 @@ function savePromotionRulesToStorage() {
     localStorage.setItem(STORAGE_KEYS.promotionRules, JSON.stringify(state.promotionRules || []));
 }
 
+async function loadPromotionRulesFromApi({ force = false } = {}) {
+    if (promotionRulesLoading) return promotionRulesLoading;
+    if (promotionRulesLoaded && !force) return state.promotionRules || [];
+
+    promotionRulesLoading = apiFetch("/api/promotions")
+        .then((payload) => {
+            state.promotionRules = Array.isArray(payload?.campaigns)
+                ? payload.campaigns
+                : Array.isArray(payload)
+                    ? payload
+                    : [];
+            promotionRulesLoaded = true;
+            savePromotionRulesToStorage();
+            return state.promotionRules;
+        })
+        .catch((error) => {
+            loadPromotionRulesFromStorage();
+            showToast(error.message || "Không tải được chiến dịch khuyến mãi từ DB.", true);
+            return state.promotionRules || [];
+        })
+        .finally(() => {
+            promotionRulesLoading = null;
+        });
+
+    return promotionRulesLoading;
+}
+
 function promotionProductSelect(value = "", scope = "products") {
     const selectedLabel = value && value !== "all"
         ? (scope === "categories" ? getCategoryNameById(value) : getPromotionProductName(value))
@@ -716,7 +745,7 @@ function getPromotionStatusLabel(status) {
 }
 
 function getPromotionTypeLabel(type) {
-    return type === "golden_hour" ? "Giảm giá theo giờ" : "Mua X tặng Y";
+    return type === "discount" || type === "golden_hour" ? "Giảm giá" : "Mua X tặng Y";
 }
 
 function openPromotionForm() {
@@ -758,15 +787,15 @@ export function resetPromotionForm() {
 export function syncPromotionPreview() {
     if (!elements.promotionForm) return;
     const raw = Object.fromEntries(new FormData(elements.promotionForm).entries());
-    const type = String(raw.type || "buy_x_get_y");
+    const type = String(raw.type || "buy_x_get_y") === "golden_hour" ? "discount" : String(raw.type || "buy_x_get_y");
     const title = String(raw.name || "").trim() || "Mùa Thu Rực Rỡ";
     const discount = Number(raw.discount_percent || 0);
     const products = getPromotionAppliedProducts();
 
     if (elements.promotionPreviewTitle) elements.promotionPreviewTitle.textContent = title;
     if (elements.promotionPreviewType) {
-        elements.promotionPreviewType.textContent = type === "golden_hour"
-            ? `Giảm ${discount || 0}% giờ vàng`
+        elements.promotionPreviewType.textContent = type === "discount"
+            ? `Giảm ${discount || 0}%`
             : "Mua X tặng Y";
     }
     if (elements.promotionPreviewSchedule) {
@@ -786,15 +815,15 @@ export function syncPromotionPreview() {
 
 function buildPromotionPayload(raw = {}) {
     const products = getPromotionAppliedProducts();
+    const type = String(raw.type || "buy_x_get_y") === "golden_hour" ? "discount" : String(raw.type || "buy_x_get_y");
     return {
-        id: Date.now(),
         name: String(raw.name || "").trim(),
-        type: String(raw.type || "buy_x_get_y"),
+        type,
         is_active: raw.is_active === "on",
         gift_product_id: raw.gift_product_id || "",
         apply_scope: String(raw.apply_scope || "products") === "categories" ? "categories" : "products",
         apply_product_ids: products,
-        discount_percent: Number(raw.discount_percent || 0),
+        discount_percent: type === "discount" ? Number(raw.discount_percent || 0) : 0,
         time_range: getPromotionSelectedTime(),
         start_date: raw.start_date || "",
         end_date: raw.end_date || "",
@@ -802,18 +831,22 @@ function buildPromotionPayload(raw = {}) {
     };
 }
 
-export function submitPromotionForm(raw) {
+export async function submitPromotionForm(raw) {
     const payload = buildPromotionPayload(raw);
     if (!payload.name) throw new Error("Vui lòng nhập tên chiến dịch khuyến mãi.");
-    state.promotionRules = [payload, ...(state.promotionRules || [])];
-    savePromotionRulesToStorage();
+
+    await apiFetch("/api/promotions", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
+    await loadPromotionRulesFromApi({ force: true });
     renderPromotionRules();
     syncPromotionPreview();
     closePromotionForm();
     showToast("Đã lưu chiến dịch khuyến mãi.");
 }
 
-export function handlePromotionAction(action, target = null) {
+export async function handlePromotionAction(action, target = null) {
     if (action === "open-form" || action === "new") {
         openPromotionForm();
         return;
@@ -823,7 +856,7 @@ export function handlePromotionAction(action, target = null) {
         return;
     }
     if (action === "refresh-list") {
-        renderPromotionRules();
+        loadPromotionRulesFromApi({ force: true }).then(renderPromotionRules);
         return;
     }
     if (action === "refresh-selects") {
@@ -883,19 +916,31 @@ export function handlePromotionAction(action, target = null) {
     if (action === "delete-rule") {
         const id = Number(target?.dataset.id || 0);
         if (!window.confirm("Bạn chắc chắn muốn xóa chiến dịch khuyến mãi này?")) return;
-        state.promotionRules = (state.promotionRules || []).filter((rule) => Number(rule.id) !== id);
-        savePromotionRulesToStorage();
-        renderPromotionRules();
+        try {
+            await apiFetch(`/api/promotions/${id}`, { method: "DELETE" });
+            await loadPromotionRulesFromApi({ force: true });
+            renderPromotionRules();
+            showToast("Đã xóa chiến dịch khuyến mãi.");
+        } catch (error) {
+            showToast(error.message || "Không xóa được chiến dịch khuyến mãi.", true);
+        }
         return;
     }
     if (action === "toggle-rule") {
         const id = Number(target?.dataset.id || 0);
-        state.promotionRules = (state.promotionRules || []).map((rule) => {
-            if (Number(rule.id) !== id) return rule;
-            return { ...rule, is_active: !rule.is_active };
-        });
-        savePromotionRulesToStorage();
-        renderPromotionRules();
+        const rule = (state.promotionRules || []).find((item) => Number(item.id) === id);
+        if (!rule) return;
+        try {
+            await apiFetch(`/api/promotions/${id}`, {
+                method: "PUT",
+                body: JSON.stringify({ ...rule, is_active: !rule.is_active })
+            });
+            await loadPromotionRulesFromApi({ force: true });
+            renderPromotionRules();
+            showToast("Đã cập nhật trạng thái chiến dịch.");
+        } catch (error) {
+            showToast(error.message || "Không cập nhật được chiến dịch khuyến mãi.", true);
+        }
     }
 }
 
@@ -905,8 +950,9 @@ function getFilteredPromotionRules() {
     const keyword = String(elements.promotionSearchInput?.value || "").trim().toLowerCase();
     return (state.promotionRules || []).filter((rule) => {
         const status = getPromotionStatus(rule);
+        const ruleType = rule.type === "golden_hour" ? "discount" : rule.type;
         const matchStatus = !statusFilter || status === statusFilter;
-        const matchType = !typeFilter || rule.type === typeFilter;
+        const matchType = !typeFilter || ruleType === typeFilter;
         const matchKeyword = !keyword || String(rule.name || "").toLowerCase().includes(keyword);
         return matchStatus && matchType && matchKeyword;
     });
@@ -929,18 +975,18 @@ function renderPromotionRules() {
         const end = rule.end_date ? formatDate(rule.end_date) : "Không giới hạn";
         return `
           <article class="promotion-campaign-item">
-            <div class="promotion-campaign-thumb">${rule.type === "golden_hour" ? "%" : "🎁"}</div>
+            <div class="promotion-campaign-thumb">${rule.type === "discount" || rule.type === "golden_hour" ? "%" : "🎁"}</div>
             <div class="promotion-campaign-info">
               <div class="promotion-campaign-title">
                 <strong>${escapeHtml(rule.name)}</strong>
                 <span class="promotion-status ${status}">${getPromotionStatusLabel(status)}</span>
               </div>
-              <p>${getPromotionTypeLabel(rule.type)} • ${rule.type === "golden_hour" ? `Giảm ${formatNumber(rule.discount_percent || 0)}%` : `Tặng ${escapeHtml(giftName)}`}</p>
+              <p>${getPromotionTypeLabel(rule.type)} • ${rule.type === "discount" || rule.type === "golden_hour" ? `Giảm ${formatNumber(rule.discount_percent || 0)}%` : `Tặng ${escapeHtml(giftName)}`}</p>
               <small>${formatNumber(productCount)} ${applyLabel}</small>
             </div>
             <div class="promotion-campaign-gift">
-              <span>${rule.type === "golden_hour" ? "Ưu đãi" : "Quà tặng"}</span>
-              <strong>${rule.type === "golden_hour" ? `Giảm ${formatNumber(rule.discount_percent || 0)}%` : escapeHtml(giftName)}</strong>
+              <span>${rule.type === "discount" || rule.type === "golden_hour" ? "Ưu đãi" : "Quà tặng"}</span>
+              <strong>${rule.type === "discount" || rule.type === "golden_hour" ? `Giảm ${formatNumber(rule.discount_percent || 0)}%` : escapeHtml(giftName)}</strong>
               <small>Số lượng: 1</small>
             </div>
             <div class="promotion-campaign-date">
@@ -958,8 +1004,11 @@ function renderPromotionRules() {
 }
 
 function renderPromotionWorkspace() {
-    loadPromotionRulesFromStorage();
     populatePromotionSelects();
+    if (!promotionRulesLoaded) {
+        loadPromotionRulesFromStorage();
+        loadPromotionRulesFromApi().then(renderPromotionRules);
+    }
     renderPromotionRules();
     syncPromotionPreview();
 }
