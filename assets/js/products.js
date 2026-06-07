@@ -989,6 +989,7 @@ export function updateProductWorkspace() {
     updatePublishBranchCard(isPublishWorkspace);
     elements.productsListTitle.textContent = workspace.listTitle;
     elements.productsListTitle.classList.toggle("hidden", !workspace.listTitle);
+    elements.productsListCard.classList.toggle("low-stock-list-wrapper", isLowStockWorkspace);
     elements.productFilterCard.classList.toggle("hidden", !workspace.showFilter);
     elements.productFilterCard.classList.toggle("full-span", isInventoryWorkspace);
     elements.productFilterCard.classList.toggle("full-span", isPublishWorkspace);

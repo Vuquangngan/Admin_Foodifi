@@ -602,3 +602,18 @@
   box-shadow: none !important;
 }
 
+#productsListCard.low-stock-list-wrapper {
+  padding: 0 !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+#productsListCard.low-stock-list-wrapper .low-stock-shell {
+  padding: 0 !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
