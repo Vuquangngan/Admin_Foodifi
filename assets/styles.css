@@ -427,3 +427,128 @@
   border-color: rgba(17, 115, 66, 0.18) !important;
 }
 
+.app-shell:not(.auth-screen) .main-panel {
+  padding: 20px 22px !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  border: 1px solid rgba(17, 95, 54, 0.16) !important;
+  border-radius: 28px !important;
+  box-shadow: 0 22px 58px rgba(35, 87, 49, 0.1) !important;
+}
+
+.app-shell:not(.auth-screen) .panel.active {
+  gap: 14px !important;
+}
+
+.app-shell:not(.auth-screen) .panel > .panel-head {
+  padding: 0 4px !important;
+  margin-bottom: 2px !important;
+}
+
+.app-shell:not(.auth-screen) .panel-head h2,
+.app-shell:not(.auth-screen) .admin-page-header h1 {
+  margin: 0 !important;
+}
+
+.surface,
+.filter-card,
+.panel-card,
+.metric-card,
+.stat-card,
+.voucher-stat-card,
+.stack-card,
+.overview-table-card,
+.orders-table-card,
+.warehouse-table-card,
+.publish-table-card,
+.low-stock-table-card,
+.recipes-table-card,
+.activity-table-card,
+.categories-table-card,
+.users-toolbar-card,
+.users-list-card,
+.branch-table-card,
+.voucher-form-dialog,
+.product-excel-import-card,
+.product-intake-section,
+.product-intake-side,
+.category-modal-surface,
+.supplier-form-section,
+.branch-form-section,
+.recipe-form-card,
+.recipe-upload-card,
+.recipe-repeat-card,
+.voucher-builder-section,
+.voucher-preview-card,
+.voucher-note-card,
+.product-editor-preview,
+.product-editor-fields,
+.publish-editor-surface,
+.settings-card,
+.profile-panel {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(17, 95, 54, 0.1) !important;
+  border-radius: 22px !important;
+  box-shadow: 0 12px 26px rgba(52, 91, 48, 0.07) !important;
+  backdrop-filter: none !important;
+}
+
+.product-excel-import-card,
+.product-intake-section,
+.product-intake-side,
+.category-modal-surface,
+.supplier-form-section,
+.branch-form-section,
+.recipe-form-card,
+.recipe-upload-card,
+.recipe-repeat-card,
+.voucher-builder-section,
+.voucher-preview-card,
+.voucher-note-card,
+.product-editor-preview,
+.product-editor-fields,
+.publish-editor-surface,
+.settings-card,
+.profile-panel {
+  padding: 16px !important;
+}
+
+#productImportCard {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.products-workspace-grid,
+.surface-grid,
+.stats-grid,
+.overview-grid,
+.voucher-stats-grid,
+.product-intake-form,
+.product-intake-main,
+.recipe-modal-grid,
+.supplier-modal-body,
+.branch-modal-form,
+.voucher-builder-grid,
+.product-editor-grid,
+.publish-editor-grid {
+  gap: 14px !important;
+}
+
+.product-intake-section + .product-intake-section,
+.supplier-form-section + .supplier-form-section,
+.branch-form-section + .branch-form-section,
+.recipe-form-section + .recipe-form-section,
+.voucher-builder-section + .voucher-builder-section {
+  border-top: 1px solid rgba(17, 95, 54, 0.1) !important;
+}
+
+.product-intake-side {
+  border-left: 1px solid rgba(17, 95, 54, 0.1) !important;
+  padding-left: 16px !important;
+}
+
+.product-excel-import-card {
+  margin-bottom: 8px !important;
+}
+
