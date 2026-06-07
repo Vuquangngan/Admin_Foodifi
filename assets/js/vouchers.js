@@ -272,25 +272,13 @@ export async function loadVouchers() {
 
 function renderVoucherSummary() {
     if (!elements.vouchersSummary) return;
-    const coupons = Array.isArray(state.vouchers) ? state.vouchers : [];
-    const active = coupons.filter((coupon) => getVoucherStatus(coupon).label === "Đang hoạt động").length;
-    const scheduled = coupons.filter((coupon) => getVoucherStatus(coupon).label === "Sắp diễn ra").length;
-    const expired = coupons.filter((coupon) => getVoucherStatus(coupon).label === "Đã hết hạn").length;
-    const totalUsage = coupons.reduce((sum, coupon) => sum + Number(coupon.used_count || 0), 0);
-
-    elements.vouchersSummary.innerHTML = `
-      <article class="voucher-stat-card"><span>Tổng voucher</span><strong>${formatNumber(coupons.length)}</strong></article>
-      <article class="voucher-stat-card"><span>Đang hoạt động</span><strong>${formatNumber(active)}</strong></article>
-      <article class="voucher-stat-card"><span>Sắp diễn ra</span><strong>${formatNumber(scheduled)}</strong></article>
-      <article class="voucher-stat-card voucher-stat-card-warm"><span>Đã dùng</span><strong>${formatNumber(totalUsage)}</strong></article>
-      <article class="voucher-stat-card voucher-stat-card-danger"><span>Đã hết hạn</span><strong>${formatNumber(expired)}</strong></article>
-    `;
+    elements.vouchersSummary.innerHTML = "";
 }
 
 function renderVoucherTable() {
     if (!elements.vouchersContent || !elements.vouchersMeta) return;
     const coupons = Array.isArray(state.vouchers) ? state.vouchers : [];
-    elements.vouchersMeta.textContent = `${formatNumber(coupons.length)} voucher`;
+    elements.vouchersMeta.textContent = "";
 
     elements.vouchersContent.innerHTML = `
       <div class="voucher-table-wrap">

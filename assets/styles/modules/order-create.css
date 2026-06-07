@@ -230,3 +230,77 @@
   font-size: 1.3rem;
 }
 
+#orderCreateCard .order-create-layout {
+  gap: 14px;
+}
+
+#orderCreateCard .order-create-shell {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 360px);
+  gap: 16px;
+  align-items: start;
+}
+
+#orderCreateCard .order-create-main {
+  gap: 16px;
+  min-width: 0;
+}
+
+#orderCreateCard .order-create-party-grid {
+  grid-template-columns: minmax(400px, 0.9fr) minmax(520px, 1.1fr);
+  gap: 16px;
+}
+
+#orderCreateCard .order-create-section,
+#orderCreateCard .order-create-products,
+#orderCreateCard .order-create-summary {
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 0;
+}
+
+#orderCreateCard .order-create-section {
+  gap: 14px;
+}
+
+#orderCreateCard .order-create-section .compact-grid {
+  gap: 14px 16px;
+}
+
+#orderCreateCard .order-create-seller-section .compact-grid {
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+}
+
+#orderCreateCard .order-create-customer-section .compact-grid,
+#orderCreateCard .order-create-payment-section .compact-grid {
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+}
+
+#orderCreateCard .order-create-section label,
+#orderCreateCard .order-create-section input,
+#orderCreateCard .order-create-section select,
+#orderCreateCard .order-create-section textarea {
+  min-width: 0;
+  width: 100%;
+}
+
+#orderCreateCard .order-create-section label > span {
+  line-height: 1.35;
+  white-space: normal;
+}
+
+#orderCreateCard .order-create-summary {
+  position: sticky;
+  top: 18px;
+}
+
+@media (max-width: 1280px) {
+  #orderCreateCard .order-create-shell,
+  #orderCreateCard .order-create-party-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #orderCreateCard .order-create-summary {
+    position: static;
+  }
+}
+

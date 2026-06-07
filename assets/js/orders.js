@@ -1834,10 +1834,9 @@ function renderCreateOrderWorkspaceLegacy() {
         </section>
 
         <section class="order-create-products">
-          <div class="section-head">
-            <h3>Sản phẩm trong đơn</h3>
-            <div class="order-create-actions-inline">
-              <button class="ghost-button" type="button" data-create-order-action="reset-draft">Làm mới form</button>
+            <div class="section-head">
+              <h3>Sản phẩm trong đơn</h3>
+              <div class="order-create-actions-inline">
               <button class="secondary-button" type="button" data-create-order-action="add-item">Thêm sản phẩm</button>
             </div>
           </div>
@@ -1948,7 +1947,7 @@ function renderCreateOrderWorkspace() {
         <div class="order-create-shell">
           <section class="order-create-main">
             <div class="order-create-party-grid">
-              <article class="surface order-create-section">
+              <article class="surface order-create-section order-create-seller-section">
                 <div class="section-head">
                   <h3>Thông tin người bán</h3>
                 </div>
@@ -1968,7 +1967,7 @@ function renderCreateOrderWorkspace() {
                 </div>
               </article>
 
-              <article class="surface order-create-section">
+              <article class="surface order-create-section order-create-customer-section">
                 <div class="section-head">
                   <h3>Thông tin khách hàng</h3>
                 </div>
@@ -2005,7 +2004,7 @@ function renderCreateOrderWorkspace() {
               </article>
             </div>
 
-            <article class="surface order-create-section">
+            <article class="surface order-create-section order-create-payment-section">
               <div class="section-head">
                 <h3>Thanh toán và ưu đãi</h3>
               </div>
@@ -2035,7 +2034,6 @@ function renderCreateOrderWorkspace() {
                 <h3>Danh sách sản phẩm</h3>
                 <div class="order-create-actions-inline">
                   <span class="status-pill tone-neutral">${formatNumber(selectedLineItems.length)} sản phẩm</span>
-                  <button class="ghost-button" type="button" data-create-order-action="reset-draft">Làm mới form</button>
                 </div>
               </div>
               <div class="order-builder-list">

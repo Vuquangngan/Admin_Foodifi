@@ -650,9 +650,6 @@ function renderBranchImportWorkspace() {
     const branchIndex = Math.max(0, STORE_BRANCHES.findIndex((item) => item.key === branch?.key));
     const lowStockProducts = getLowStockProducts(branch?.key);
     const requests = readBranchImportRequests().filter((request) => String(request.branch_key) === String(branch?.key));
-    const pendingCount = requests.filter((request) => request.status === "pending").length;
-    const approvedCount = requests.filter((request) => request.status === "approved").length;
-    const receivingCount = requests.filter((request) => request.status === "receiving").length;
     const draftItems = getBranchDraftItems();
     const totalQuantity = draftItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
 
@@ -660,9 +657,6 @@ function renderBranchImportWorkspace() {
     elements.branchesContent.innerHTML = `
       <section class="branch-import-shell">
         <div class="branch-import-topbar">
-          <div>
-            <h3>Yêu cầu nhập hàng theo chi nhánh</h3>
-          </div>
           <label class="branch-import-select">
             <span>Chi nhánh</span>
             <select data-branch-import-field="branch">
@@ -677,13 +671,6 @@ function renderBranchImportWorkspace() {
           <div>${renderAppIcon("pin")} <span>Địa chỉ</span><strong>${escapeHtml([branch?.address, branch?.city].filter(Boolean).join(", ") || "Chưa cập nhật")}</strong></div>
           <div>${renderAppIcon("calendar")} <span>Cập nhật tồn kho</span><strong>${escapeHtml(formatDate(new Date()))}</strong></div>
         </article>
-
-        <div class="branch-import-stats">
-          ${renderBranchImportSummaryCard("warning", "Sản phẩm sắp hết", formatNumber(lowStockProducts.length), "cần bổ sung", "danger")}
-          ${renderBranchImportSummaryCard("receipt", "Yêu cầu chờ duyệt", formatNumber(pendingCount), "yêu cầu", "pending")}
-          ${renderBranchImportSummaryCard("shield", "Đã duyệt", formatNumber(approvedCount), "yêu cầu", "active")}
-          ${renderBranchImportSummaryCard("truck", "Đang nhập hàng", formatNumber(receivingCount), "yêu cầu", "shipping")}
-        </div>
 
         <div class="branch-import-layout">
           <article class="surface branch-import-card">

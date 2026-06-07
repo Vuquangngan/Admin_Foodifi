@@ -428,6 +428,7 @@ function renderSupplierReturns() {
     const tickets = readSupplierReturns();
     const supplierOptions = getSupplierFilterOptions();
     const filters = state.supplierReturnFilters || {};
+    elements.suppliersMeta.closest(".section-head")?.classList.remove("hidden");
     elements.suppliersMeta.textContent = `${formatNumber(products.length)} sản phẩm cần theo dõi`;
     elements.suppliersSummary.innerHTML = "";
     elements.suppliersContent.innerHTML = `
@@ -533,14 +534,14 @@ function renderSupplierSummary() {
 function renderSupplierTable() {
     if (!elements.suppliersContent) return;
     const suppliers = Array.isArray(state.suppliers) ? state.suppliers : [];
-    elements.suppliersMeta.textContent = `${formatNumber(suppliers.length)} nhà cung cấp`;
+    elements.suppliersMeta.textContent = "";
+    elements.suppliersMeta.closest(".section-head")?.classList.add("hidden");
     elements.suppliersContent.innerHTML = `
       <div class="suppliers-table-wrap">
         <table class="list-table suppliers-table">
           <thead>
             <tr>
               <th>Nhà cung cấp</th>
-              <th>Mã số</th>
               <th>Người liên hệ</th>
               <th>Liên hệ</th>
               <th>Địa chỉ</th>
@@ -564,7 +565,6 @@ function renderSupplierTable() {
                         </div>
                       </div>
                     </td>
-                    <td>${escapeHtml(supplier.code || "-")}</td>
                     <td>${escapeHtml(supplier.contact_person || "-")}</td>
                     <td>
                       <div class="supplier-contact-stack">
@@ -584,7 +584,7 @@ function renderSupplierTable() {
                     </td>
                   </tr>
                 `;
-            }).join("") || '<tr><td colspan="8">Chưa có nhà cung cấp phù hợp.</td></tr>'}
+            }).join("") || '<tr><td colspan="7">Chưa có nhà cung cấp phù hợp.</td></tr>'}
           </tbody>
         </table>
       </div>
@@ -881,6 +881,7 @@ function renderSupplierReturnsV2() {
     const tickets = readSupplierReturns();
     const supplierOptions = getSupplierFilterOptions();
     const filters = state.supplierReturnFilters || {};
+    elements.suppliersMeta.closest(".section-head")?.classList.remove("hidden");
     elements.suppliersMeta.textContent = `${formatNumber(products.length)} sản phẩm cần theo dõi`;
     elements.suppliersSummary.innerHTML = "";
     elements.suppliersContent.innerHTML = `

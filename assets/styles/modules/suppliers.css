@@ -114,6 +114,19 @@
   vertical-align: top;
 }
 
+.suppliers-table th:first-child,
+.suppliers-table td:first-child {
+  min-width: 340px;
+  width: 32%;
+}
+
+.suppliers-table th:nth-child(2),
+.suppliers-table td:nth-child(2),
+.suppliers-table th:nth-child(3),
+.suppliers-table td:nth-child(3) {
+  min-width: 150px;
+}
+
 .suppliers-table th:last-child,
 .suppliers-table td:last-child {
   border-right: none;
@@ -149,8 +162,8 @@
 
 .supplier-name-cell {
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: 58px minmax(230px, 1fr);
+  gap: 16px;
   align-items: center;
 }
 
@@ -178,7 +191,10 @@
   display: block;
   margin-bottom: 4px;
   color: #1f2f25;
-  font-size: 1.02rem;
+  font-size: 1.16rem;
+  line-height: 1.35;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .supplier-name-cell span,

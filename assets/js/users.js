@@ -309,7 +309,6 @@ function buildStaffRows() {
                     <td>
                       <div class="user-contact-stack">
                         <span>${escapeHtml(user.phone || "Chưa có số điện thoại")}</span>
-                        <small>${escapeHtml(user.must_change_password ? "Cần đổi mật khẩu" : "Đang dùng bình thường")}</small>
                       </div>
                     </td>
                     <td>
