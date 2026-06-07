@@ -808,6 +808,50 @@ export function restoreSession() {
     }
 }
 
+export async function refreshStoredSession() {
+    if (!state.refreshToken) return false;
+
+    let response;
+    try {
+        response = await fetch(`${state.apiBase}/api/auth/refresh`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                refresh_token: state.refreshToken
+            })
+        });
+    } catch (_error) {
+        const error = new Error(`Không kết nối được backend tại ${state.apiBase}.`);
+        error.isNetworkError = true;
+        throw error;
+    }
+
+    const contentType = response.headers.get("content-type") || "";
+    const payload = contentType.includes("application/json")
+        ? await response.json()
+        : await response.text();
+
+    if (!response.ok) {
+        const message = typeof payload === "string" ? payload : payload?.message || "Không thể làm mới phiên đăng nhập.";
+        const error = new Error(message);
+        error.status = response.status;
+        throw error;
+    }
+
+    const nextToken = payload?.token || payload?.access_token || "";
+    if (!nextToken) return false;
+
+    state.token = nextToken;
+    state.refreshToken = payload.refresh_token || state.refreshToken;
+    if (payload.user) {
+        state.user = payload.user;
+    }
+    saveSession();
+    return true;
+}
+
 export function formatCurrency(value) {
     const rounded = Math.round(Number(value || 0));
     return `${new Intl.NumberFormat("vi-VN", {
@@ -1168,7 +1212,9 @@ export async function apiFetch(path, options = {}) {
             headers
         });
     } catch (_error) {
-        throw new Error(`Không kết nối được backend tại ${state.apiBase}. Hãy kiểm tra server backend đã chạy và API base URL đúng.`);
+        const error = new Error(`Không kết nối được backend tại ${state.apiBase}. Hãy kiểm tra server backend đã chạy và API base URL đúng.`);
+        error.isNetworkError = true;
+        throw error;
     }
 
     const contentType = response.headers.get("content-type") || "";
@@ -1178,7 +1224,9 @@ export async function apiFetch(path, options = {}) {
 
     if (!response.ok) {
         const message = typeof payload === "string" ? payload : payload?.message || "Yêu cầu thất bại.";
-        throw new Error(message);
+        const error = new Error(message);
+        error.status = response.status;
+        throw error;
     }
 
     recordApiActivity(path, options.method || "GET");

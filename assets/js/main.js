@@ -5,6 +5,7 @@
     elements,
     bindImageFallbacks,
     normalizeApiBase,
+    refreshStoredSession,
     restoreSession,
     saveSession,
     showToast,
@@ -1414,6 +1415,35 @@ async function initialize() {
         showToast(hasLoadedData ? "Đã khôi phục phiên đăng nhập." : "Đã khôi phục phiên đăng nhập, nhưng một số dữ liệu chưa tải được.", !hasLoadedData);
         return;
     } catch (error) {
+        if ((error.status === 401 || error.status === 403) && state.refreshToken) {
+            try {
+                const refreshed = await refreshStoredSession();
+                if (refreshed) {
+                    const restoredUser = await apiFetch("/api/users/me");
+                    if (!restoredUser || !["admin", "staff"].includes(restoredUser.role)) {
+                        throw new Error("Phiên đăng nhập không còn quyền truy cập admin.");
+                    }
+
+                    state.user = restoredUser;
+                    saveSession();
+                    updateSessionUi();
+                    selectSidebarItem("overview-home");
+                    const hasLoadedData = await bootstrapAdmin();
+                    showToast(hasLoadedData ? "Đã tự khôi phục phiên đăng nhập." : "Đã tự khôi phục phiên đăng nhập, nhưng một số dữ liệu chưa tải được.", !hasLoadedData);
+                    return;
+                }
+            } catch (refreshError) {
+                console.warn("Khong the lam moi phien admin da luu:", refreshError);
+            }
+        }
+
+        if (error.isNetworkError) {
+            updateSessionUi();
+            selectSidebarItem("overview-home");
+            showToast("Chưa kiểm tra được phiên do backend chưa phản hồi. Tải lại sau vài giây nếu dữ liệu chưa hiện.", true);
+            return;
+        }
+
         console.warn("Khong the xac thuc phien admin da luu:", error);
         logout(false);
         updateSessionUi();
