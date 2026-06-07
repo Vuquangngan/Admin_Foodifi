@@ -101,6 +101,93 @@
   margin-bottom: -6px !important;
 }
 
+#productsPanel .panel-head:has(#publishBranchCard:not(.hidden)) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 16px;
+  margin-bottom: 12px !important;
+}
+
+#productsPanel .panel-head:has(#publishBranchCard:not(.hidden)) .products-panel-actions {
+  justify-content: flex-end;
+}
+
+#productsPanel .publish-branch-card {
+  min-width: 260px;
+  min-height: 118px;
+  padding: 18px 72px 16px 22px;
+  border-radius: 14px;
+}
+
+#productsPanel .publish-branch-card strong {
+  font-size: 1.55rem;
+  letter-spacing: 0;
+}
+
+#productsPanel .publish-branch-card small {
+  font-size: 0.82rem;
+}
+
+#productsPanel .publish-filter-card {
+  padding: 18px 20px !important;
+  border-radius: 14px !important;
+  overflow: hidden;
+}
+
+#productsPanel .publish-filter-form {
+  grid-template-columns: minmax(260px, 1.5fr) repeat(3, minmax(160px, 1fr)) auto !important;
+  gap: 14px !important;
+  align-items: end;
+}
+
+#productsPanel .publish-filter-form label {
+  min-width: 0;
+}
+
+#productsPanel .publish-filter-form label:nth-of-type(n + 5) {
+  grid-row: 2;
+}
+
+#productsPanel .publish-filter-form button[type="submit"] {
+  grid-row: 2;
+  min-width: 150px;
+  min-height: 48px;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+#productsPanel .publish-filter-inline {
+  grid-row: 3;
+  grid-column: 1 / -1;
+}
+
+#productsPanel .publish-filter-panel {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #edf7ea;
+}
+
+#productsPanel .publish-store-copy {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+@media (max-width: 1200px) {
+  #productsPanel .publish-filter-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  #productsPanel .publish-filter-form label:nth-of-type(n + 5),
+  #productsPanel .publish-filter-form button[type="submit"],
+  #productsPanel .publish-filter-inline {
+    grid-row: auto;
+  }
+}
+
 .app-shell:not(.auth-screen) .admin-page-content {
   padding-top: 0;
 }
