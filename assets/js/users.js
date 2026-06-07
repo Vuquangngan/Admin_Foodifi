@@ -254,22 +254,7 @@ function renderFilterForm() {
 }
 
 function buildStaffSummary() {
-    const users = state.users || [];
-    const stats = {
-        total: users.length,
-        admins: users.filter((user) => user.role === "admin").length,
-        staff: users.filter((user) => user.role === "staff").length,
-        blocked: users.filter((user) => user.status === "blocked").length
-    };
-
-    return `
-      <div class="users-summary">
-        <article class="user-stat-card"><span>Tổng tài khoản</span><strong>${formatNumber(stats.total)}</strong></article>
-        <article class="user-stat-card"><span>Quản trị</span><strong>${formatNumber(stats.admins)}</strong></article>
-        <article class="user-stat-card"><span>Nhân viên</span><strong>${formatNumber(stats.staff)}</strong></article>
-        <article class="user-stat-card user-stat-card-danger"><span>Bị khóa</span><strong>${formatNumber(stats.blocked)}</strong></article>
-      </div>
-    `;
+    return "";
 }
 
 function buildStaffRows() {
@@ -946,7 +931,9 @@ export function renderUsers() {
     setActivePageState(Math.min(Math.max(1, getActivePageState() || 1), pageCount));
 
     if (elements.usersMeta) {
-        elements.usersMeta.textContent = `${formatNumber(activeCollection.length)} ${isCustomerWorkspace() ? "khách hàng" : "tài khoản"} phù hợp`;
+        elements.usersMeta.textContent = isCustomerWorkspace()
+            ? `${formatNumber(activeCollection.length)} khách hàng phù hợp`
+            : "";
     }
 
     if (isCustomerWorkspace()) {

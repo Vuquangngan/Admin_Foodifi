@@ -880,6 +880,152 @@
   background: rgba(255, 255, 255, 0.98) !important;
 }
 
+#chatsPanel .chat-workspace {
+  grid-template-columns: minmax(300px, 340px) minmax(0, 1fr) !important;
+  border-radius: 14px !important;
+}
+
+#chatsPanel .chat-sidebar {
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  gap: 12px !important;
+  padding: 18px !important;
+}
+
+#chatsPanel .chat-sidebar-header > div {
+  display: none !important;
+}
+
+#chatsPanel .chat-sidebar-header {
+  justify-content: flex-end !important;
+  min-height: 0 !important;
+}
+
+#chatsPanel .chat-search-bar {
+  min-height: 48px !important;
+  border-radius: 13px !important;
+  padding-inline: 14px !important;
+}
+
+#chatsPanel .chat-filter-tabs {
+  border-radius: 14px !important;
+  padding: 5px !important;
+}
+
+#chatsPanel .chat-filter-tab {
+  min-height: 38px !important;
+  border-radius: 10px !important;
+  font-size: 0.88rem !important;
+}
+
+#chatsPanel .chat-conversation-list {
+  gap: 10px !important;
+}
+
+#chatsPanel .chat-conversation-card {
+  grid-template-columns: 48px minmax(0, 1fr) !important;
+  gap: 12px !important;
+  padding: 13px !important;
+  border-radius: 13px !important;
+}
+
+#chatsPanel .chat-conversation-avatar {
+  width: 48px !important;
+  height: 48px !important;
+}
+
+#chatsPanel .chat-conversation-top strong {
+  font-size: 1.08rem !important;
+}
+
+#chatsPanel .chat-conversation-top span,
+#chatsPanel .chat-conversation-meta,
+#chatsPanel .chat-conversation-preview {
+  font-size: 0.88rem !important;
+}
+
+#chatsPanel .chat-detail-header {
+  padding: 16px 22px !important;
+}
+
+#chatsPanel .chat-detail-avatar {
+  width: 52px !important;
+  height: 52px !important;
+}
+
+#chatsPanel .chat-detail-copy h3 {
+  font-size: 1.55rem !important;
+}
+
+#chatsPanel .chat-detail-copy p {
+  font-size: 0.92rem !important;
+}
+
+#chatsPanel .chat-message-thread {
+  padding: 18px 22px 20px !important;
+}
+
+#chatsPanel .chat-message-bubble {
+  padding: 14px 16px !important;
+  border-radius: 15px !important;
+  font-size: 0.96rem !important;
+}
+
+#chatsPanel .chat-composer-form {
+  gap: 10px !important;
+  padding: 14px 20px 18px !important;
+}
+
+#chatsPanel .chat-quick-reply {
+  min-height: 36px !important;
+  padding-inline: 14px !important;
+  font-size: 0.9rem !important;
+}
+
+#chatsPanel .chat-icon-button {
+  min-width: 42px !important;
+  height: 42px !important;
+  border-radius: 12px !important;
+}
+
+#chatsPanel .chat-composer-input-row textarea {
+  min-height: 50px !important;
+  border-radius: 13px !important;
+  font-size: 0.96rem !important;
+}
+
+#chatsPanel .chat-send-button {
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 13px !important;
+  font-size: 1.12rem !important;
+}
+
+#usersPanel #userFilterForm {
+  grid-template-columns: minmax(260px, 1.2fr) minmax(220px, 1fr) minmax(220px, 1fr) auto !important;
+  align-items: end;
+}
+
+#usersPanel #userFilterForm .primary-button[type="submit"] {
+  width: auto !important;
+  min-width: 120px !important;
+  min-height: 48px !important;
+  padding: 0 22px !important;
+  border-radius: 12px !important;
+  justify-self: end;
+}
+
+#usersPanel .users-summary {
+  display: none !important;
+}
+
+#usersPanel .users-list-card .section-head {
+  align-items: center;
+}
+
+#usersPanel #usersMeta:empty {
+  display: none;
+}
+
 :root {
   --radius-xl: 14px;
   --radius-lg: 10px;
