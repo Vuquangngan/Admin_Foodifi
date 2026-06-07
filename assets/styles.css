@@ -617,3 +617,7 @@
   box-shadow: none !important;
 }
 
+#productsListCard.low-stock-list-wrapper .low-stock-summary-grid {
+  display: none !important;
+}
+
