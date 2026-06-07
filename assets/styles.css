@@ -639,3 +639,121 @@
   background: rgba(255, 255, 255, 0.98) !important;
 }
 
+:root {
+  --radius-xl: 14px;
+  --radius-lg: 10px;
+}
+
+.app-shell:not(.auth-screen) .sidebar,
+.app-shell:not(.auth-screen) .main-panel,
+.modal-card,
+.product-editor-modal,
+.publish-editor-modal,
+.recipe-modal-card,
+.recipe-category-modal-card,
+.supplier-modal-popup,
+.branch-modal-card,
+.user-modal-card,
+.customer-profile-modal-card,
+.shift-modal-card,
+.order-detail-modal,
+.supplier-return-sheet {
+  border-radius: 14px !important;
+}
+
+.surface,
+.filter-card,
+.panel-card,
+.metric-card,
+.stat-card,
+.voucher-stat-card,
+.stack-card,
+.overview-table-card,
+.orders-table-card,
+.warehouse-table-card,
+.publish-table-card,
+.low-stock-table-card,
+.recipes-table-card,
+.activity-table-card,
+.categories-table-card,
+.users-toolbar-card,
+.users-list-card,
+.branch-table-card,
+.voucher-form-dialog,
+.product-excel-import-card,
+.product-intake-section,
+.product-intake-side,
+.category-modal-surface,
+.supplier-form-section,
+.branch-form-section,
+.recipe-form-card,
+.recipe-upload-card,
+.recipe-repeat-card,
+.voucher-builder-section,
+.voucher-preview-card,
+.voucher-note-card,
+.product-editor-preview,
+.product-editor-fields,
+.publish-editor-surface,
+.settings-card,
+.profile-panel,
+.low-stock-summary-card,
+.low-stock-filter-panel,
+.low-stock-table-card,
+.shift-board-table-wrap,
+.table-wrap,
+.orders-table-scroll,
+.warehouse-table-scroll,
+.publish-table-scroll,
+.recipes-table-scroll,
+.activity-table-wrap,
+.users-table-wrap,
+.categories-table-wrap,
+.branch-table-wrap,
+.voucher-table-wrap {
+  border-radius: 11px !important;
+}
+
+input,
+select,
+textarea,
+.input-shell,
+.upload-dropzone,
+.recipe-upload-zone,
+.recipe-category-upload,
+.supplier-logo-dropzone,
+.category-upload-dropzone,
+.branch-upload-box,
+.product-import-preview,
+.product-editor-preview-image,
+.low-stock-table-scroll {
+  border-radius: 8px !important;
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button,
+.chip-button,
+.action-button,
+.danger-button,
+.low-stock-filter-button,
+.low-stock-actions .primary-button,
+.low-stock-actions .chip-button,
+.session-logout,
+.nav-link,
+.nav-section-trigger,
+.nav-sublink {
+  border-radius: 8px !important;
+}
+
+.status-pill,
+.badge,
+.pill,
+.low-stock-category,
+.low-stock-status,
+.shift-tone-pill,
+.shift-status-pill,
+.session-badge {
+  border-radius: 999px !important;
+}
+
