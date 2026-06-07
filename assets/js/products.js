@@ -303,6 +303,18 @@ function buildPublishFilterChips() {
     `;
 }
 
+function buildPublishBranchSummary() {
+    const activeStore = getStoreBranch();
+    return `
+      <article class="publish-filter-branch-card">
+        <span>Chi nhánh</span>
+        <strong>${escapeHtml(activeStore.label || activeStore.name || "-")}</strong>
+        <small>Tổng số chi nhánh: ${formatNumber(STORE_BRANCHES.length)}</small>
+        <i></i>
+      </article>
+    `;
+}
+
 function buildProductActionButtons(product) {
     return `
       <div class="action-row">
@@ -965,6 +977,7 @@ function renderProductFilterForm(isPublishWorkspace) {
       </label>
       ` : ""}
       <button class="primary-button" type="submit">Áp dụng</button>
+      ${isPublishWorkspace ? buildPublishBranchSummary() : ""}
       ${isPublishWorkspace ? `<div class="publish-filter-inline">${buildPublishFilterChips()}</div>` : ""}
     `;
 }

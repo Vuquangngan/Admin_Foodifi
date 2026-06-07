@@ -103,14 +103,14 @@
 
 #productsPanel .panel-head:has(#publishBranchCard:not(.hidden)) {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   gap: 16px;
-  margin-bottom: 12px !important;
+  margin-bottom: 6px !important;
 }
 
 #productsPanel .panel-head:has(#publishBranchCard:not(.hidden)) .products-panel-actions {
-  justify-content: flex-end;
+  display: none !important;
 }
 
 #productsPanel .publish-branch-card {
@@ -130,14 +130,16 @@
 }
 
 #productsPanel .publish-filter-card {
-  padding: 18px 20px !important;
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  padding: 22px 24px !important;
   border-radius: 14px !important;
   overflow: hidden;
 }
 
 #productsPanel .publish-filter-form {
-  grid-template-columns: minmax(260px, 1.5fr) repeat(3, minmax(160px, 1fr)) auto !important;
-  gap: 14px !important;
+  grid-template-columns: minmax(280px, 1.45fr) repeat(3, minmax(170px, 1fr)) minmax(280px, 0.95fr) !important;
+  gap: 16px !important;
   align-items: end;
 }
 
@@ -149,17 +151,86 @@
   grid-row: 2;
 }
 
+#productsPanel .publish-filter-form label:nth-of-type(5) {
+  grid-column: 1;
+}
+
+#productsPanel .publish-filter-form label:nth-of-type(6) {
+  grid-column: 2;
+}
+
+#productsPanel .publish-filter-form label:nth-of-type(7) {
+  grid-column: 3;
+}
+
 #productsPanel .publish-filter-form button[type="submit"] {
   grid-row: 2;
+  grid-column: 4;
   min-width: 150px;
   min-height: 48px;
   border-radius: 12px;
   box-shadow: none;
 }
 
+#productsPanel .publish-filter-branch-card {
+  position: relative;
+  grid-column: 5;
+  grid-row: 1 / span 3;
+  align-self: stretch;
+  min-height: 100%;
+  padding: 22px 82px 20px 24px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0d8d4c 0%, #24bd69 100%);
+  color: #fff;
+  box-shadow: 0 18px 34px rgba(9, 122, 64, 0.2);
+}
+
+#productsPanel .publish-filter-branch-card span {
+  display: block;
+  position: relative;
+  z-index: 1;
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+#productsPanel .publish-filter-branch-card strong {
+  display: block;
+  position: relative;
+  z-index: 1;
+  margin-top: 10px;
+  font-size: 1.75rem;
+  line-height: 1.12;
+}
+
+#productsPanel .publish-filter-branch-card small {
+  display: inline-flex;
+  position: relative;
+  z-index: 1;
+  margin-top: 14px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.18);
+  font-weight: 800;
+}
+
+#productsPanel .publish-filter-branch-card i {
+  position: absolute;
+  right: -10px;
+  bottom: -18px;
+  width: 104px;
+  height: 86px;
+  border-radius: 100% 0 14px 0;
+  background:
+    radial-gradient(circle at 68% 30%, rgba(255, 255, 255, 0.18) 0 36%, transparent 37%),
+    linear-gradient(135deg, rgba(134, 226, 139, 0.52), rgba(90, 197, 103, 0.88));
+}
+
 #productsPanel .publish-filter-inline {
   grid-row: 3;
-  grid-column: 1 / -1;
+  grid-column: 1 / 5;
 }
 
 #productsPanel .publish-filter-panel {
@@ -183,8 +254,14 @@
 
   #productsPanel .publish-filter-form label:nth-of-type(n + 5),
   #productsPanel .publish-filter-form button[type="submit"],
-  #productsPanel .publish-filter-inline {
+  #productsPanel .publish-filter-inline,
+  #productsPanel .publish-filter-branch-card {
+    grid-column: auto;
     grid-row: auto;
+  }
+
+  #productsPanel .publish-filter-branch-card {
+    grid-column: 1 / -1;
   }
 }
 
