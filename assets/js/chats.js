@@ -482,7 +482,6 @@ export function renderChats() {
               <p class="eyebrow">Support</p>
               <h2>Chat khách hàng</h2>
             </div>
-            <button class="secondary-button" type="button" data-chat-action="refresh-conversations">Làm mới</button>
           </div>
 
           <label class="chat-search-bar">
@@ -1124,7 +1123,6 @@ renderChats = function renderChatsPatched() {
               <p class="eyebrow">Support</p>
               <h2>Chat khách hàng</h2>
             </div>
-            <button class="secondary-button" type="button" data-chat-action="refresh-conversations">Làm mới</button>
           </div>
 
           <label class="chat-search-bar">
@@ -1840,28 +1838,7 @@ function renderAiSupportWorkspace() {
 
     elements.chatsContent.innerHTML = `
       <section class="ai-support-workspace">
-        <header class="ai-support-hero">
-          <div>
-            <p class="eyebrow">Tin nhắn / Hỏi đáp AI</p>
-            <h2>Hỏi đáp AI nội bộ</h2>
-          </div>
-          <button class="secondary-button" type="button" data-chat-action="ai-clear">Xóa hội thoại</button>
-        </header>
-
         <div class="ai-support-layout">
-          <aside class="ai-support-guide">
-            <h3>Gợi ý câu hỏi</h3>
-            <div class="ai-support-suggestions">
-              ${AI_SUPPORT_SUGGESTIONS.map((prompt) => `
-                <button type="button" data-chat-action="ai-suggest" data-prompt="${escapeHtml(prompt)}">${escapeHtml(prompt)}</button>
-              `).join("")}
-            </div>
-            <div class="ai-support-note">
-              <strong>Lưu ý</strong>
-              <span>AI chỉ hỗ trợ soạn câu trả lời. Với thông tin nhạy cảm, admin vẫn cần kiểm tra lại trước khi gửi khách.</span>
-            </div>
-          </aside>
-
           <section class="ai-support-chat">
             <div class="ai-support-thread" id="aiSupportThread">
               ${state.aiSupportMessages.map((message) => buildAiSupportMessage(message)).join("")}

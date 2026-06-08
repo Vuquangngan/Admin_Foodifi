@@ -230,6 +230,17 @@
   font-size: 1.3rem;
 }
 
+#orderCreateCard {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+#orderCreateCard > .section-head {
+  display: none;
+}
+
 #orderCreateCard .order-create-layout {
   gap: 14px;
 }

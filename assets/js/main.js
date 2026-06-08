@@ -868,7 +868,8 @@ function bindGlobalEvents() {
             state.filters.customers = {
                 ...state.filters.customers,
                 keyword: String(elements.userFilterForm.elements.keyword?.value || "").trim(),
-                status: String(elements.userFilterForm.elements.status?.value || "").trim()
+                status: String(elements.userFilterForm.elements.status?.value || "").trim(),
+                tier: String(elements.userFilterForm.elements.tier?.value || "").trim()
             };
             await withLoading(event.submitter, loadCustomers);
             return;
@@ -912,17 +913,6 @@ function bindGlobalEvents() {
             const shiftButton = event.target.closest("[data-shift-action]");
             if (!shiftButton) return;
             await withLoading(shiftButton, () => handleStaffShiftAction(shiftButton.dataset.shiftAction, shiftButton));
-            return;
-        }
-
-        const customerTierButton = event.target.closest("[data-customer-tier]");
-        if (customerTierButton) {
-            state.customerAdminPage = 1;
-            state.filters.customers = {
-                ...state.filters.customers,
-                tier: customerTierButton.dataset.customerTier || ""
-            };
-            await loadCustomers();
             return;
         }
 

@@ -480,6 +480,35 @@
     justify-self: end;
   }
 
+  .chat-filter-tabs {
+    align-items: center !important;
+    align-self: start !important;
+    min-height: 58px !important;
+    height: auto !important;
+  }
+
+  .chat-filter-tab {
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+    padding: 0 14px !important;
+  }
+
+  .ai-support-workspace {
+    grid-template-rows: minmax(0, 1fr) !important;
+    gap: 0 !important;
+    padding: 12px !important;
+  }
+
+  .ai-support-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 0 !important;
+  }
+
+  .ai-support-message {
+    max-width: min(960px, 92%) !important;
+  }
+
   .app-shell:not(.auth-screen) .panel > .filter-card:first-child,
   .app-shell:not(.auth-screen) .panel > .inventory-filter-card:first-child,
   .app-shell:not(.auth-screen) .panel > .categories-filter-card:first-child,

@@ -173,7 +173,10 @@ function setPanelHeadings() {
 
     if (isShiftWorkspace()) {
         elements.usersPanelTitle.textContent = "Qu\u1ea3n l\u00fd ca l\u00e0m vi\u1ec7c";
-        if (elements.usersListTitle) elements.usersListTitle.textContent = "L\u1ecbch ca l\u00e0m vi\u1ec7c";
+        if (elements.usersListTitle) {
+            elements.usersListTitle.textContent = "L\u1ecbch ca l\u00e0m vi\u1ec7c";
+            elements.usersListTitle.classList.remove("hidden");
+        }
         elements.openUserFormButton.classList.add("hidden");
         return;
     }
@@ -182,13 +185,19 @@ function setPanelHeadings() {
 
     if (isCustomerWorkspace()) {
         elements.usersPanelTitle.textContent = "Quản lý khách hàng";
-        if (elements.usersListTitle) elements.usersListTitle.textContent = "Danh sách khách hàng";
+        if (elements.usersListTitle) {
+            elements.usersListTitle.textContent = "";
+            elements.usersListTitle.classList.add("hidden");
+        }
         elements.openUserFormButton.textContent = "Thêm khách hàng";
         return;
     }
 
     elements.usersPanelTitle.textContent = "Quản lý admin và nhân viên";
-    if (elements.usersListTitle) elements.usersListTitle.textContent = "Danh sách tài khoản nội bộ";
+    if (elements.usersListTitle) {
+        elements.usersListTitle.textContent = "Danh sách tài khoản nội bộ";
+        elements.usersListTitle.classList.remove("hidden");
+    }
     elements.openUserFormButton.textContent = "Tạo tài khoản mới";
 }
 
@@ -205,6 +214,7 @@ function renderFilterForm() {
     if (isCustomerWorkspace()) {
         const currentKeyword = escapeHtml(state.filters.customers.keyword || "");
         const currentStatus = String(state.filters.customers.status || "");
+        const currentTier = String(state.filters.customers.tier || "");
         elements.userFilterForm.innerHTML = `
           <label class="span-2">
             <span>Tìm kiếm khách hàng</span>
@@ -217,6 +227,12 @@ function renderFilterForm() {
               <option value="active" ${currentStatus === "active" ? "selected" : ""}>Đang hoạt động</option>
               <option value="inactive" ${currentStatus === "inactive" ? "selected" : ""}>Tạm ngưng</option>
               <option value="blocked" ${currentStatus === "blocked" ? "selected" : ""}>Bị khóa</option>
+            </select>
+          </label>
+          <label class="customer-tier-select-field">
+            <span>Hạng thành viên</span>
+            <select name="tier">
+              ${CUSTOMER_TIERS.map((tier) => `<option value="${escapeHtml(tier.key)}" ${currentTier === tier.key ? "selected" : ""}>${escapeHtml(tier.label)}</option>`).join("")}
             </select>
           </label>
           <button class="primary-button" type="submit">Áp dụng</button>
@@ -330,22 +346,6 @@ function buildStaffRows() {
             }).join("")}
           </tbody>
         </table>
-      </div>
-    `;
-}
-
-function buildCustomerTierFilters() {
-    const activeTier = String(state.filters.customers.tier || "");
-    return `
-      <div class="customer-tier-row">
-        <span>Hạng thành viên:</span>
-        <div class="customer-tier-chips">
-          ${CUSTOMER_TIERS.map((tier) => `
-            <button class="customer-tier-chip ${activeTier === tier.key ? "active" : ""}" type="button" data-customer-tier="${tier.key}">
-              ${escapeHtml(tier.label)}
-            </button>
-          `).join("")}
-        </div>
       </div>
     `;
 }
@@ -544,7 +544,7 @@ function renderCustomerProfileModal() {
     `;
 }
 
-function buildPagination() {
+function buildPagination({ showSummary = true } = {}) {
     const total = getActiveCollection().length;
     const pageCount = getUsersPageCount(total);
     const currentPage = getActivePageState() || 1;
@@ -553,7 +553,7 @@ function buildPagination() {
 
     return `
       <div class="users-footer">
-        <span>Hiển thị ${formatNumber(start)}-${formatNumber(end)} trên ${formatNumber(total)} tài khoản</span>
+        ${showSummary ? `<span>Hiển thị ${formatNumber(start)}-${formatNumber(end)} trên ${formatNumber(total)} tài khoản</span>` : "<span></span>"}
         <div class="users-pagination">
           <button class="pagination-dot-button" type="button" data-user-action="page" data-page="${currentPage - 1}" ${currentPage <= 1 ? "disabled" : ""}>&lsaquo;</button>
           ${Array.from({ length: pageCount }, (_, index) => index + 1).map((page) => `
@@ -937,7 +937,6 @@ export function renderUsers() {
 
     if (isCustomerWorkspace()) {
         elements.usersContent.innerHTML = `
-          ${buildCustomerTierFilters()}
           <div class="surface users-table-card customer-users-card">
             ${buildCustomerRows()}
             ${buildPagination()}
@@ -950,7 +949,7 @@ export function renderUsers() {
       ${buildStaffSummary()}
       <div class="surface users-table-card">
         ${buildStaffRows()}
-        ${buildPagination()}
+        ${buildPagination({ showSummary: false })}
       </div>
     `;
 }
