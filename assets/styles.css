@@ -137,6 +137,52 @@
   overflow: hidden;
 }
 
+#productsPanel .inventory-filter-card {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box;
+  overflow: visible !important;
+}
+
+#productsPanel .inventory-filter-form {
+  display: grid !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  grid-template-columns:
+    minmax(220px, 1.35fr)
+    minmax(150px, 0.72fr)
+    minmax(150px, 0.72fr)
+    minmax(150px, 0.72fr)
+    minmax(160px, 0.8fr)
+    minmax(120px, auto) !important;
+  gap: 12px !important;
+  align-items: end !important;
+}
+
+#productsPanel .inventory-filter-form label {
+  min-width: 0 !important;
+}
+
+#productsPanel .inventory-filter-form input,
+#productsPanel .inventory-filter-form select {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+#productsPanel .inventory-filter-form button[type="submit"] {
+  width: auto !important;
+  min-width: 112px !important;
+  min-height: 42px !important;
+  padding-inline: 22px !important;
+  justify-self: start !important;
+}
+
+#productsPanel .low-stock-filter-button {
+  color: #ffffff !important;
+}
+
 #productsPanel .publish-filter-form {
   grid-template-columns: minmax(280px, 1.45fr) repeat(3, minmax(170px, 1fr)) minmax(280px, 0.95fr) !important;
   gap: 16px !important;
@@ -248,6 +294,14 @@
 }
 
 @media (max-width: 1200px) {
+  #productsPanel .inventory-filter-form {
+    grid-template-columns: repeat(3, minmax(180px, 1fr)) !important;
+  }
+
+  #productsPanel .inventory-filter-form button[type="submit"] {
+    width: 100% !important;
+  }
+
   #productsPanel .publish-filter-form {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
@@ -262,6 +316,12 @@
 
   #productsPanel .publish-filter-branch-card {
     grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  #productsPanel .inventory-filter-form {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -1024,6 +1084,56 @@
 
 #usersPanel #usersMeta:empty {
   display: none;
+}
+
+#usersPanel .customer-users-table {
+  width: 100% !important;
+  min-width: 980px;
+  table-layout: fixed;
+}
+
+#usersPanel .customer-users-table th:nth-child(1),
+#usersPanel .customer-users-table td:nth-child(1) {
+  width: 24%;
+}
+
+#usersPanel .customer-users-table th:nth-child(2),
+#usersPanel .customer-users-table td:nth-child(2) {
+  width: 15%;
+}
+
+#usersPanel .customer-users-table th:nth-child(3),
+#usersPanel .customer-users-table td:nth-child(3) {
+  width: 10%;
+}
+
+#usersPanel .customer-users-table th:nth-child(4),
+#usersPanel .customer-users-table td:nth-child(4) {
+  width: 8%;
+}
+
+#usersPanel .customer-users-table th:nth-child(5),
+#usersPanel .customer-users-table td:nth-child(5) {
+  width: 13%;
+}
+
+#usersPanel .customer-users-table th:nth-child(6),
+#usersPanel .customer-users-table td:nth-child(6) {
+  width: 30%;
+}
+
+#usersPanel .customer-users-table .users-actions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(64px, 1fr));
+  gap: 8px;
+  min-width: 0;
+  justify-content: stretch;
+}
+
+#usersPanel .customer-users-table .users-actions .chip-button {
+  width: 100%;
+  min-width: 0;
+  padding-inline: 10px !important;
 }
 
 :root {

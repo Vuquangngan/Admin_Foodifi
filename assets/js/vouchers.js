@@ -514,24 +514,51 @@ function savePromotionRulesToStorage() {
     localStorage.setItem(STORAGE_KEYS.promotionRules, JSON.stringify(state.promotionRules || []));
 }
 
+function getStoredPromotionRules() {
+    try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEYS.promotionRules) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (_error) {
+        return [];
+    }
+}
+
+function mergePromotionRules(remoteRules = [], localRules = []) {
+    const merged = new Map();
+    [...localRules, ...remoteRules].forEach((rule) => {
+        if (!rule) return;
+        const id = rule.id ?? `${rule.name || "promotion"}-${rule.created_at || ""}`;
+        merged.set(String(id), rule);
+    });
+    return Array.from(merged.values()).sort((a, b) => {
+        const aTime = new Date(a.updated_at || a.created_at || 0).getTime();
+        const bTime = new Date(b.updated_at || b.created_at || 0).getTime();
+        return bTime - aTime;
+    });
+}
+
 async function loadPromotionRulesFromApi({ force = false } = {}) {
     if (promotionRulesLoading) return promotionRulesLoading;
     if (promotionRulesLoaded && !force) return state.promotionRules || [];
 
     promotionRulesLoading = apiFetch("/api/promotions")
         .then((payload) => {
-            state.promotionRules = Array.isArray(payload?.campaigns)
+            const remoteRules = Array.isArray(payload?.campaigns)
                 ? payload.campaigns
                 : Array.isArray(payload)
                     ? payload
                     : [];
+            const localRules = getStoredPromotionRules();
+            state.promotionRules = mergePromotionRules(remoteRules, localRules);
             promotionRulesLoaded = true;
             savePromotionRulesToStorage();
             return state.promotionRules;
         })
         .catch((error) => {
             loadPromotionRulesFromStorage();
-            showToast(error.message || "Không tải được chiến dịch khuyến mãi từ DB.", true);
+            if (!(error.status === 404 && (state.promotionRules || []).length)) {
+                showToast(error.message || "Không tải được chiến dịch khuyến mãi từ DB.", true);
+            }
             return state.promotionRules || [];
         })
         .finally(() => {
@@ -823,15 +850,39 @@ export async function submitPromotionForm(raw) {
     const payload = buildPromotionPayload(raw);
     if (!payload.name) throw new Error("Vui lòng nhập tên chiến dịch khuyến mãi.");
 
-    await apiFetch("/api/promotions", {
-        method: "POST",
-        body: JSON.stringify(payload)
-    });
-    await loadPromotionRulesFromApi({ force: true });
+    let savedLocally = false;
+    try {
+        await apiFetch("/api/promotions", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        await loadPromotionRulesFromApi({ force: true });
+    } catch (error) {
+        const canSaveLocally = error.status === 404 || error.isNetworkError;
+        if (!canSaveLocally) {
+            throw error;
+        }
+
+        const fallbackRule = {
+            ...payload,
+            id: Date.now(),
+            status: payload.is_active ? "active" : "paused",
+            apply_product_ids: Array.isArray(payload.apply_product_ids) ? payload.apply_product_ids : ["all"],
+            created_at: payload.created_at || new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            saved_locally: true
+        };
+        state.promotionRules = [fallbackRule, ...(state.promotionRules || [])];
+        savePromotionRulesToStorage();
+        showToast("Đã lưu chiến dịch khuyến mãi trên máy. Khi backend có route, dữ liệu sẽ đồng bộ sau.");
+        savedLocally = true;
+    }
     renderPromotionRules();
     syncPromotionPreview();
     closePromotionForm();
-    showToast("Đã lưu chiến dịch khuyến mãi.");
+    if (!savedLocally) {
+        showToast("Đã lưu chiến dịch khuyến mãi.");
+    }
 }
 
 export async function handlePromotionAction(action, target = null) {
@@ -904,6 +955,14 @@ export async function handlePromotionAction(action, target = null) {
     if (action === "delete-rule") {
         const id = Number(target?.dataset.id || 0);
         if (!window.confirm("Bạn chắc chắn muốn xóa chiến dịch khuyến mãi này?")) return;
+        const rule = (state.promotionRules || []).find((item) => Number(item.id) === id);
+        if (rule?.saved_locally) {
+            state.promotionRules = (state.promotionRules || []).filter((item) => Number(item.id) !== id);
+            savePromotionRulesToStorage();
+            renderPromotionRules();
+            showToast("Đã xóa chiến dịch khuyến mãi.");
+            return;
+        }
         try {
             await apiFetch(`/api/promotions/${id}`, { method: "DELETE" });
             await loadPromotionRulesFromApi({ force: true });
@@ -918,6 +977,15 @@ export async function handlePromotionAction(action, target = null) {
         const id = Number(target?.dataset.id || 0);
         const rule = (state.promotionRules || []).find((item) => Number(item.id) === id);
         if (!rule) return;
+        if (rule.saved_locally) {
+            rule.is_active = !rule.is_active;
+            rule.status = rule.is_active ? "active" : "paused";
+            rule.updated_at = new Date().toISOString();
+            savePromotionRulesToStorage();
+            renderPromotionRules();
+            showToast("Đã cập nhật trạng thái chiến dịch.");
+            return;
+        }
         try {
             await apiFetch(`/api/promotions/${id}`, {
                 method: "PUT",

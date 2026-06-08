@@ -1221,3 +1221,95 @@
   font-size: 0.9rem;
 }
 
+.branches-filter-card {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(280px, 1.2fr) minmax(190px, 0.7fr) minmax(118px, auto);
+  align-items: end;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.96);
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ffffff 0%, #ffffff 76%, #fbfef9 100%);
+  box-shadow:
+    0 16px 34px rgba(45, 79, 48, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.98);
+}
+
+.branch-filter-title {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #183828;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.branch-filter-title .app-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.branches-filter-card label {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  color: #213a2d;
+  font-weight: 900;
+}
+
+.branches-filter-card label span {
+  font-size: 0.9rem;
+}
+
+.branches-filter-card input,
+.branches-filter-card select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(88, 67, 48, 0.16);
+  border-radius: 14px;
+  background: #fffdf9;
+  color: #21382b;
+  font: inherit;
+  font-weight: 800;
+  outline: none;
+  padding: 0 14px;
+}
+
+.branches-filter-card input:focus,
+.branches-filter-card select:focus {
+  border-color: rgba(20, 151, 84, 0.48);
+  box-shadow: 0 0 0 4px rgba(36, 195, 113, 0.12);
+}
+
+.branch-filter-submit {
+  min-width: 118px;
+  min-height: 44px;
+  justify-self: start;
+  padding-inline: 24px;
+  color: #fff !important;
+}
+
+@media (max-width: 1180px) {
+  .branches-filter-card {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .branch-filter-title,
+  .branch-filter-submit {
+    grid-column: 1 / -1;
+  }
+
+  .branch-filter-submit {
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .branches-filter-card {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+}
+

@@ -2,7 +2,37 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
-  margin: 18px 0;
+  margin: 8px 0;
+}
+
+.suppliers-summary:empty {
+  display: none;
+  margin: 0;
+}
+
+.panel#suppliersPanel {
+  gap: 12px;
+}
+
+#suppliersPanel .panel-head {
+  margin-bottom: 4px;
+}
+
+#supplierFilterCard {
+  padding: 16px 18px;
+  margin-bottom: 8px;
+}
+
+#supplierFilterCard .section-head {
+  margin-bottom: 12px;
+}
+
+#supplierFilterForm {
+  gap: 10px 14px;
+}
+
+#supplierFilterForm .primary-button[type="submit"] {
+  min-height: 42px;
 }
 
 .supplier-stat-card {

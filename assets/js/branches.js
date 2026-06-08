@@ -539,18 +539,23 @@ function renderBranchListWorkspace() {
     elements.branchesMeta.textContent = `${visibleBranches.length} / ${STORE_BRANCHES.length} chi nhánh`;
     elements.branchesContent.innerHTML = `
       <section class="branches-shell">
-        <div class="branches-search-bar">
-          <span>${renderAppIcon("search")}</span>
-          <input id="branchSearchInput" value="${escapeHtml(state.branchSearch || "")}" placeholder="Tìm kiếm chi nhánh...">
-        </div>
-        <div class="branches-toolbar">
-          <button class="branch-filter-toggle" type="button">${renderAppIcon("grid")} <span>Bộ lọc</span></button>
-          <span class="branch-filter-label">Trạng thái:</span>
-          <button class="branch-filter-pill ${state.branchStatusFilter === "all" ? "active" : ""}" type="button" data-branch-status="all">Tất cả</button>
-          <button class="branch-filter-pill ${state.branchStatusFilter === "active" ? "active" : ""}" type="button" data-branch-status="active">Đang hoạt động</button>
-          <button class="branch-filter-pill ${state.branchStatusFilter === "paused" ? "active" : ""}" type="button" data-branch-status="paused">Tạm ngưng</button>
-          <button class="branch-filter-pill ${state.branchStatusFilter === "closed" ? "active" : ""}" type="button" data-branch-status="closed">Đã đóng</button>
-        </div>
+        <form class="branches-filter-card" data-branch-filter-form>
+          <div class="branch-filter-title">${renderAppIcon("grid")} <strong>Bộ lọc</strong></div>
+          <label>
+            <span>Tìm kiếm</span>
+            <input id="branchSearchInput" name="keyword" value="${escapeHtml(state.branchSearch || "")}" placeholder="Tìm kiếm chi nhánh...">
+          </label>
+          <label>
+            <span>Trạng thái</span>
+            <select name="status">
+              <option value="all" ${state.branchStatusFilter === "all" ? "selected" : ""}>Tất cả</option>
+              <option value="active" ${state.branchStatusFilter === "active" ? "selected" : ""}>Đang hoạt động</option>
+              <option value="paused" ${state.branchStatusFilter === "paused" ? "selected" : ""}>Tạm ngưng</option>
+              <option value="closed" ${state.branchStatusFilter === "closed" ? "selected" : ""}>Đã đóng</option>
+            </select>
+          </label>
+          <button class="primary-button branch-filter-submit" type="submit">Áp dụng</button>
+        </form>
 
         <article class="surface branch-table-card">
           <div class="branch-table-wrap">

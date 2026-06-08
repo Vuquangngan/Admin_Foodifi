@@ -930,17 +930,13 @@ export function renderUsers() {
     setActivePageState(Math.min(Math.max(1, getActivePageState() || 1), pageCount));
 
     if (elements.usersMeta) {
-        elements.usersMeta.textContent = isCustomerWorkspace()
-            ? `${formatNumber(activeCollection.length)} khách hàng phù hợp`
-            : "";
+        elements.usersMeta.textContent = "";
     }
 
     if (isCustomerWorkspace()) {
         elements.usersContent.innerHTML = `
-          <div class="surface users-table-card customer-users-card">
-            ${buildCustomerRows()}
-            ${buildPagination()}
-          </div>
+          ${buildCustomerRows()}
+          ${buildPagination()}
         `;
         return;
     }

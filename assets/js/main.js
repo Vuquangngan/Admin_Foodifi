@@ -841,18 +841,19 @@ function bindGlobalEvents() {
         if (!button) return;
         handleBranchAction(button.dataset.branchAction, button.dataset.branchKey);
     });
+    elements.branchesContent?.addEventListener("submit", (event) => {
+        const form = event.target.closest("[data-branch-filter-form]");
+        if (!form) return;
+        event.preventDefault();
+        const formData = new FormData(form);
+        state.branchSearch = String(formData.get("keyword") || "").trim();
+        state.branchStatusFilter = String(formData.get("status") || "all") || "all";
+        renderBranches();
+    });
     elements.branchesContent?.addEventListener("input", (event) => {
         if (handleBranchImportInput(event)) return;
 
-        if (event.target.id !== "branchSearchInput") return;
-        state.branchSearch = event.target.value || "";
-        const cursorPosition = event.target.selectionStart || state.branchSearch.length;
-        renderBranches();
-        const nextInput = elements.branchesContent.querySelector("#branchSearchInput");
-        if (nextInput) {
-            nextInput.focus();
-            nextInput.setSelectionRange(cursorPosition, cursorPosition);
-        }
+        if (event.target.id === "branchSearchInput") return;
     });
     elements.branchesContent?.addEventListener("change", (event) => {
         handleBranchImportInput(event);
