@@ -447,6 +447,8 @@ export const state = {
     branchShipmentBranchFilter: "all",
     branchShipmentKeyword: "",
     branchShipmentDetailId: "",
+    branchShipmentCreateOpen: false,
+    branchShipmentDraft: null,
     voucherWorkspace: "list",
     userAdminPage: 1,
     customerAdminPage: 1,

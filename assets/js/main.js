@@ -106,6 +106,7 @@ import {
     handleBranchAction,
     openBranchModal,
     renderBranches,
+    submitBranchShipmentCreateForm,
     submitBranchForm
 } from "./branches.js";
 import {
@@ -841,7 +842,9 @@ function bindGlobalEvents() {
         if (!button) return;
         handleBranchAction(button.dataset.branchAction, button.dataset.branchKey);
     });
-    elements.branchesContent?.addEventListener("submit", (event) => {
+    elements.branchesContent?.addEventListener("submit", async (event) => {
+        if (await submitBranchShipmentCreateForm(event)) return;
+
         const form = event.target.closest("[data-branch-filter-form]");
         if (!form) return;
         event.preventDefault();

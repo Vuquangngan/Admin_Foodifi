@@ -309,10 +309,184 @@ function getBranchRequestStatusMeta(status) {
     const value = String(status || "pending");
     if (value === "draft") return { label: "Nháp", tone: "neutral" };
     if (value === "approved") return { label: "Đã duyệt", tone: "active" };
-    if (value === "receiving") return { label: "Đang nhập hàng", tone: "shipping" };
+    if (value === "receiving") return { label: "Đang gửi hàng", tone: "shipping" };
     if (value === "completed") return { label: "Hoàn tất", tone: "completed" };
     if (value === "rejected") return { label: "Từ chối", tone: "cancelled" };
     return { label: "Chờ duyệt", tone: "warning" };
+}
+
+function defaultBranchShipmentDate() {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    return date.toISOString().slice(0, 10);
+}
+
+function ensureBranchShipmentDraft() {
+    if (!state.branchShipmentDraft) {
+        state.branchShipmentDraft = {
+            warehouse: "Kho tổng",
+            branch_key: state.branchShipmentBranchFilter && state.branchShipmentBranchFilter !== "all"
+                ? state.branchShipmentBranchFilter
+                : STORE_BRANCHES[0]?.key || "",
+            expected_date: defaultBranchShipmentDate(),
+            priority: "normal",
+            note: "",
+            items: []
+        };
+    }
+    return state.branchShipmentDraft;
+}
+
+function getShipmentProductOptions(selectedId = "") {
+    return (state.products || [])
+        .map((product) => `<option value="${escapeHtml(String(product.id))}" ${String(product.id) === String(selectedId) ? "selected" : ""}>${escapeHtml(product.name || "Sản phẩm")} - ${escapeHtml(product.sku || "SKU")}</option>`)
+        .join("");
+}
+
+function buildShipmentDraftItem(productId) {
+    const product = (state.products || []).find((item) => String(item.id) === String(productId));
+    if (!product) return null;
+    return {
+        product_id: product.id,
+        name: product.name || "Sản phẩm",
+        sku: product.sku || "",
+        thumbnail_url: product.thumbnail_url || "",
+        unit: getProductUnit(product),
+        quantity: 1
+    };
+}
+
+function addShipmentDraftProduct(productId = "") {
+    const draft = ensureBranchShipmentDraft();
+    const selectedId = productId || (state.products || [])
+        .find((product) => !draft.items.some((item) => String(item.product_id) === String(product.id)))?.id;
+    const nextItem = buildShipmentDraftItem(selectedId);
+    if (!nextItem) return;
+    draft.items = [...draft.items, nextItem];
+}
+
+function updateShipmentDraftProduct(index, productId) {
+    const draft = ensureBranchShipmentDraft();
+    const nextItem = buildShipmentDraftItem(productId);
+    if (!nextItem) return;
+    nextItem.quantity = Math.max(1, Number(draft.items[index]?.quantity || 1));
+    draft.items = draft.items.map((item, itemIndex) => itemIndex === index ? nextItem : item);
+}
+
+function updateShipmentDraftQuantity(index, quantity) {
+    const draft = ensureBranchShipmentDraft();
+    draft.items = draft.items.map((item, itemIndex) => (
+        itemIndex === index ? { ...item, quantity: Math.max(1, Number(quantity || 1)) } : item
+    ));
+}
+
+function removeShipmentDraftProduct(index) {
+    const draft = ensureBranchShipmentDraft();
+    draft.items = draft.items.filter((_, itemIndex) => itemIndex !== index);
+}
+
+function getShipmentDraftTotal() {
+    const draft = ensureBranchShipmentDraft();
+    return draft.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+}
+
+function renderBranchShipmentCreateModal() {
+    if (!state.branchShipmentCreateOpen) return "";
+    const draft = ensureBranchShipmentDraft();
+    if (!draft.items.length && (state.products || []).length) {
+        addShipmentDraftProduct();
+    }
+
+    return `
+      <div class="modal-backdrop branch-shipment-create-backdrop" data-branch-shipment-draft-action="close">
+        <form class="modal-card branch-shipment-create-modal" data-branch-shipment-create-form onclick="event.stopPropagation()">
+          <header class="branch-shipment-create-head">
+            <div>
+              <span>Tạo đơn gửi hàng</span>
+              <h3>Chi nhánh & Kho vận</h3>
+            </div>
+            <button type="button" class="branch-shipment-create-close" data-branch-shipment-draft-action="close" aria-label="Đóng popup">×</button>
+          </header>
+
+          <div class="branch-shipment-create-body">
+            <section class="branch-shipment-create-section">
+              <h4><span></span>Thông tin vận chuyển</h4>
+              <div class="branch-shipment-create-grid">
+                <label>
+                  <span>Kho xuất hàng</span>
+                  <select data-branch-shipment-draft-field="warehouse">
+                    ${["Kho tổng", "Kho 1 - Đông lạnh", "Kho 2 - Rau và trái cây", "Kho 3 - Đồ khô"].map((name) => `<option value="${escapeHtml(name)}" ${draft.warehouse === name ? "selected" : ""}>${escapeHtml(name)}</option>`).join("")}
+                  </select>
+                </label>
+                <label>
+                  <span>Chi nhánh nhận</span>
+                  <select data-branch-shipment-draft-field="branch_key">
+                    ${STORE_BRANCHES.map((branch) => `<option value="${escapeHtml(branch.key)}" ${String(draft.branch_key) === String(branch.key) ? "selected" : ""}>${escapeHtml(getBranchLabel(branch))}</option>`).join("")}
+                  </select>
+                </label>
+                <label>
+                  <span>Ngày dự kiến giao</span>
+                  <input type="date" value="${escapeHtml(draft.expected_date || defaultBranchShipmentDate())}" data-branch-shipment-draft-field="expected_date">
+                </label>
+                <div class="branch-shipment-priority">
+                  <span>Mức độ ưu tiên</span>
+                  <label><input type="radio" name="branch_shipment_priority" value="normal" ${draft.priority !== "urgent" ? "checked" : ""} data-branch-shipment-draft-field="priority"> Thường</label>
+                  <label><input type="radio" name="branch_shipment_priority" value="urgent" ${draft.priority === "urgent" ? "checked" : ""} data-branch-shipment-draft-field="priority"> Hỏa tốc</label>
+                </div>
+              </div>
+            </section>
+
+            <section class="branch-shipment-create-section">
+              <div class="branch-shipment-create-section-head">
+                <h4><span></span>Danh sách sản phẩm</h4>
+                <button type="button" class="ghost-button branch-shipment-add-product" data-branch-shipment-draft-action="add-product">+ Thêm sản phẩm</button>
+              </div>
+              <div class="branch-shipment-create-table">
+                <div class="branch-shipment-create-row header">
+                  <span>Sản phẩm</span>
+                  <span>ĐVT</span>
+                  <span>Số lượng gửi</span>
+                  <span>Thao tác</span>
+                </div>
+                ${draft.items.map((item, index) => `
+                  <div class="branch-shipment-create-row">
+                    <div class="branch-shipment-product-select-cell">
+                      <img src="${escapeHtml(resolveMediaUrl(item.thumbnail_url, defaultProductThumb()))}" alt="">
+                      <select data-branch-shipment-draft-product="${index}">
+                        ${getShipmentProductOptions(item.product_id)}
+                      </select>
+                    </div>
+                    <strong>${escapeHtml(item.unit || "đơn vị")}</strong>
+                    <div class="branch-shipment-quantity-control">
+                      <button type="button" data-branch-shipment-draft-action="decrease-quantity" data-index="${index}">−</button>
+                      <input value="${escapeHtml(String(item.quantity || 1))}" inputmode="numeric" data-branch-shipment-draft-quantity="${index}">
+                      <button type="button" data-branch-shipment-draft-action="increase-quantity" data-index="${index}">+</button>
+                    </div>
+                    <button type="button" class="branch-shipment-remove-product" data-branch-shipment-draft-action="remove-product" data-index="${index}">${renderAppIcon("trash")}</button>
+                  </div>
+                `).join("") || '<p class="branch-import-empty">Chưa có sản phẩm trong đơn gửi hàng.</p>'}
+              </div>
+            </section>
+
+            <section class="branch-shipment-create-bottom">
+              <label>
+                <span>Ghi chú chung</span>
+                <textarea data-branch-shipment-draft-field="note" placeholder="Nhập ghi chú cho bộ phận kho vận...">${escapeHtml(draft.note || "")}</textarea>
+              </label>
+              <aside class="branch-shipment-create-summary">
+                <div><span>Tổng số mặt hàng</span><strong>${formatNumber(draft.items.length)}</strong></div>
+                <div><span>Tổng số lượng</span><strong>${formatNumber(getShipmentDraftTotal())}</strong></div>
+              </aside>
+            </section>
+          </div>
+
+          <footer class="branch-shipment-create-footer">
+            <button type="button" class="ghost-button" data-branch-shipment-draft-action="close">Hủy</button>
+            <button type="submit" class="primary-button">Lưu đơn</button>
+          </footer>
+        </form>
+      </div>
+    `;
 }
 
 function buildBranchRequestCode(branch) {
@@ -521,6 +695,62 @@ async function completeShipmentRequest(requestId) {
         updateProductWorkspace();
         renderProducts();
     }
+}
+
+async function submitBranchShipmentDraft() {
+    const draft = ensureBranchShipmentDraft();
+    const branch = STORE_BRANCHES.find((item) => String(item.key) === String(draft.branch_key));
+    if (!branch) throw new Error("Vui lòng chọn chi nhánh nhận hàng.");
+    if (!draft.items.length) throw new Error("Vui lòng thêm ít nhất một sản phẩm.");
+
+    const payload = {
+        branch_key: branch.key,
+        branch_name: getBranchLabel(branch),
+        expected_date: draft.expected_date || defaultBranchShipmentDate(),
+        note: [
+            draft.note || "",
+            draft.priority === "urgent" ? "Ưu tiên: Hỏa tốc" : "Ưu tiên: Thường",
+            draft.warehouse ? `Kho xuất: ${draft.warehouse}` : ""
+        ].filter(Boolean).join("\n"),
+        status: "pending",
+        items: draft.items.map((item) => ({
+            product_id: item.product_id,
+            name: item.name,
+            sku: item.sku,
+            thumbnail_url: item.thumbnail_url,
+            unit: item.unit,
+            quantity: Number(item.quantity || 1)
+        }))
+    };
+
+    const createdResponse = await apiFetch("/api/branch-import-requests", {
+        method: "POST",
+        body: JSON.stringify(payload)
+    });
+    let savedRequest = createdResponse?.request ? normalizeBranchImportRequest(createdResponse.request) : null;
+
+    if (savedRequest?.id) {
+        const receivingResponse = await apiFetch(`/api/branch-import-requests/${encodeURIComponent(savedRequest.id)}`, {
+            method: "PATCH",
+            body: JSON.stringify({ status: "receiving", note: payload.note })
+        });
+        savedRequest = receivingResponse?.request ? normalizeBranchImportRequest(receivingResponse.request) : savedRequest;
+    }
+
+    if (savedRequest) {
+        saveBranchImportRequests([
+            savedRequest,
+            ...readBranchImportRequests().filter((request) => String(request.id) !== String(savedRequest.id))
+        ]);
+        state.branchShipmentDetailId = savedRequest.id;
+        state.branchShipmentStatusFilter = "receiving";
+    } else {
+        await loadBranchImportRequestsFromApi({ silent: true });
+    }
+
+    state.branchShipmentCreateOpen = false;
+    state.branchShipmentDraft = null;
+    showToast("Đã tạo đơn gửi hàng cho chi nhánh.");
 }
 
 function renderBranchListWorkspace() {
@@ -915,13 +1145,16 @@ function renderBranchShipmentWorkspace() {
       <section class="branch-shipment-shell">
         <div class="branch-shipment-layout">
           <section class="branch-shipment-main-column">
-            <label class="branch-import-select branch-shipment-branch-select">
-              <span>Chi nhánh</span>
-              <select data-branch-shipment-filter="branch">
-                <option value="all" ${state.branchShipmentBranchFilter === "all" ? "selected" : ""}>Tất cả chi nhánh</option>
-                ${STORE_BRANCHES.map((branch) => `<option value="${escapeHtml(branch.key)}" ${String(state.branchShipmentBranchFilter) === String(branch.key) ? "selected" : ""}>${escapeHtml(getBranchLabel(branch))}</option>`).join("")}
-              </select>
-            </label>
+            <div class="branch-shipment-topbar">
+              <label class="branch-import-select branch-shipment-branch-select">
+                <span>Chi nhánh</span>
+                <select data-branch-shipment-filter="branch">
+                  <option value="all" ${state.branchShipmentBranchFilter === "all" ? "selected" : ""}>Tất cả chi nhánh</option>
+                  ${STORE_BRANCHES.map((branch) => `<option value="${escapeHtml(branch.key)}" ${String(state.branchShipmentBranchFilter) === String(branch.key) ? "selected" : ""}>${escapeHtml(getBranchLabel(branch))}</option>`).join("")}
+                </select>
+              </label>
+              <button class="primary-button branch-shipment-create-button" type="button" data-branch-shipment-draft-action="open">+ Tạo đơn gửi hàng</button>
+            </div>
 
             <section class="branch-shipment-list-card surface">
               <div class="branch-shipment-tabs">
@@ -947,6 +1180,7 @@ function renderBranchShipmentWorkspace() {
 
           ${renderShipmentDetail(detailRequest)}
         </div>
+        ${renderBranchShipmentCreateModal()}
       </section>
     `;
 }
@@ -1162,6 +1396,49 @@ export async function handleBranchAction(action, branchKey) {
 }
 
 export async function handleBranchImportClick(event) {
+    const draftButton = event.target.closest("[data-branch-shipment-draft-action]");
+    if (draftButton) {
+        const action = draftButton.dataset.branchShipmentDraftAction;
+        const index = Number(draftButton.dataset.index || 0);
+
+        if (action === "open") {
+            state.branchShipmentDraft = null;
+            ensureBranchShipmentDraft();
+            state.branchShipmentCreateOpen = true;
+            renderBranches();
+            return true;
+        }
+
+        if (action === "close") {
+            state.branchShipmentCreateOpen = false;
+            state.branchShipmentDraft = null;
+            renderBranches();
+            return true;
+        }
+
+        if (action === "add-product") {
+            addShipmentDraftProduct();
+            renderBranches();
+            return true;
+        }
+
+        if (action === "remove-product") {
+            removeShipmentDraftProduct(index);
+            renderBranches();
+            return true;
+        }
+
+        if (action === "increase-quantity" || action === "decrease-quantity") {
+            const draft = ensureBranchShipmentDraft();
+            const current = Number(draft.items[index]?.quantity || 1);
+            updateShipmentDraftQuantity(index, current + (action === "increase-quantity" ? 1 : -1));
+            renderBranches();
+            return true;
+        }
+
+        return true;
+    }
+
     const shipmentStatusButton = event.target.closest("[data-branch-shipment-filter-status]");
     if (shipmentStatusButton) {
         state.branchShipmentStatusFilter = shipmentStatusButton.dataset.branchShipmentFilterStatus || "all";
@@ -1255,6 +1532,20 @@ export async function handleBranchImportClick(event) {
 
 export function handleBranchImportInput(event) {
     const target = event.target;
+    if (target?.dataset.branchShipmentDraftField) {
+        const draft = ensureBranchShipmentDraft();
+        draft[target.dataset.branchShipmentDraftField] = target.value || "";
+        return true;
+    }
+    if (target?.dataset.branchShipmentDraftProduct !== undefined) {
+        updateShipmentDraftProduct(Number(target.dataset.branchShipmentDraftProduct), target.value);
+        renderBranches();
+        return true;
+    }
+    if (target?.dataset.branchShipmentDraftQuantity !== undefined) {
+        updateShipmentDraftQuantity(Number(target.dataset.branchShipmentDraftQuantity), target.value);
+        return true;
+    }
     if (target?.dataset.branchShipmentFilter === "branch") {
         state.branchShipmentBranchFilter = target.value || "all";
         state.branchShipmentDetailId = "";
@@ -1296,4 +1587,17 @@ export function handleBranchImportInput(event) {
         return true;
     }
     return false;
+}
+
+export async function submitBranchShipmentCreateForm(event) {
+    const form = event.target.closest("[data-branch-shipment-create-form]");
+    if (!form) return false;
+    event.preventDefault();
+    try {
+        await submitBranchShipmentDraft();
+    } catch (error) {
+        showToast(error.message || "Không tạo được đơn gửi hàng.", true);
+    }
+    renderBranches();
+    return true;
 }
