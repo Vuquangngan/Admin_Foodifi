@@ -356,7 +356,19 @@ function buildShipmentDraftItem(productId) {
     };
 }
 
-function addShipmentDraftProduct(productId = "") {
+async function ensureShipmentProductsReady() {
+    if ((state.products || []).length) return;
+    try {
+        const payload = await apiFetch("/api/products?limit=1000");
+        state.products = payload?.items || [];
+    } catch (error) {
+        showToast(error.message || "Không tải được danh sách sản phẩm từ kho.", true);
+        throw error;
+    }
+}
+
+async function addShipmentDraftProduct(productId = "") {
+    await ensureShipmentProductsReady();
     const draft = ensureBranchShipmentDraft();
     const selectedId = productId || (state.products || [])
         .find((product) => !draft.items.some((item) => String(item.product_id) === String(product.id)))?.id;
@@ -1461,7 +1473,7 @@ export async function handleBranchImportClick(event) {
         }
 
         if (action === "add-product") {
-            addShipmentDraftProduct();
+            await addShipmentDraftProduct();
             renderBranches();
             return true;
         }
