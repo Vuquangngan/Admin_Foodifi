@@ -370,6 +370,10 @@ async function ensureShipmentProductsReady() {
 async function addShipmentDraftProduct(productId = "") {
     await ensureShipmentProductsReady();
     const draft = ensureBranchShipmentDraft();
+    if (productId && draft.items.some((item) => String(item.product_id) === String(productId))) {
+        showToast("Sản phẩm này đã có trong đơn gửi hàng.", true);
+        return;
+    }
     const selectedId = productId || (state.products || [])
         .find((product) => !draft.items.some((item) => String(item.product_id) === String(product.id)))?.id;
     const nextItem = buildShipmentDraftItem(selectedId);
@@ -378,6 +382,54 @@ async function addShipmentDraftProduct(productId = "") {
         return;
     }
     draft.items = [...draft.items, nextItem];
+}
+
+function getAvailableShipmentProducts() {
+    const draft = ensureBranchShipmentDraft();
+    const keyword = String(state.branchShipmentProductPickerKeyword || "").trim().toLowerCase();
+    return (state.products || [])
+        .filter((product) => !draft.items.some((item) => String(item.product_id) === String(product.id)))
+        .filter((product) => Number(product.stock_quantity || 0) > 0)
+        .filter((product) => {
+            if (!keyword) return true;
+            return [product.name, product.sku, product.short_description, product.category_name]
+                .some((value) => String(value || "").toLowerCase().includes(keyword));
+        });
+}
+
+function renderBranchShipmentProductPicker() {
+    if (!state.branchShipmentProductPickerOpen) return "";
+    const products = getAvailableShipmentProducts();
+    return `
+      <div class="branch-shipment-picker-backdrop" data-branch-shipment-draft-action="close-product-picker">
+        <div class="branch-shipment-picker" onclick="event.stopPropagation()">
+          <header>
+            <div>
+              <span>Chọn sản phẩm trong kho</span>
+              <strong>${formatNumber(products.length)} sản phẩm khả dụng</strong>
+            </div>
+            <button type="button" data-branch-shipment-draft-action="close-product-picker" aria-label="Đóng chọn sản phẩm">×</button>
+          </header>
+          <label class="branch-shipment-picker-search">
+            <span>Tìm sản phẩm</span>
+            <input value="${escapeHtml(state.branchShipmentProductPickerKeyword || "")}" placeholder="Nhập tên sản phẩm hoặc SKU..." data-branch-shipment-picker-keyword>
+          </label>
+          <div class="branch-shipment-picker-list">
+            ${products.map((product) => `
+              <article class="branch-shipment-picker-item">
+                <img src="${escapeHtml(resolveMediaUrl(product.thumbnail_url, defaultProductThumb()))}" alt="">
+                <div>
+                  <strong>${escapeHtml(product.name || "Sản phẩm")}</strong>
+                  <span>SKU: ${escapeHtml(product.sku || "Chưa có")}</span>
+                  <small>Kho tổng còn ${formatNumber(product.stock_quantity || 0)} ${escapeHtml(getProductUnit(product))}</small>
+                </div>
+                <button type="button" data-branch-shipment-draft-action="choose-product" data-product-id="${escapeHtml(String(product.id))}">Chọn</button>
+              </article>
+            `).join("") || '<p class="branch-import-empty">Không còn sản phẩm phù hợp để chọn.</p>'}
+          </div>
+        </div>
+      </div>
+    `;
 }
 
 function updateShipmentDraftProduct(index, productId) {
@@ -529,6 +581,7 @@ function renderBranchShipmentCreateModal() {
             <button type="button" class="ghost-button" data-branch-shipment-draft-action="close">Hủy</button>
             <button type="submit" class="primary-button">Lưu đơn</button>
           </footer>
+          ${renderBranchShipmentProductPicker()}
         </form>
       </div>
     `;
@@ -1468,12 +1521,30 @@ export async function handleBranchImportClick(event) {
         if (action === "close") {
             state.branchShipmentCreateOpen = false;
             state.branchShipmentDraft = null;
+            state.branchShipmentProductPickerOpen = false;
+            state.branchShipmentProductPickerKeyword = "";
             renderBranches();
             return true;
         }
 
         if (action === "add-product") {
-            await addShipmentDraftProduct();
+            await ensureShipmentProductsReady();
+            state.branchShipmentProductPickerOpen = true;
+            renderBranches();
+            return true;
+        }
+
+        if (action === "close-product-picker") {
+            state.branchShipmentProductPickerOpen = false;
+            state.branchShipmentProductPickerKeyword = "";
+            renderBranches();
+            return true;
+        }
+
+        if (action === "choose-product") {
+            await addShipmentDraftProduct(draftButton.dataset.productId || "");
+            state.branchShipmentProductPickerOpen = false;
+            state.branchShipmentProductPickerKeyword = "";
             renderBranches();
             return true;
         }
@@ -1600,6 +1671,19 @@ export function handleBranchImportInput(event) {
     }
     if (target?.dataset.branchShipmentDraftQuantity !== undefined) {
         updateShipmentDraftQuantity(Number(target.dataset.branchShipmentDraftQuantity), target.value);
+        return true;
+    }
+    if (target?.dataset.branchShipmentPickerKeyword !== undefined) {
+        state.branchShipmentProductPickerKeyword = target.value || "";
+        renderBranches();
+        const nextInput = elements.branchesContent?.querySelector("[data-branch-shipment-picker-keyword]");
+        if (nextInput) {
+            nextInput.focus();
+            nextInput.setSelectionRange(
+                state.branchShipmentProductPickerKeyword.length,
+                state.branchShipmentProductPickerKeyword.length
+            );
+        }
         return true;
     }
     if (target?.dataset.branchShipmentFilter === "branch") {

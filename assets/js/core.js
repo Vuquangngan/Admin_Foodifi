@@ -449,6 +449,8 @@ export const state = {
     branchShipmentDetailId: "",
     branchShipmentCreateOpen: false,
     branchShipmentDraft: null,
+    branchShipmentProductPickerOpen: false,
+    branchShipmentProductPickerKeyword: "",
     voucherWorkspace: "list",
     userAdminPage: 1,
     customerAdminPage: 1,

@@ -1096,6 +1096,7 @@
 }
 
 .branch-shipment-create-modal {
+  position: relative;
   width: min(1120px, calc(100vw - 56px));
   max-height: calc(100vh - 56px);
   display: grid;
@@ -1313,6 +1314,134 @@
 .branch-shipment-remove-product .app-icon {
   width: 18px;
   height: 18px;
+}
+
+.branch-shipment-picker-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(19, 42, 29, 0.28);
+}
+
+.branch-shipment-picker {
+  width: min(640px, 100%);
+  max-height: min(620px, calc(100vh - 120px));
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(15, 139, 72, 0.18);
+  border-radius: 22px;
+  background: #fffefa;
+  box-shadow: 0 24px 60px rgba(23, 48, 33, 0.2);
+}
+
+.branch-shipment-picker header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.branch-shipment-picker header div {
+  display: grid;
+  gap: 4px;
+}
+
+.branch-shipment-picker header span {
+  color: #0b7f45;
+  font-weight: 900;
+}
+
+.branch-shipment-picker header strong {
+  color: #617665;
+  font-size: 0.88rem;
+}
+
+.branch-shipment-picker header button {
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: #edf4ea;
+  color: #1d3025;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.branch-shipment-picker-search {
+  display: grid;
+  gap: 8px;
+  font-weight: 900;
+}
+
+.branch-shipment-picker-search input {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(90, 64, 42, 0.16);
+  border-radius: 14px;
+  background: #f5faf2;
+  font: inherit;
+  font-weight: 800;
+}
+
+.branch-shipment-picker-list {
+  display: grid;
+  gap: 10px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.branch-shipment-picker-item {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid rgba(17, 95, 54, 0.1);
+  border-radius: 16px;
+  background: #f5faf2;
+}
+
+.branch-shipment-picker-item img {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #fffefa;
+}
+
+.branch-shipment-picker-item div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.branch-shipment-picker-item strong,
+.branch-shipment-picker-item span,
+.branch-shipment-picker-item small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch-shipment-picker-item span,
+.branch-shipment-picker-item small {
+  color: #5f7466;
+  font-size: 0.86rem;
+}
+
+.branch-shipment-picker-item button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 999px;
+  background: #0f8b48;
+  color: #fff;
+  font-weight: 900;
 }
 
 .branch-shipment-create-bottom {
