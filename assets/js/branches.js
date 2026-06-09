@@ -361,7 +361,10 @@ function addShipmentDraftProduct(productId = "") {
     const selectedId = productId || (state.products || [])
         .find((product) => !draft.items.some((item) => String(item.product_id) === String(product.id)))?.id;
     const nextItem = buildShipmentDraftItem(selectedId);
-    if (!nextItem) return;
+    if (!nextItem) {
+        showToast("Không còn sản phẩm trong kho để thêm vào đơn.", true);
+        return;
+    }
     draft.items = [...draft.items, nextItem];
 }
 
@@ -423,9 +426,6 @@ function validateShipmentDraftStock(items) {
 function renderBranchShipmentCreateModal() {
     if (!state.branchShipmentCreateOpen) return "";
     const draft = ensureBranchShipmentDraft();
-    if (!draft.items.length && (state.products || []).length) {
-        addShipmentDraftProduct();
-    }
 
     return `
       <div class="modal-backdrop branch-shipment-create-backdrop" data-branch-shipment-draft-action="close">
@@ -497,7 +497,7 @@ function renderBranchShipmentCreateModal() {
                     </div>
                     <button type="button" class="branch-shipment-remove-product" data-branch-shipment-draft-action="remove-product" data-index="${index}">${renderAppIcon("trash")}</button>
                   </div>
-                `).join("") || '<p class="branch-import-empty">Chưa có sản phẩm trong đơn gửi hàng.</p>'}
+                `).join("") || '<p class="branch-import-empty">Chưa có sản phẩm trong đơn. Bấm "+ Thêm sản phẩm" để chọn hàng từ kho.</p>'}
               </div>
             </section>
 
