@@ -339,7 +339,7 @@ function ensureBranchShipmentDraft() {
 
 function getShipmentProductOptions(selectedId = "") {
     return (state.products || [])
-        .map((product) => `<option value="${escapeHtml(String(product.id))}" ${String(product.id) === String(selectedId) ? "selected" : ""}>${escapeHtml(product.name || "Sản phẩm")} - ${escapeHtml(product.sku || "SKU")}</option>`)
+        .map((product) => `<option value="${escapeHtml(String(product.id))}" ${String(product.id) === String(selectedId) ? "selected" : ""}>${escapeHtml(product.name || "Sản phẩm")} - ${escapeHtml(product.sku || "SKU")} (${formatNumber(product.stock_quantity || 0)} ${escapeHtml(getProductUnit(product))})</option>`)
         .join("");
 }
 
@@ -367,6 +367,10 @@ function addShipmentDraftProduct(productId = "") {
 
 function updateShipmentDraftProduct(index, productId) {
     const draft = ensureBranchShipmentDraft();
+    if (draft.items.some((item, itemIndex) => itemIndex !== index && String(item.product_id) === String(productId))) {
+        showToast("Sản phẩm này đã có trong đơn gửi hàng.", true);
+        return;
+    }
     const nextItem = buildShipmentDraftItem(productId);
     if (!nextItem) return;
     nextItem.quantity = Math.max(1, Number(draft.items[index]?.quantity || 1));
@@ -388,6 +392,32 @@ function removeShipmentDraftProduct(index) {
 function getShipmentDraftTotal() {
     const draft = ensureBranchShipmentDraft();
     return draft.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+}
+
+function getShipmentDraftItemProduct(item) {
+    return (state.products || []).find((product) => String(product.id) === String(item?.product_id)) || null;
+}
+
+function getShipmentDraftItemStock(item) {
+    const product = getShipmentDraftItemProduct(item);
+    return Math.max(0, Number(product?.stock_quantity || 0));
+}
+
+function validateShipmentDraftStock(items) {
+    const totals = new Map();
+    items.forEach((item) => {
+        const productId = String(item.product_id);
+        totals.set(productId, Number(totals.get(productId) || 0) + Number(item.quantity || 0));
+    });
+
+    for (const [productId, quantity] of totals.entries()) {
+        const product = (state.products || []).find((entry) => String(entry.id) === productId);
+        if (!product) throw new Error("Có sản phẩm không còn tồn tại trong kho.");
+        const stock = Number(product.stock_quantity || 0);
+        if (quantity > stock) {
+            throw new Error(`Kho tổng chỉ còn ${formatNumber(stock)} ${getProductUnit(product)} cho ${product.name || product.sku}.`);
+        }
+    }
 }
 
 function renderBranchShipmentCreateModal() {
@@ -452,9 +482,12 @@ function renderBranchShipmentCreateModal() {
                   <div class="branch-shipment-create-row">
                     <div class="branch-shipment-product-select-cell">
                       <img src="${escapeHtml(resolveMediaUrl(item.thumbnail_url, defaultProductThumb()))}" alt="">
-                      <select data-branch-shipment-draft-product="${index}">
-                        ${getShipmentProductOptions(item.product_id)}
-                      </select>
+                      <div>
+                        <select data-branch-shipment-draft-product="${index}">
+                          ${getShipmentProductOptions(item.product_id)}
+                        </select>
+                        <small>Kho tổng còn ${formatNumber(getShipmentDraftItemStock(item))} ${escapeHtml(item.unit || "đơn vị")}</small>
+                      </div>
                     </div>
                     <strong>${escapeHtml(item.unit || "đơn vị")}</strong>
                     <div class="branch-shipment-quantity-control">
@@ -667,7 +700,17 @@ async function completeShipmentRequest(requestId) {
         return;
     }
 
-    for (const item of request.items) {
+    const groupedItems = Array.from(request.items.reduce((map, item) => {
+        const productId = String(item.product_id);
+        const current = map.get(productId) || { ...item, quantity: 0 };
+        current.quantity = Number(current.quantity || 0) + Number(item.quantity || 0);
+        map.set(productId, current);
+        return map;
+    }, new Map()).values());
+
+    validateShipmentDraftStock(groupedItems);
+
+    for (const item of groupedItems) {
         const product = (state.products || []).find((productItem) => String(productItem.id) === String(item.product_id));
         if (!product) throw new Error(`Không tìm thấy sản phẩm ${item.name || item.product_id}.`);
 
@@ -702,6 +745,7 @@ async function submitBranchShipmentDraft() {
     const branch = STORE_BRANCHES.find((item) => String(item.key) === String(draft.branch_key));
     if (!branch) throw new Error("Vui lòng chọn chi nhánh nhận hàng.");
     if (!draft.items.length) throw new Error("Vui lòng thêm ít nhất một sản phẩm.");
+    validateShipmentDraftStock(draft.items);
 
     const payload = {
         branch_key: branch.key,

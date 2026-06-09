@@ -1267,6 +1267,17 @@
   align-items: center;
 }
 
+.branch-shipment-product-select-cell > div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.branch-shipment-product-select-cell small {
+  color: #5f7466;
+  font-weight: 800;
+}
+
 .branch-shipment-product-select-cell img {
   width: 58px;
   height: 58px;
