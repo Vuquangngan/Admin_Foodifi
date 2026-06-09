@@ -401,8 +401,8 @@ function renderBranchShipmentProductPicker() {
     if (!state.branchShipmentProductPickerOpen) return "";
     const products = getAvailableShipmentProducts();
     return `
-      <div class="branch-shipment-picker-backdrop" data-branch-shipment-draft-action="close-product-picker">
-        <div class="branch-shipment-picker" onclick="event.stopPropagation()">
+      <div class="branch-shipment-picker-backdrop" data-branch-shipment-picker-backdrop>
+        <div class="branch-shipment-picker">
           <header>
             <div>
               <span>Chọn sản phẩm trong kho</span>
@@ -492,8 +492,8 @@ function renderBranchShipmentCreateModal() {
     const draft = ensureBranchShipmentDraft();
 
     return `
-      <div class="modal-backdrop branch-shipment-create-backdrop" data-branch-shipment-draft-action="close">
-        <form class="modal-card branch-shipment-create-modal" data-branch-shipment-create-form onclick="event.stopPropagation()">
+      <div class="modal-backdrop branch-shipment-create-backdrop" data-branch-shipment-draft-backdrop>
+        <form class="modal-card branch-shipment-create-modal" data-branch-shipment-create-form>
           <header class="branch-shipment-create-head">
             <div>
               <span>Tạo đơn gửi hàng</span>
@@ -1505,6 +1505,22 @@ export async function handleBranchAction(action, branchKey) {
 }
 
 export async function handleBranchImportClick(event) {
+    if (event.target.matches("[data-branch-shipment-picker-backdrop]")) {
+        state.branchShipmentProductPickerOpen = false;
+        state.branchShipmentProductPickerKeyword = "";
+        renderBranches();
+        return true;
+    }
+
+    if (event.target.matches("[data-branch-shipment-draft-backdrop]")) {
+        state.branchShipmentCreateOpen = false;
+        state.branchShipmentDraft = null;
+        state.branchShipmentProductPickerOpen = false;
+        state.branchShipmentProductPickerKeyword = "";
+        renderBranches();
+        return true;
+    }
+
     const draftButton = event.target.closest("[data-branch-shipment-draft-action]");
     if (draftButton) {
         const action = draftButton.dataset.branchShipmentDraftAction;
