@@ -64,7 +64,8 @@
 }
 
 .recipes-table-card .section-head {
-  padding: 22px 28px 0;
+  display: none;
+  padding: 0;
 }
 
 .recipes-table-scroll {
@@ -84,7 +85,7 @@
 }
 
 .recipes-table th {
-  padding: 20px 28px;
+  padding: 16px 28px;
   background: #edf6e9;
   color: #263d30;
   font-size: 0.78rem;
