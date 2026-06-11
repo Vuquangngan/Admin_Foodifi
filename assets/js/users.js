@@ -176,6 +176,7 @@ function setPanelHeadings() {
         if (elements.usersListTitle) {
             elements.usersListTitle.textContent = "L\u1ecbch ca l\u00e0m vi\u1ec7c";
             elements.usersListTitle.classList.remove("hidden");
+            elements.usersListTitle.closest(".section-head")?.classList.remove("hidden");
         }
         elements.openUserFormButton.classList.add("hidden");
         return;
@@ -188,6 +189,7 @@ function setPanelHeadings() {
         if (elements.usersListTitle) {
             elements.usersListTitle.textContent = "";
             elements.usersListTitle.classList.add("hidden");
+            elements.usersListTitle.closest(".section-head")?.classList.add("hidden");
         }
         elements.openUserFormButton.textContent = "Thêm khách hàng";
         return;
@@ -195,8 +197,9 @@ function setPanelHeadings() {
 
     elements.usersPanelTitle.textContent = "Quản lý admin và nhân viên";
     if (elements.usersListTitle) {
-        elements.usersListTitle.textContent = "Danh sách tài khoản nội bộ";
-        elements.usersListTitle.classList.remove("hidden");
+        elements.usersListTitle.textContent = "";
+        elements.usersListTitle.classList.add("hidden");
+        elements.usersListTitle.closest(".section-head")?.classList.add("hidden");
     }
     elements.openUserFormButton.textContent = "Tạo tài khoản mới";
 }

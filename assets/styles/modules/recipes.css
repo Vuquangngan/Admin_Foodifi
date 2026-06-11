@@ -86,8 +86,9 @@
 
 .recipes-table th {
   padding: 16px 28px;
-  background: #edf6e9;
-  color: #263d30;
+  background: #d9ebd1;
+  color: #173625;
+  border-bottom: 1px solid rgba(17, 95, 54, 0.2);
   font-size: 0.78rem;
   letter-spacing: 0.16em;
   text-align: left;
