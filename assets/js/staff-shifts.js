@@ -424,7 +424,6 @@ function buildPendingNotice() {
     return `
       <div class="shift-pending-notice">
         <strong>Có ${formatNumber(pendingCount)} lượt đăng ký đang chờ xác nhận.</strong>
-        <span>Admin hãy bấm nút <b>Xác nhận ca làm</b> trong ô ca có nhãn <b>chờ duyệt</b> để duyệt và gửi email cho nhân viên.</span>
       </div>
     `;
 }
@@ -432,15 +431,16 @@ function buildPendingNotice() {
 function buildShiftMember(item, dateKey, shiftId) {
     const statusLabel = item.status === "pending" ? "Chờ xác nhận" : "Đã xác nhận";
     const statusClass = item.status === "pending" ? "pending" : "confirmed";
+    const employeeCode = item.user.code || `ID #${item.user.id}`;
 
     return `
       <article class="shift-member-pill is-${statusClass}">
         <span class="shift-member-avatar">${escapeHtml((item.user.username || "U").trim().charAt(0).toUpperCase())}</span>
         <div class="shift-member-copy">
           <strong>${escapeHtml(item.user.username || item.user.email || "Nhân viên")}</strong>
-          <span>${escapeHtml(statusLabel)} • ${escapeHtml(item.user.phone || item.user.role || "Nhân sự nội bộ")}</span>
+          <span>${escapeHtml(employeeCode)}</span>
         </div>
-        <button type="button" class="shift-member-remove" data-shift-action="remove-assignment" data-date="${dateKey}" data-shift-id="${shiftId}" data-user-id="${item.user.id}">×</button>
+        <button type="button" class="shift-member-remove" title="${escapeHtml(statusLabel)}" aria-label="Xóa nhân viên khỏi ca" data-shift-action="remove-assignment" data-date="${dateKey}" data-shift-id="${shiftId}" data-user-id="${item.user.id}">×</button>
       </article>
     `;
 }

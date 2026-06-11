@@ -245,6 +245,7 @@
 .shift-cell-card {
   display: grid;
   gap: 14px;
+  min-width: 0;
   min-height: 188px;
   border-radius: 22px;
   border: 1px solid rgba(18, 87, 48, 0.14);
@@ -314,15 +315,17 @@
 .shift-cell-members {
   display: grid;
   gap: 10px;
+  min-width: 0;
 }
 
 .shift-member-pill {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 10px;
+  grid-template-columns: 34px minmax(0, 1fr) 28px;
+  gap: 8px;
   align-items: center;
-  padding: 10px 12px;
-  border-radius: 18px;
+  min-width: 0;
+  padding: 9px 10px;
+  border-radius: 16px;
   background: linear-gradient(180deg, #f4faf1 0%, #edf6ea 100%);
   border: 1px solid rgba(18, 87, 48, 0.12);
   box-shadow: 0 8px 18px rgba(17, 92, 50, 0.05);
@@ -339,8 +342,8 @@
 
 .shift-member-avatar,
 .shift-assign-avatar {
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -354,21 +357,27 @@
 .shift-assign-copy {
   display: grid;
   gap: 4px;
+  min-width: 0;
 }
 
 .shift-member-copy strong,
 .shift-assign-copy strong {
-  font-size: 1rem;
+  min-width: 0;
+  font-size: 0.94rem;
+  overflow-wrap: anywhere;
 }
 
 .shift-member-copy span,
 .shift-assign-copy small {
   color: var(--ink-muted);
+  min-width: 0;
+  font-size: 0.86rem;
+  overflow-wrap: anywhere;
 }
 
 .shift-member-remove {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: none;
   background: rgba(184, 76, 76, 0.1);
@@ -381,6 +390,13 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  min-width: 0;
+}
+
+.shift-cell-actions .chip-button {
+  min-width: 0;
+  flex: 1 1 96px;
+  justify-content: center;
 }
 
 .shift-self-note {

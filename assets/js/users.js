@@ -75,12 +75,7 @@ function getUsersPageCount(total) {
 }
 
 function getCurrentPageItems() {
-    const items = getActiveCollection();
-    const pageCount = getUsersPageCount(items.length);
-    const currentPage = Math.min(Math.max(1, getActivePageState() || 1), pageCount);
-    setActivePageState(currentPage);
-    const startIndex = (currentPage - 1) * USERS_PER_PAGE;
-    return items.slice(startIndex, startIndex + USERS_PER_PAGE);
+    return getActiveCollection();
 }
 
 function getRoleLabel(role) {
@@ -548,24 +543,7 @@ function renderCustomerProfileModal() {
 }
 
 function buildPagination({ showSummary = true } = {}) {
-    const total = getActiveCollection().length;
-    const pageCount = getUsersPageCount(total);
-    const currentPage = getActivePageState() || 1;
-    const start = total ? ((currentPage - 1) * USERS_PER_PAGE) + 1 : 0;
-    const end = Math.min(total, currentPage * USERS_PER_PAGE);
-
-    return `
-      <div class="users-footer">
-        ${showSummary ? `<span>Hiển thị ${formatNumber(start)}-${formatNumber(end)} trên ${formatNumber(total)} tài khoản</span>` : "<span></span>"}
-        <div class="users-pagination">
-          <button class="pagination-dot-button" type="button" data-user-action="page" data-page="${currentPage - 1}" ${currentPage <= 1 ? "disabled" : ""}>&lsaquo;</button>
-          ${Array.from({ length: pageCount }, (_, index) => index + 1).map((page) => `
-            <button class="pagination-dot-button ${page === currentPage ? "active" : ""}" type="button" data-user-action="page" data-page="${page}">${page}</button>
-          `).join("")}
-          <button class="pagination-dot-button" type="button" data-user-action="page" data-page="${currentPage + 1}" ${currentPage >= pageCount ? "disabled" : ""}>&rsaquo;</button>
-        </div>
-      </div>
-    `;
+    return "";
 }
 
 function setUserFormHeadings(isEditing) {

@@ -37,8 +37,15 @@
 }
 
 .users-table-wrap {
+  max-height: 690px;
   overflow: auto;
   border-radius: 20px;
+}
+
+.users-table-wrap thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .users-table th,
