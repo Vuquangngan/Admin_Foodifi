@@ -163,6 +163,18 @@ function renderAudienceCard(audience, draft) {
     `;
 }
 
+function renderAudienceOptions(draft) {
+    return AUDIENCES.map((audience) => {
+        const count = getAudienceCustomers(audience.key).length;
+        return `<option value="${escapeHtml(audience.key)}" ${draft.audience === audience.key ? "selected" : ""}>${escapeHtml(audience.title)} - ${formatNumber(count)} khách hàng</option>`;
+    }).join("");
+}
+
+function getAudienceDescription(audienceKey) {
+    const selected = AUDIENCES.find((audience) => audience.key === audienceKey) || AUDIENCES[0];
+    return selected?.description || "";
+}
+
 function renderPreview(draft) {
     const banner = draft.banner_url
         ? `<img src="${escapeHtml(draft.banner_url)}" alt="Banner chiến dịch">`
@@ -204,10 +216,6 @@ export function renderEmailMarketing() {
     elements.emailMarketingContent.innerHTML = `
       <section class="email-marketing-page">
         <div class="email-marketing-head">
-          <div>
-            <p class="eyebrow">Email Marketing</p>
-            <h2>Tạo chiến dịch Email</h2>
-          </div>
           <div class="email-marketing-actions">
             <button class="secondary-button" type="button" data-email-action="save-draft">Lưu nháp</button>
             <button class="secondary-button" type="button" data-email-action="send-test">Gửi thử</button>
@@ -217,8 +225,6 @@ export function renderEmailMarketing() {
 
         <div class="email-builder-layout">
           <form class="email-builder-main" id="emailCampaignForm">
-            <input type="hidden" name="audience" value="${escapeHtml(draft.audience)}">
-
             <article class="surface email-builder-section">
               <span class="email-section-index">1</span>
               <h3>Thông tin chiến dịch</h3>
@@ -250,9 +256,13 @@ export function renderEmailMarketing() {
             <article class="surface email-builder-section">
               <span class="email-section-index">2</span>
               <h3>Đối tượng nhận Email</h3>
-              <div class="email-audience-grid">
-                ${AUDIENCES.map((audience) => renderAudienceCard(audience, draft)).join("")}
-              </div>
+              <label class="email-audience-select-wrap">
+                <span>Loại khách hàng</span>
+                <select name="audience" id="emailAudienceSelect">
+                  ${renderAudienceOptions(draft)}
+                </select>
+                <small id="emailAudienceDescription">${escapeHtml(getAudienceDescription(draft.audience))}</small>
+              </label>
               <p class="email-audience-note">Đang chọn <strong id="emailAudienceCount">${formatNumber(audienceCount)}</strong> khách có email hợp lệ.</p>
             </article>
 
@@ -320,6 +330,7 @@ function updatePreview(draft) {
     const summary = elements.emailMarketingContent?.querySelector("[data-email-preview='summary']");
     const cta = elements.emailMarketingContent?.querySelector("[data-email-preview='cta']");
     const count = elements.emailMarketingContent?.querySelector("#emailAudienceCount");
+    const audienceDescription = elements.emailMarketingContent?.querySelector("#emailAudienceDescription");
     const preview = elements.emailMarketingContent?.querySelector("#emailCampaignPreview");
 
     if (title) title.textContent = draft.title || DEFAULT_CAMPAIGN.title;
@@ -329,6 +340,7 @@ function updatePreview(draft) {
         cta.setAttribute("href", draft.cta_url || "#");
     }
     if (count) count.textContent = formatNumber(getAudienceCustomers(draft.audience).length);
+    if (audienceDescription) audienceDescription.textContent = getAudienceDescription(draft.audience);
     if (preview) {
         const currentMedia = preview.querySelector("img, .email-preview-hero");
         if (draft.banner_url) {

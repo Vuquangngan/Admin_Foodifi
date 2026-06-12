@@ -326,7 +326,7 @@
 .email-marketing-head {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 18px;
 }
 
@@ -405,6 +405,40 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
+}
+
+.email-audience-select-wrap {
+  display: grid;
+  gap: 10px;
+  max-width: 520px;
+}
+
+.email-audience-select-wrap > span {
+  color: #273b2d;
+  font-weight: 900;
+}
+
+.email-audience-select-wrap select {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1px solid rgba(18, 111, 61, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #17261c;
+  font: inherit;
+  font-weight: 800;
+}
+
+.email-audience-select-wrap select:focus {
+  outline: none;
+  border-color: #0d8748;
+  box-shadow: 0 0 0 3px rgba(13, 135, 72, 0.12);
+}
+
+.email-audience-select-wrap small {
+  color: #617461;
+  line-height: 1.45;
 }
 
 .email-audience-card {
