@@ -374,18 +374,21 @@
 
 .email-builder-section {
   position: relative;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  column-gap: 10px;
   padding: 24px;
 }
 
 .email-builder-section h3 {
+  grid-column: 2;
+  align-self: center;
   margin: 0 0 18px;
   color: #2b3b2d;
 }
 
 .email-section-index {
-  position: absolute;
-  top: 22px;
-  left: 22px;
+  grid-column: 1;
   width: 24px;
   height: 24px;
   border-radius: 999px;
@@ -397,8 +400,8 @@
   font-weight: 900;
 }
 
-.email-section-index + h3 {
-  padding-left: 34px;
+.email-builder-section > :not(.email-section-index):not(h3) {
+  grid-column: 1 / -1;
 }
 
 .email-audience-grid {
