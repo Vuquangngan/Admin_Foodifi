@@ -768,6 +768,79 @@ function openPromotionForm() {
     elements.promotionFormView?.classList.remove("hidden");
 }
 
+function setPromotionType(type = "buy_x_get_y") {
+    const normalizedType = type === "discount" || type === "golden_hour" ? "discount" : "buy_x_get_y";
+    elements.promotionForm?.querySelectorAll("input[name='type']").forEach((input) => {
+        input.checked = input.value === normalizedType;
+        input.closest(".promotion-type-card")?.classList.toggle("active", input.checked);
+    });
+}
+
+function setPromotionTimeRange(timeRange = "") {
+    const normalizedTime = String(timeRange || "").trim();
+    const timeButtons = elements.promotionFormView?.querySelectorAll("[data-promotion-time]") || [];
+    let matched = false;
+    timeButtons.forEach((button) => {
+        const active = normalizedTime && button.dataset.promotionTime === normalizedTime;
+        button.classList.toggle("active", active);
+        matched = matched || active;
+    });
+
+    if (!normalizedTime || matched) return;
+
+    const [start = "", end = ""] = normalizedTime.split("-").map((part) => part.trim());
+    addPromotionTimeRange();
+    const customRow = elements.promotionFormView?.querySelector("[data-promotion-custom-time].active");
+    if (customRow) {
+        const startInput = customRow.querySelector("[data-time-start]");
+        const endInput = customRow.querySelector("[data-time-end]");
+        if (startInput) startInput.value = start;
+        if (endInput) endInput.value = end;
+    }
+}
+
+function setPromotionComboboxValue(kind, value, scope = "products") {
+    const root = elements.promotionForm?.querySelector(`[data-promotion-combobox="${kind}"]`);
+    if (!root) return;
+    const hiddenInput = root.querySelector("[data-promotion-search-target]")?.name === "gift_product_search"
+        ? elements.promotionForm.elements.gift_product_id
+        : elements.promotionForm.elements.apply_product_id;
+    const searchInput = root.querySelector("[data-promotion-search-target]");
+    const nextValue = String(value || (kind === "apply" ? "all" : ""));
+    if (hiddenInput) hiddenInput.value = nextValue;
+    if (searchInput) {
+        searchInput.value = nextValue && nextValue !== "all"
+            ? (scope === "categories" ? getCategoryNameById(nextValue) : getPromotionProductName(nextValue))
+            : (kind === "apply" ? (scope === "categories" ? "Tất cả danh mục" : "Tất cả sản phẩm") : "");
+    }
+}
+
+function openPromotionRuleDetail(ruleId) {
+    const rule = (state.promotionRules || []).find((item) => String(item.id) === String(ruleId));
+    if (!rule || !elements.promotionForm) return;
+
+    resetPromotionForm();
+    elements.promotionFormView?.classList.remove("hidden");
+
+    elements.promotionForm.elements.name.value = rule.name || "";
+    elements.promotionForm.elements.is_active.checked = Boolean(rule.is_active);
+    elements.promotionForm.elements.apply_scope.value = rule.apply_scope === "categories" ? "categories" : "products";
+    elements.promotionForm.elements.discount_percent.value = rule.discount_percent || "";
+    elements.promotionForm.elements.start_date.value = rule.start_date || "";
+    elements.promotionForm.elements.end_date.value = rule.end_date || "";
+
+    setPromotionType(rule.type);
+    populatePromotionSelects();
+    setPromotionComboboxValue("gift", rule.gift_product_id || "", "products");
+
+    const applyScope = getPromotionApplyScope();
+    const productIds = Array.isArray(rule.apply_product_ids) && rule.apply_product_ids.length ? rule.apply_product_ids : ["all"];
+    setPromotionComboboxValue("apply", productIds[0] || "all", applyScope);
+    productIds.slice(1).forEach((value) => addPromotionAppliedProduct(value));
+    setPromotionTimeRange(rule.time_range || "");
+    syncPromotionPreview();
+}
+
 function closePromotionForm() {
     closePromotionComboboxes();
     elements.promotionFormView?.classList.add("hidden");
@@ -888,6 +961,10 @@ export async function submitPromotionForm(raw) {
 export async function handlePromotionAction(action, target = null) {
     if (action === "open-form" || action === "new") {
         openPromotionForm();
+        return;
+    }
+    if (action === "view-rule") {
+        openPromotionRuleDetail(target?.dataset.id || "");
         return;
     }
     if (action === "close-form") {
@@ -1051,7 +1128,7 @@ function renderPromotionRules() {
             </div>
             <div class="promotion-campaign-actions">
               <button class="promotion-status-button ${status}" type="button" data-promotion-action="toggle-rule" data-id="${rule.id}">${getPromotionStatusLabel(status)}</button>
-              <button class="outline-button" type="button">Xem chi tiết</button>
+              <button class="outline-button" type="button" data-promotion-action="view-rule" data-id="${rule.id}">Xem chi tiết</button>
               <button class="ghost-button danger" type="button" data-promotion-action="delete-rule" data-id="${rule.id}">Xóa</button>
             </div>
           </article>

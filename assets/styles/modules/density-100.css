@@ -419,14 +419,7 @@
   .publish-filter-card::before,
   .recipes-filter-card::before,
   .complaint-filter-card::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 14px;
-    bottom: 14px;
-    width: 3px;
-    border-radius: 0 999px 999px 0;
-    background: linear-gradient(180deg, rgba(15, 143, 78, 0.9), rgba(36, 200, 117, 0.9));
+    content: none;
   }
 
   .filter-card > strong,
