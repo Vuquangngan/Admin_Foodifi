@@ -1,22 +1,69 @@
 .admin-quickbar {
     position: fixed;
-    top: 18px;
-    right: 22px;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 900;
-    display: flex;
+    min-height: 92px;
+    padding: 18px 28px 18px 42px;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: center;
-    gap: 10px;
+    gap: 26px;
+    background: rgba(255, 255, 255, 0.98);
+    border-bottom: 1px solid rgba(18, 32, 52, 0.1);
+    box-shadow: 0 10px 28px rgba(20, 44, 31, 0.08);
+    backdrop-filter: blur(14px);
 }
 
 .admin-quickbar.hidden {
     display: none;
 }
 
+.admin-topbar-menu {
+    width: 30px;
+    height: 30px;
+    padding: 4px;
+    border: 0;
+    background: transparent;
+    display: grid;
+    gap: 5px;
+    align-content: center;
+}
+
+.admin-topbar-menu span {
+    display: block;
+    width: 24px;
+    height: 3px;
+    border-radius: 999px;
+    background: #374151;
+}
+
+.admin-topbar-title-block {
+    min-width: 0;
+}
+
+.admin-topbar-title-block h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: clamp(1.55rem, 2.6vw, 2rem);
+    line-height: 1.08;
+    font-weight: 900;
+    letter-spacing: -0.035em;
+}
+
+.admin-topbar-title-block p {
+    margin: 5px 0 0;
+    color: #697386;
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
 .admin-notification-button,
 .admin-account-trigger {
-    border: 1px solid rgba(17, 95, 54, 0.12);
-    background: rgba(255, 255, 255, 0.94);
-    box-shadow: 0 12px 32px rgba(63, 88, 59, 0.12);
+    border: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .admin-notification-button {
@@ -26,7 +73,7 @@
     border-radius: 50%;
     display: grid;
     place-items: center;
-    color: #0d7f42;
+    color: #4b5563;
 }
 
 .admin-notification-button svg {
@@ -43,14 +90,14 @@
     position: absolute;
     top: 3px;
     right: 5px;
-    min-width: 18px;
-    height: 18px;
+    min-width: 10px;
+    width: 10px;
+    height: 10px;
     padding: 0 5px;
     border-radius: 999px;
     background: #ee3d32;
-    color: #fff;
-    font-size: 0.72rem;
-    font-weight: 800;
+    color: transparent;
+    font-size: 0;
     display: grid;
     place-items: center;
     box-shadow: 0 6px 14px rgba(238, 61, 50, 0.28);
@@ -58,37 +105,56 @@
 
 .admin-account-menu {
     position: relative;
+    padding-left: 20px;
+    border-left: 1px solid rgba(17, 24, 39, 0.12);
 }
 
 .admin-account-trigger {
-    min-height: 48px;
-    padding: 6px 12px 6px 8px;
-    border-radius: 999px;
-    display: inline-flex;
+    min-height: 56px;
+    padding: 0;
+    border-radius: 0;
+    display: grid;
+    grid-template-columns: minmax(0, auto) 48px;
     align-items: center;
-    gap: 10px;
-    color: #18452d;
+    gap: 14px;
+    color: #0f172a;
     font-weight: 800;
     white-space: nowrap;
 }
 
 .admin-account-trigger img {
-    width: 34px;
-    height: 34px;
+    grid-column: 2;
+    grid-row: 1;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     object-fit: cover;
-    background: #e2f5e9;
+    background: #c7d2fe;
+}
+
+.admin-account-copy {
+    grid-column: 1;
+    grid-row: 1;
+    display: grid;
+    gap: 3px;
+    text-align: right;
+}
+
+.admin-account-copy strong {
+    color: #0f172a;
+    font-size: 0.96rem;
+    line-height: 1.1;
+}
+
+.admin-account-copy small {
+    color: #697386;
+    font-size: 0.86rem;
+    font-weight: 500;
+    line-height: 1.1;
 }
 
 .admin-account-chevron {
-    width: 18px;
-    height: 18px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2.2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    opacity: 0.75;
+    display: none;
 }
 
 .admin-account-dropdown {
@@ -129,12 +195,35 @@
 
 @media (max-width: 768px) {
     .admin-quickbar {
-        top: 12px;
-        right: 12px;
+        min-height: 78px;
+        padding: 14px 16px;
+        grid-template-columns: auto minmax(0, 1fr) auto auto;
+        gap: 12px;
     }
 
-    .admin-account-trigger span {
+    .admin-topbar-title-block h1 {
+        font-size: 1.25rem;
+    }
+
+    .admin-topbar-title-block p {
+        font-size: 0.82rem;
+    }
+
+    .admin-account-copy {
         display: none;
+    }
+
+    .admin-account-menu {
+        padding-left: 10px;
+    }
+
+    .admin-account-trigger {
+        grid-template-columns: 40px;
+    }
+
+    .admin-account-trigger img {
+        width: 40px;
+        height: 40px;
     }
 
     .admin-account-dropdown {

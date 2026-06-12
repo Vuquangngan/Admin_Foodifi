@@ -39,14 +39,23 @@
   grid-template-columns: 300px minmax(0, 1fr) !important;
   gap: 18px !important;
   align-items: stretch;
-  min-height: calc(100vh - 24px);
+  min-height: calc(100vh - 116px);
+  margin-top: 92px;
+}
+
+.app-shell:not(.auth-screen).sidebar-collapsed {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.app-shell:not(.auth-screen).sidebar-collapsed .sidebar {
+  display: none;
 }
 
 .app-shell:not(.auth-screen) .sidebar {
   width: 300px !important;
   max-width: 300px !important;
-  min-height: calc(100vh - 24px);
-  max-height: calc(100vh - 24px);
+  min-height: calc(100vh - 116px);
+  max-height: calc(100vh - 116px);
   padding: 22px !important;
   gap: 14px;
   background: rgba(255, 255, 255, 0.98);
@@ -57,8 +66,8 @@
 }
 
 .app-shell:not(.auth-screen) .main-panel {
-  min-height: calc(100vh - 24px);
-  height: calc(100vh - 24px);
+  min-height: calc(100vh - 116px);
+  height: calc(100vh - 116px);
   padding: 24px;
   background: rgba(255, 255, 255, 0.98);
   border: 1px solid rgba(20, 117, 67, 0.16);
@@ -88,6 +97,7 @@
 }
 
 .app-shell:not(.auth-screen) .admin-page-header {
+  display: none !important;
   min-height: auto !important;
   padding: 0 260px 0 6px;
   margin-bottom: 0;
@@ -335,7 +345,9 @@
 
 @media (max-width: 900px) {
   .app-shell:not(.auth-screen) {
+    margin-top: 78px;
     grid-template-columns: 1fr !important;
+    min-height: calc(100vh - 102px);
   }
 
   .app-shell:not(.auth-screen) .sidebar,

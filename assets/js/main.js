@@ -253,6 +253,12 @@ function bindGlobalEvents() {
     });
 
     document.addEventListener("click", (event) => {
+        const topbarMenuButton = event.target.closest("#adminTopbarMenuButton");
+        if (topbarMenuButton) {
+            elements.appShell?.classList.toggle("sidebar-collapsed");
+            return;
+        }
+
         const accountTrigger = event.target.closest("#adminAccountTrigger");
         if (accountTrigger) {
             const isOpen = elements.adminAccountDropdown?.classList.toggle("hidden") === false;
