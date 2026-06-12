@@ -39,8 +39,7 @@
   grid-template-columns: 300px minmax(0, 1fr) !important;
   gap: 18px !important;
   align-items: stretch;
-  min-height: calc(100vh - 116px);
-  margin-top: 92px;
+  min-height: calc(100vh - 48px);
 }
 
 .app-shell:not(.auth-screen).sidebar-collapsed {
@@ -51,11 +50,15 @@
   display: none;
 }
 
+.app-shell:not(.auth-screen).sidebar-collapsed .admin-quickbar {
+  left: 24px;
+}
+
 .app-shell:not(.auth-screen) .sidebar {
   width: 300px !important;
   max-width: 300px !important;
-  min-height: calc(100vh - 116px);
-  max-height: calc(100vh - 116px);
+  min-height: calc(100vh - 48px);
+  max-height: calc(100vh - 48px);
   padding: 22px !important;
   gap: 14px;
   background: rgba(255, 255, 255, 0.98);
@@ -66,9 +69,9 @@
 }
 
 .app-shell:not(.auth-screen) .main-panel {
-  min-height: calc(100vh - 116px);
-  height: calc(100vh - 116px);
-  padding: 24px;
+  min-height: calc(100vh - 48px);
+  height: calc(100vh - 48px);
+  padding: 116px 24px 24px;
   background: rgba(255, 255, 255, 0.98);
   border: 1px solid rgba(20, 117, 67, 0.16);
   border-radius: 26px;
@@ -345,9 +348,8 @@
 
 @media (max-width: 900px) {
   .app-shell:not(.auth-screen) {
-    margin-top: 78px;
     grid-template-columns: 1fr !important;
-    min-height: calc(100vh - 102px);
+    min-height: calc(100vh - 48px);
   }
 
   .app-shell:not(.auth-screen) .sidebar,
@@ -356,6 +358,10 @@
     max-width: none !important;
     min-height: auto;
     height: auto;
+  }
+
+  .app-shell:not(.auth-screen) .main-panel {
+    padding-top: 102px;
   }
 }
 
@@ -745,11 +751,17 @@
 }
 
 .app-shell:not(.auth-screen) .main-panel {
-  padding: 20px 22px !important;
+  padding: 116px 22px 20px !important;
   background: rgba(255, 255, 255, 0.98) !important;
   border: 1px solid rgba(17, 95, 54, 0.16) !important;
   border-radius: 28px !important;
   box-shadow: 0 22px 58px rgba(35, 87, 49, 0.1) !important;
+}
+
+@media (max-width: 900px) {
+  .app-shell:not(.auth-screen) .main-panel {
+    padding: 102px 22px 20px !important;
+  }
 }
 
 .app-shell:not(.auth-screen) .panel.active {
