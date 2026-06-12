@@ -298,7 +298,7 @@ function buildPublishFilterChips() {
 
     return `
       <div class="publish-filter-panel">
-        <p class="section-copy publish-store-copy"><span>Đang xem</span> <strong>${escapeHtml(activeStore.label)} - ${escapeHtml(activeStore.name)}</strong><span>Sản phẩm chưa chuyển sang cửa hàng này sẽ không được bán tại đây.</span></p>
+        <p class="section-copy publish-store-copy"><strong>${escapeHtml(activeStore.label)} - ${escapeHtml(activeStore.name)}</strong><span>Sản phẩm chưa chuyển sang cửa hàng này sẽ không được bán tại đây.</span></p>
       </div>
     `;
 }
