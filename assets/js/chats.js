@@ -1714,7 +1714,7 @@ const submitChatInboxComposer = submitChatComposer;
 const AI_SUPPORT_SUGGESTIONS = [
     "Hướng dẫn khách đặt hàng trên app",
     "Chính sách đổi trả và hoàn tiền",
-    "Cách dùng voucher trong Garden Fresh",
+    "Cách dùng voucher trong FOODIFI",
     "Gợi ý công thức từ rau củ đang có"
 ];
 
@@ -1726,7 +1726,7 @@ function normalizeAiSupportMessages() {
     if (!state.aiSupportMessages.length) {
         state.aiSupportMessages = [{
             role: "assistant",
-            content: "Chào bạn, tôi là trợ lý AI của Garden Fresh. Bạn có thể hỏi về sản phẩm, đơn hàng, voucher, công thức nấu ăn hoặc cách hỗ trợ khách hàng.",
+            content: "Chào bạn, tôi là trợ lý AI của FOODIFI. Bạn có thể hỏi về sản phẩm, đơn hàng, voucher, công thức nấu ăn hoặc cách hỗ trợ khách hàng.",
             createdAt: new Date().toISOString()
         }];
     }

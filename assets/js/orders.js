@@ -2617,7 +2617,7 @@ function resolveInvoiceBranch(adminMeta) {
 
 function buildInvoiceBrandBlock(adminMeta) {
     const branch = resolveInvoiceBranch(adminMeta);
-    const branchName = getBranchDisplayName(branch) || "Foodifi";
+    const branchName = getBranchDisplayName(branch) || "FOODIFI";
     const branchAddress = getBranchFullAddress(branch);
     const branchPhone = normalizeText(branch?.phone);
     const manager = normalizeText(branch?.manager);

@@ -1,8 +1,8 @@
 {
-  "name": "shopfood-web-admin",
+  "name": "foodifi-web-admin",
   "version": "1.0.0",
   "private": true,
-  "description": "Web admin for ShopFood backend",
+  "description": "Web admin for FOODIFI backend",
   "scripts": {
     "start": "node server.js"
   }

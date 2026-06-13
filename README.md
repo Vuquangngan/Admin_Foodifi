@@ -1,10 +1,10 @@
-# Web Admin ShopFood
+# Web Admin FOODIFI
 
 Web admin nay dung truc tiep API tu backend `BackEnd\foodshop-api`.
 
 ## Chay local
 
-1. Chay backend ShopFood truoc, mac dinh o `http://localhost:3000`.
+1. Chay backend FOODIFI truoc, mac dinh o `http://localhost:3000`.
 2. Mo terminal tai thu muc `web_admin`.
 3. Chay:
 

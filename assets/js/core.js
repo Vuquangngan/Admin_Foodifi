@@ -1,4 +1,4 @@
-﻿export const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
     apiBase: "shopfood_admin_api_base",
     session: "shopfood_admin_session",
     branches: "shopfood_admin_branches",
@@ -249,8 +249,8 @@ const DEFAULT_STORE_BRANCHES = [
     {
         key: "store_1",
         code: "CN-001",
-        label: "Garden Fresh 1",
-        name: "Garden Fresh 1",
+        label: "FOODIFI 1",
+        name: "FOODIFI 1",
         manager: "Trần Văn Lý",
         phone: "0906572167",
         city: "Hà Nội",
@@ -261,8 +261,8 @@ const DEFAULT_STORE_BRANCHES = [
     {
         key: "store_2",
         code: "CN-002",
-        label: "Garden Fresh 2",
-        name: "Garden Fresh 2",
+        label: "FOODIFI 2",
+        name: "FOODIFI 2",
         manager: "Vũ Quang Ngân",
         phone: "0916837759",
         city: "Hà Nội",
@@ -273,8 +273,8 @@ const DEFAULT_STORE_BRANCHES = [
     {
         key: "store_3",
         code: "CN-003",
-        label: "Garden Fresh 3",
-        name: "Garden Fresh 3",
+        label: "FOODIFI 3",
+        name: "FOODIFI 3",
         manager: "",
         phone: "",
         city: "Hà Nội",

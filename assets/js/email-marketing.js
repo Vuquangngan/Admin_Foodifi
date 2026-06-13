@@ -14,8 +14,8 @@ const DEFAULT_CAMPAIGN = {
     campaign_name: "Ưu đãi rau củ tươi hôm nay",
     goal: "increase_sales",
     subject: "Tươi mát mỗi ngày - Ưu đãi riêng cho bạn",
-    preheader: "Nhận ưu đãi mới nhất từ Garden Fresh.",
-    title: "Chào mừng bạn đến với Garden Fresh!",
+    preheader: "Nhận ưu đãi mới nhất từ FOODIFI.",
+    title: "Chào mừng bạn đến với FOODIFI!",
     summary: "Mùa này, chúng tôi chuẩn bị nhiều rau củ tươi ngon được chọn lọc mỗi ngày để bữa ăn gia đình luôn trọn vị.",
     cta_label: "Mua ngay",
     cta_url: "",
@@ -178,7 +178,7 @@ function getAudienceDescription(audienceKey) {
 function renderPreview(draft) {
     const banner = draft.banner_url
         ? `<img src="${escapeHtml(draft.banner_url)}" alt="Banner chiến dịch">`
-        : `<div class="email-preview-hero"><strong>Garden Fresh</strong><span>Fresh summer harvest</span></div>`;
+        : `<div class="email-preview-hero"><strong>FOODIFI</strong><span>Fresh summer harvest</span></div>`;
 
     return `
       <div class="email-preview-phone" id="emailCampaignPreview">
@@ -189,7 +189,7 @@ function renderPreview(draft) {
           <p data-email-preview="summary">${nl2br(draft.summary || DEFAULT_CAMPAIGN.summary)}</p>
           <a href="${escapeHtml(draft.cta_url || "#")}" data-email-preview="cta">${escapeHtml(draft.cta_label || "Mua ngay")}</a>
         </div>
-        <div class="email-preview-footer">Bạn nhận email này vì đã đăng ký hoặc mua hàng tại Garden Fresh.</div>
+        <div class="email-preview-footer">Bạn nhận email này vì đã đăng ký hoặc mua hàng tại FOODIFI.</div>
       </div>
     `;
 }
@@ -351,7 +351,7 @@ function updatePreview(draft) {
         } else if (currentMedia?.tagName === "IMG") {
             currentMedia.replaceWith(Object.assign(document.createElement("div"), {
                 className: "email-preview-hero",
-                innerHTML: "<strong>Garden Fresh</strong><span>Fresh summer harvest</span>"
+                innerHTML: "<strong>FOODIFI</strong><span>Fresh summer harvest</span>"
             }));
         }
     }

@@ -3,7 +3,7 @@ import { renderSidebarMenu } from "./auth-nav.js";
 import { renderAppIcon } from "./icons.js";
 
 const DEFAULT_SETTINGS = {
-    storeName: "Garden Fresh",
+    storeName: "FOODIFI",
     slogan: "Tươi ngon từ vườn đến bàn ăn...",
     supportEmail: "support@gardenfresh.vn",
     hotline: "1900 1234",
