@@ -777,7 +777,10 @@ export function showToast(message, isError = false) {
 }
 
 export function normalizeApiBase(input) {
-    return String(input || "").trim().replace(/\/+$/, "");
+    return String(input || "")
+        .trim()
+        .replace(/\/+$/, "")
+        .replace(/\/api$/i, "");
 }
 
 export function saveSession() {

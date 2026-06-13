@@ -900,10 +900,17 @@ export async function submitPromotionForm(raw) {
     const payload = buildPromotionPayload(raw);
     if (!payload.name) throw new Error("Vui lòng nhập tên chiến dịch khuyến mãi.");
 
-    await apiFetch("/api/promotions", {
-        method: "POST",
-        body: JSON.stringify(payload)
-    });
+    try {
+        await apiFetch("/api/promotions", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+    } catch (error) {
+        if (error.status === 404) {
+            throw new Error(`Backend hiện tại chưa có API /api/promotions tại ${state.apiBase}. Cần deploy backend mới rồi lưu lại chiến dịch.`);
+        }
+        throw error;
+    }
     await loadPromotionRulesFromApi({ force: true });
 
     renderPromotionRules();
