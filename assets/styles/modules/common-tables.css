@@ -174,8 +174,8 @@
 }
 
 .chip-button[data-action="open-publish-editor"] {
-  background: #dff1d8;
-  color: #236b33;
+  background: #f9d8d5;
+  color: #9d2f2f;
 }
 
 .chip-button[data-action="unpublish-product"],

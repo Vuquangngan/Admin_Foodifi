@@ -262,7 +262,6 @@ svg * {
 
 .chip-button[data-tone="accent"],
 .chip-button[data-action="edit-product"],
-.chip-button[data-action="open-publish-editor"],
 .branch-actions button[data-branch-action="edit"],
 .branch-actions button[data-branch-action="toggle-status"],
 .icon-action-button,
@@ -274,6 +273,7 @@ svg * {
 .danger-button,
 .ghost-button.danger,
 .chip-button[data-tone="danger"],
+.chip-button[data-action="open-publish-editor"],
 .chip-button[data-action="delete-product"],
 .chip-button[data-user-action="delete"],
 .chip-button[data-voucher-action="delete"],
@@ -300,6 +300,37 @@ button[data-recipe-action*="delete"]:hover,
 button[data-settings-menu-action="delete"]:hover {
   background: #ffe4e4 !important;
   color: #b42323 !important;
+}
+
+.primary-button,
+.primary-button *,
+.chat-send-button,
+.chat-send-button *,
+.order-product-picker-confirm,
+.order-product-picker-confirm *,
+.revenue-apply-button,
+.revenue-apply-button *,
+.branch-filter-pill.active,
+.branch-filter-pill.active *,
+.branch-shipment-tabs button.active,
+.branch-shipment-tabs button.active *,
+.warehouse-zone-tab.active,
+.warehouse-zone-tab.active *,
+.range-chip.active,
+.range-chip.active *,
+.customer-tier-chip.active,
+.customer-tier-chip.active *,
+.activity-action-tabs .chip-button.active,
+.activity-action-tabs .chip-button.active *,
+.activity-page-button.active,
+.activity-page-button.active *,
+.voucher-scope-chip.active,
+.voucher-scope-chip.active *,
+.promotion-hour-list button.active,
+.promotion-hour-list button.active *,
+.order-status-filter-chip.active:not([data-order-status-value="cancelled"]),
+.order-status-filter-chip.active:not([data-order-status-value="cancelled"]) * {
+  color: #ffffff !important;
 }
 
 .app-icon,
