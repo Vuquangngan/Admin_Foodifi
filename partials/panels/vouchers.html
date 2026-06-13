@@ -33,6 +33,11 @@
                 <div>
                   <p class="eyebrow">Khuyến mãi</p>
                   <h2 id="promotionFormTitle">Thiết lập khuyến mãi</h2>
+                  <p>Tạo chương trình ưu đãi mới cho cửa hàng của bạn</p>
+                </div>
+                <div class="promotion-progress" aria-label="Tiến độ thiết lập">
+                  <span class="active">50%</span>
+                  <span>Hoàn thành</span>
                 </div>
                 <div class="promotion-topbar-actions">
                   <button class="ghost-button" type="button" data-promotion-action="close-form">Hủy</button>
@@ -42,35 +47,39 @@
 
               <div class="promotion-content-grid">
                 <form id="promotionForm" class="promotion-form-column">
-                  <article class="surface promotion-card">
+                  <article class="promotion-form-section">
                     <div class="promotion-section-title">
-                      <span class="info-dot">i</span>
+                      <span class="promotion-section-icon">1</span>
                       <h3>Thông tin cơ bản</h3>
                     </div>
                     <label>
-                      <span>Tên chiến dịch</span>
-                      <input name="name" placeholder="Ví dụ: Combo rau củ mùa hè" required>
+                      <span>Tên chiến dịch khuyến mãi</span>
+                      <input name="name" placeholder="VD: Mua 2 tặng 1 - Tháng 6" required>
                     </label>
                     <label class="promotion-toggle-row">
                       <span>
                         <strong>Trạng thái hoạt động</strong>
-                        <small>Cho phép áp dụng chiến dịch ngay khi lưu</small>
+                        <small>Bật khuyến mãi ngay sau khi lưu vào cơ sở dữ liệu</small>
                       </span>
                       <input name="is_active" type="checkbox" checked>
                     </label>
+                    <p class="promotion-helper-text">Khuyến mãi sẽ được Android áp dụng khi sản phẩm nằm trong phạm vi và chiến dịch đang hoạt động.</p>
                   </article>
 
-                  <article class="surface promotion-card">
+                  <article class="promotion-form-section">
                     <div class="promotion-section-title">
-                      <span class="info-dot">△</span>
-                      <h3>Hình thức khuyến mãi</h3>
+                      <span class="promotion-section-icon">2</span>
+                      <h3>Loại khuyến mãi</h3>
                     </div>
+                    <p class="promotion-field-hint">Chọn hình thức khuyến mãi</p>
                     <div class="promotion-type-grid">
                       <label class="promotion-type-card active">
                         <input name="type" type="radio" value="buy_x_get_y" checked>
-                        <span class="promo-icon">□</span>
-                        <strong>Mua X tặng Y</strong>
-                        <small>Tặng sản phẩm miễn phí khi đạt ngưỡng mua hàng nhất định.</small>
+                        <span class="promo-icon">+</span>
+                        <span class="promotion-type-copy">
+                          <strong>Mua X tặng Y</strong>
+                          <small>Tặng sản phẩm miễn phí khi khách mua hàng theo chương trình.</small>
+                        </span>
                         <span>Sản phẩm tặng kèm</span>
                         <div class="promotion-combobox" data-promotion-combobox="gift">
                           <input name="gift_product_search" data-promotion-search-target="gift_product_id" autocomplete="off" placeholder="Nhấn để chọn hoặc nhập tên/mã sản phẩm...">
@@ -80,15 +89,23 @@
                       </label>
                       <label class="promotion-type-card">
                         <input name="type" type="radio" value="discount">
-                        <span class="promo-icon">◷</span>
-                        <strong>Giảm giá</strong>
-                        <small>Tự động áp dụng chiết khấu cho sản phẩm hoặc danh mục đã chọn.</small>
+                        <span class="promo-icon">%</span>
+                        <span class="promotion-type-copy">
+                          <strong>Giảm giá theo điều kiện</strong>
+                          <small>Tự động giảm giá cho sản phẩm hoặc danh mục đã chọn.</small>
+                        </span>
                       </label>
                     </div>
+                  </article>
 
+                  <article class="promotion-form-section">
+                    <div class="promotion-section-title">
+                      <span class="promotion-section-icon">3</span>
+                      <h3>Chi tiết &amp; phạm vi áp dụng</h3>
+                    </div>
                     <div class="promotion-apply-grid">
                       <label>
-                        <span>Loại áp dụng</span>
+                        <span>Phạm vi áp dụng</span>
                         <div class="promotion-inline-select">
                           <select name="apply_scope">
                             <option value="products">Sản phẩm</option>
@@ -104,16 +121,17 @@
                         </div>
                       </label>
                       <label>
-                        <span>Mức chiết khấu (%)</span>
+                        <span>Mức giảm giá (%)</span>
                         <input name="discount_percent" type="number" min="0" max="100" step="1" placeholder="20">
                       </label>
                     </div>
                     <div id="promotionProductsList" class="promotion-product-list"></div>
+                    <p class="promotion-helper-text">Nếu chọn “Tất cả”, chiến dịch áp dụng cho toàn bộ sản phẩm hoặc toàn bộ danh mục tương ứng.</p>
                   </article>
 
-                  <article class="surface promotion-card">
+                  <article class="promotion-form-section">
                     <div class="promotion-section-title">
-                      <span class="info-dot">□</span>
+                      <span class="promotion-section-icon">4</span>
                       <h3>Thời gian áp dụng</h3>
                     </div>
                     <div class="promotion-date-grid">
@@ -127,7 +145,8 @@
                       </label>
                     </div>
                     <div class="promotion-hour-box">
-                      <strong>Thiết lập khung giờ áp dụng</strong>
+                      <strong>Khung giờ áp dụng tùy chọn</strong>
+                      <span>Nếu không chọn, khuyến mãi có thể áp dụng cả ngày.</span>
                       <div class="promotion-hour-list">
                         <button class="active" type="button" data-promotion-time="20:00 - 22:00">20:00 - 22:00</button>
                         <button type="button" data-promotion-time="06:00 - 08:00">06:00 - 08:00</button>
@@ -135,6 +154,10 @@
                       </div>
                       <button class="chip-button" type="button" data-promotion-action="add-time">+ Thêm khung giờ</button>
                       <div id="promotionCustomTimeList" class="promotion-custom-time-list"></div>
+                    </div>
+                    <div class="promotion-form-footer">
+                      <button class="ghost-button" type="button" data-promotion-action="close-form">Hủy</button>
+                      <button class="primary-button" type="submit">Lưu &amp; kích hoạt</button>
                     </div>
                   </article>
                 </form>
