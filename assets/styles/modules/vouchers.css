@@ -344,7 +344,7 @@
 .promotion-topbar {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 300;
   min-height: 96px;
   padding: 28px 34px 24px;
   border-bottom: 2px solid rgba(13, 127, 66, 0.1);
@@ -370,30 +370,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.promotion-progress {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   margin-left: auto;
-}
-
-.promotion-progress span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  border-radius: 999px;
-  padding: 0 14px;
-  background: #e5f1e1;
-  color: #5f7465;
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-
-.promotion-progress span.active {
-  background: #08793e;
-  color: #ffffff;
 }
 
 .notification-dot,
@@ -541,10 +518,14 @@
 }
 
 .promotion-type-card.active {
-  z-index: 30;
+  z-index: 2;
   border-color: #08793e;
   background: #f4fbf0;
   box-shadow: 0 0 0 3px rgba(8, 121, 62, 0.08);
+}
+
+.promotion-type-card:has(.promotion-combobox.open) {
+  z-index: 80;
 }
 
 .promotion-type-card input[type="radio"] {
@@ -693,15 +674,6 @@
   border-color: #08793e;
   background: #08793e;
   color: white;
-}
-
-.promotion-form-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 28px;
-  padding-top: 22px;
-  border-top: 2px solid #e6f1e4;
 }
 
 .promotion-custom-time-list {
