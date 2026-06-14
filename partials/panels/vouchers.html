@@ -271,11 +271,17 @@
                   </div>
                   <div class="voucher-audience-group">
                     <span>Chọn tài khoản được hưởng ưu đãi</span>
-                    <div class="voucher-audience-grid">
-                      <button class="voucher-audience-chip active" type="button" data-voucher-audience="all">Tất cả thành viên</button>
-                      <button class="voucher-audience-chip" type="button" data-voucher-audience="silver">Thành viên Bạc</button>
-                      <button class="voucher-audience-chip" type="button" data-voucher-audience="gold">Thành viên Vàng</button>
-                    </div>
+                    <label class="voucher-audience-select-wrap">
+                      <select id="voucherAudienceSelect" name="audiences" multiple size="6" aria-label="Chọn nhiều cấp tài khoản được hưởng ưu đãi">
+                        <option value="all" selected>Tất cả thành viên</option>
+                        <option value="silver">Thành viên Bạc</option>
+                        <option value="gold">Thành viên Vàng</option>
+                        <option value="platinum">Thành viên Bạch kim</option>
+                        <option value="diamond">Thành viên Kim cương</option>
+                        <option value="vip">Thành viên VIP</option>
+                      </select>
+                      <small>Giữ Ctrl để chọn nhiều cấp. Nếu chọn “Tất cả thành viên”, hệ thống sẽ áp dụng cho mọi tài khoản.</small>
+                    </label>
                     <input type="hidden" name="audience" value="all">
                   </div>
                   <div class="compact-grid">

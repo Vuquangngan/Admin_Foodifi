@@ -50,6 +50,39 @@ function getVoucherMeta(coupon) {
     return { ...descriptionMeta, ...campaignMeta };
 }
 
+const VOUCHER_AUDIENCE_LABELS = {
+    all: "Tất cả thành viên",
+    silver: "Thành viên Bạc",
+    gold: "Thành viên Vàng",
+    platinum: "Thành viên Bạch kim",
+    diamond: "Thành viên Kim cương",
+    vip: "Thành viên VIP"
+};
+
+function normalizeVoucherAudiences(value) {
+    const values = Array.isArray(value)
+        ? value
+        : String(value || "all").split(",");
+    const normalized = values
+        .map((item) => String(item || "").trim())
+        .filter((item) => Object.prototype.hasOwnProperty.call(VOUCHER_AUDIENCE_LABELS, item));
+    if (!normalized.length || normalized.includes("all")) return ["all"];
+    return Array.from(new Set(normalized));
+}
+
+function getSelectedVoucherAudiences() {
+    if (!elements.voucherAudienceSelect) {
+        return normalizeVoucherAudiences(elements.voucherForm?.elements.audience?.value || "all");
+    }
+    return normalizeVoucherAudiences(Array.from(elements.voucherAudienceSelect.selectedOptions).map((option) => option.value));
+}
+
+function getVoucherAudienceLabel(value) {
+    const audiences = normalizeVoucherAudiences(value);
+    if (audiences.includes("all")) return VOUCHER_AUDIENCE_LABELS.all;
+    return audiences.map((item) => VOUCHER_AUDIENCE_LABELS[item] || item).join(", ");
+}
+
 function getProductNameById(id) {
     const product = (state.products || []).find((item) => String(item.id) === String(id));
     return product?.name || "Sản phẩm";
@@ -220,7 +253,8 @@ function formatVoucherDiscount(coupon) {
 function buildVoucherPayload(raw) {
     const title = String(raw.title || "").trim();
     const note = String(raw.note || "").trim();
-    const audience = String(raw.audience || "all").trim() || "all";
+    const audiences = getSelectedVoucherAudiences();
+    const audience = audiences[0] || "all";
     const applyScope = String(raw.apply_scope || getVoucherApplyScope()).trim() === "categories" ? "categories" : "products";
     const appliedProducts = applyScope === "products" ? getSelectedAppliedProducts() : ["all"];
     const appliedCategories = applyScope === "categories" ? getSelectedAppliedCategories() : ["all"];
@@ -230,6 +264,7 @@ function buildVoucherPayload(raw) {
         campaign_type: String(raw.campaign_type || "discount").trim() || "discount",
         apply_scope: applyScope,
         audience,
+        audiences,
         note,
         applied_product_ids: applyScope === "products" && !appliedProducts.includes("all")
             ? appliedProducts.map((value) => Number(value)).filter(Boolean)
@@ -301,7 +336,7 @@ function renderVoucherTable() {
                 const status = getVoucherStatus(coupon);
                 const usageLimit = coupon.usage_limit ? `${formatNumber(coupon.used_count || 0)} / ${formatNumber(coupon.usage_limit)}` : `${formatNumber(coupon.used_count || 0)} lượt`;
                 const minOrder = Number(coupon.min_order_value || 0) > 0 ? formatCurrency(coupon.min_order_value) : "Không giới hạn";
-                const audience = meta.audience === "silver" ? "Thành viên Bạc" : meta.audience === "gold" ? "Thành viên Vàng" : "Tất cả thành viên";
+                const audience = getVoucherAudienceLabel(meta.audiences || meta.audience || "all");
                 return `
                   <tr>
                     <td><strong>${escapeHtml(coupon.code || "-")}</strong></td>
@@ -335,10 +370,10 @@ function setVoucherPreview(raw = {}) {
     const maxDiscountValue = parseMoneyInputValue(raw.max_discount_value);
     const minOrderValue = parseMoneyInputValue(raw.min_order_value);
     const title = String(raw.title || "").trim() || "Mã giảm giá của bạn";
-    const audience = String(raw.audience || "all").trim() || "all";
+    const audience = raw.audiences || raw.audience || getSelectedVoucherAudiences();
     const applyScope = getVoucherApplyScope();
 
-    elements.voucherPreviewBadge.textContent = audience === "silver" ? "Thành viên Bạc" : audience === "gold" ? "Thành viên Vàng" : "Tất cả thành viên";
+    elements.voucherPreviewBadge.textContent = getVoucherAudienceLabel(audience);
     elements.voucherPreviewTitle.textContent = title;
     elements.voucherPreviewCode.textContent = code;
     elements.voucherPreviewDiscount.textContent = discountType === "percent" ? `${formatNumber(discountValue)}%` : formatCurrency(discountValue);
@@ -352,12 +387,18 @@ function setVoucherPreview(raw = {}) {
 }
 
 function setAudienceButtons(audience = "all") {
-    const selected = String(audience || "all").trim() || "all";
+    const selectedAudiences = normalizeVoucherAudiences(audience);
+    const selected = selectedAudiences[0] || "all";
     elements.voucherAudienceButtons.forEach((button) => {
         button.classList.toggle("active", button.dataset.voucherAudience === selected);
     });
+    if (elements.voucherAudienceSelect) {
+        Array.from(elements.voucherAudienceSelect.options).forEach((option) => {
+            option.selected = selectedAudiences.includes(option.value);
+        });
+    }
     if (elements.voucherForm?.elements.audience) {
-        elements.voucherForm.elements.audience.value = selected;
+        elements.voucherForm.elements.audience.value = selectedAudiences.join(",");
     }
 }
 
@@ -370,7 +411,7 @@ export function resetVoucherForm() {
     setAudienceButtons("all");
     setVoucherApplyScope("products", ["all"]);
     if (elements.voucherForm?.elements.is_active) elements.voucherForm.elements.is_active.checked = true;
-    setVoucherPreview({ title: "", code: "", discount_type: "percent", discount_value: 0, max_discount_value: 0, min_order_value: 0, audience: "all" });
+    setVoucherPreview({ title: "", code: "", discount_type: "percent", discount_value: 0, max_discount_value: 0, min_order_value: 0, audiences: ["all"] });
 }
 
 export function openVoucherForm(voucherId = null) {
@@ -421,8 +462,9 @@ export function openVoucherForm(voucherId = null) {
         appliedValues = meta.applied_product_ids.map(String);
     }
     setVoucherApplyScope(applyScope, appliedValues);
-    setAudienceButtons(meta.audience || "all");
-    setVoucherPreview({ ...values, audience: meta.audience || "all" });
+    const audiences = meta.audiences || meta.audience || "all";
+    setAudienceButtons(audiences);
+    setVoucherPreview({ ...values, audiences });
     elements.voucherFormView?.classList.remove("hidden");
     renderVouchers();
 }

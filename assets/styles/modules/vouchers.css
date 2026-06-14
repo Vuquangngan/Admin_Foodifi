@@ -996,6 +996,40 @@
   gap: 12px;
 }
 
+.voucher-audience-select-wrap {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.voucher-audience-select-wrap select {
+  width: 100%;
+  min-height: 148px;
+  padding: 10px 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(17, 95, 54, 0.2);
+  background: #fffdf9;
+  color: #203c2a;
+  font-size: 0.98rem;
+  font-weight: 700;
+  outline: none;
+}
+
+.voucher-audience-select-wrap select:focus {
+  border-color: #0d7f42;
+  box-shadow: 0 0 0 4px rgba(13, 127, 66, 0.12);
+}
+
+.voucher-audience-select-wrap option {
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.voucher-audience-select-wrap small {
+  color: #68786b;
+  font-weight: 600;
+}
+
 .voucher-audience-chip {
   min-height: 82px;
   padding: 18px;

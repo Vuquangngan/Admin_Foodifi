@@ -802,16 +802,18 @@ async function submitSupplierReturnTicketV2() {
     const product = (state.products || []).find((item) => Number(item.id) === Number(raw.product_id));
     if (!product) throw new Error("Không tìm thấy sản phẩm cần trả.");
 
+    const existing = getSupplierReturnTicketByProduct(product.id);
+    const alreadyResolved = existing?.status === "resolved";
     const quantity = Number(raw.quantity || 0);
     const stock = getProductStock(product);
     if (!Number.isFinite(quantity) || quantity <= 0) {
         throw new Error("Số lượng trả phải lớn hơn 0.");
     }
-    if (quantity > stock) {
+    if (!alreadyResolved && quantity > stock) {
         throw new Error("Số lượng trả không được lớn hơn tồn kho chính.");
     }
 
-    const nextStock = Math.max(0, stock - quantity);
+    const nextStock = alreadyResolved ? stock : Math.max(0, stock - quantity);
     const unit = product.stock_unit || product.unit || "đơn vị";
     const productPayload = {
         category_id: Number(product.category_id || product.category?.id || 0),
@@ -867,11 +869,16 @@ async function submitSupplierReturnTicketV2() {
         : [payload, ...tickets];
     saveSupplierReturns(nextTickets);
 
-    product.stock_quantity = nextStock;
-    product.status = productPayload.status;
+    if (!alreadyResolved) {
+        product.stock_quantity = nextStock;
+        product.status = productPayload.status;
+    }
     state.supplierReturnModalProductId = "";
     renderSuppliers();
-    showToast(`Đã xác nhận trả hàng và trừ ${formatNumber(quantity)} ${unit} khỏi kho chính.`);
+    showToast(alreadyResolved
+        ? "Phiếu trả hàng này đã được xử lý trước đó."
+        : `Đã xác nhận trả hàng và trừ ${formatNumber(quantity)} ${unit} khỏi kho chính.`
+    );
 }
 
 function renderSupplierReturnsV2() {

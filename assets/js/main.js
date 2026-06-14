@@ -322,7 +322,7 @@ function bindGlobalEvents() {
         });
     });
 
-    elements.logoutButton.addEventListener("click", performLogout);
+    elements.logoutButton?.addEventListener("click", performLogout);
 
     elements.navCard.addEventListener("click", (event) => {
         const sectionTrigger = event.target.closest("[data-section-toggle]");
@@ -1012,6 +1012,20 @@ function bindGlobalEvents() {
             elements.voucherAudienceButtons.forEach((item) => item.classList.toggle("active", item === button));
             syncVoucherPreview();
         });
+    });
+    elements.voucherAudienceSelect?.addEventListener("change", () => {
+        const selected = Array.from(elements.voucherAudienceSelect.selectedOptions).map((option) => option.value);
+        if (!selected.length || selected.includes("all")) {
+            Array.from(elements.voucherAudienceSelect.options).forEach((option) => {
+                option.selected = option.value === "all";
+            });
+        }
+        if (elements.voucherForm?.elements.audience) {
+            elements.voucherForm.elements.audience.value = Array.from(elements.voucherAudienceSelect.selectedOptions)
+                .map((option) => option.value)
+                .join(",");
+        }
+        syncVoucherPreview();
     });
 
     elements.voucherFormView?.addEventListener("click", (event) => {

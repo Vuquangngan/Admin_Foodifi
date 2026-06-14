@@ -701,6 +701,7 @@ export const elements = {
     voucherCodeInput: document.querySelector("#voucherCodeInput"),
     voucherCodeAutoButton: document.querySelector("#voucherCodeAutoButton"),
     voucherAudienceButtons: Array.from(document.querySelectorAll("[data-voucher-audience]")),
+    voucherAudienceSelect: document.querySelector("#voucherAudienceSelect"),
     voucherPreviewBadge: document.querySelector("#voucherPreviewBadge"),
     voucherPreviewTitle: document.querySelector("#voucherPreviewTitle"),
     voucherPreviewCode: document.querySelector("#voucherPreviewCode"),
