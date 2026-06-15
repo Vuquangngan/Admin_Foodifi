@@ -276,6 +276,11 @@ function bindGlobalEvents() {
             }
 
             await login(formData.email, formData.password);
+            updateSessionUi();
+            setAdminPageTitle("Tổng quan");
+            setActivePanel("overview");
+            renderSidebarMenu();
+            renderOverview();
             selectSidebarItem("overview-home");
             const hasLoadedData = await bootstrapAdmin();
             if (!hasLoadedData) {
