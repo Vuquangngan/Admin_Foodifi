@@ -1412,6 +1412,7 @@ function bindGlobalEvents() {
     });
     elements.orderInvoicePrintButton?.addEventListener("click", printCurrentOrderInvoice);
     elements.orderInvoiceExportButton?.addEventListener("click", exportCurrentOrderInvoice);
+    window.__foodifiMainReady = true;
 }
 
 async function initialize() {

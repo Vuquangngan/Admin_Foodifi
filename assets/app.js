@@ -1,4 +1,77 @@
 import { loadPartials } from "./js/partials-loader.js";
 
 await loadPartials(document);
-await import("./js/main.js");
+
+function showAuthMessage(message, isError = true) {
+    const subtitle = document.querySelector("#authSubtitle");
+    if (!subtitle) return;
+    subtitle.textContent = message;
+    subtitle.classList.remove("hidden");
+    subtitle.classList.toggle("auth-error-message", isError);
+}
+
+function bindLoginFallback() {
+    const form = document.querySelector("#loginForm");
+    if (!form) return;
+
+    form.addEventListener("submit", async (event) => {
+        if (window.__foodifiMainReady) return;
+        event.preventDefault();
+
+        const button = document.querySelector("#authSubmitButton");
+        const originalText = button?.textContent || "Đăng nhập";
+        if (button) {
+            button.disabled = true;
+            button.textContent = "Đang xử lý...";
+        }
+
+        try {
+            showAuthMessage("", false);
+            const formData = new FormData(form);
+            const apiBase = String(formData.get("apiBase") || "http://localhost:3000").replace(/\/+$/, "").replace(/\/api$/i, "");
+            const response = await fetch(`${apiBase}/api/auth/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: String(formData.get("email") || "").trim(),
+                    password: String(formData.get("password") || "")
+                })
+            });
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(payload?.message || "Không đăng nhập được. Vui lòng kiểm tra email và mật khẩu.");
+            }
+
+            const user = payload.user || payload.data?.user || null;
+            const token = payload.token || payload.access_token || payload.data?.token || "";
+            if (!token || !user || !["admin", "staff"].includes(user.role)) {
+                throw new Error("Tài khoản không có quyền truy cập admin.");
+            }
+
+            localStorage.setItem("shopfood_admin_api_base", apiBase);
+            localStorage.setItem("shopfood_admin_session", JSON.stringify({
+                token,
+                refreshToken: payload.refresh_token || payload.refreshToken || "",
+                user
+            }));
+            showAuthMessage("Đăng nhập thành công. Đang mở trang quản trị...", false);
+            window.location.reload();
+        } catch (error) {
+            showAuthMessage(error.message || "Có lỗi xảy ra khi đăng nhập.", true);
+        } finally {
+            if (button) {
+                button.disabled = false;
+                button.textContent = originalText;
+            }
+        }
+    });
+}
+
+bindLoginFallback();
+
+try {
+    await import("./js/main.js");
+} catch (error) {
+    console.error("Không khởi tạo được admin shell:", error);
+    showAuthMessage("Giao diện quản trị chưa khởi tạo đầy đủ, nhưng bạn vẫn có thể thử đăng nhập.", true);
+}
