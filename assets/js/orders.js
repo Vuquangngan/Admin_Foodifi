@@ -32,15 +32,15 @@ const ORDER_ADMIN_NOTE_PREFIX = "[[ORDER_ADMIN_META]]";
 const COMPLAINT_ADMIN_META_PREFIX = "[[COMPLAINT_ADMIN_META]]";
 const HANOI_ROUTE_POINTS = [
     { key: "mieu-dam", label: "Miếu Đầm", lat: 21.0138, lng: 105.7812, terms: ["116 miếu đầm", "miếu đầm", "mieu dam", "mễ trì", "me tri", "nam từ liêm", "nam tu liem"] },
-    { key: "cau-giay", label: "C?u Gi?y", lat: 21.0362, lng: 105.7908, terms: ["c?u gi?y", "cau giay", "duy t�n", "duy tan", "tr?n th�i t�ng", "tran thai tong", "xu�n th?y", "xuan thuy"] },
+    { key: "cau-giay", label: "Cầu Giấy", lat: 21.0362, lng: 105.7908, terms: ["cầu giấy", "cau giay", "duy tân", "duy tan", "trần thái tông", "tran thai tong", "xuân thủy", "xuan thuy"] },
     { key: "ba-dinh", label: "Ba Đình", lat: 21.0343, lng: 105.8141, terms: ["ba đình", "ba dinh", "kim mã", "kim ma", "đội cấn", "doi can", "ngọc hà", "ngoc ha"] },
-    { key: "dong-da", label: "�?ng �a", lat: 21.0186, lng: 105.8297, terms: ["d?ng da", "dong da", "th�i h�", "thai ha", "t�y son", "tay son", "ch�a b?c", "chua boc"] },
+    { key: "dong-da", label: "Đống Đa", lat: 21.0186, lng: 105.8297, terms: ["đống đa", "dong da", "thái hà", "thai ha", "tây sơn", "tay son", "chùa bộc", "chua boc"] },
     { key: "hoan-kiem", label: "Hoàn Kiếm", lat: 21.0285, lng: 105.8542, terms: ["hoàn kiếm", "hoan kiem", "hàng bài", "hang bai", "tràng tiền", "trang tien", "hồ gươm", "ho guom"] },
     { key: "hai-ba-trung", label: "Hai Bà Trưng", lat: 21.0064, lng: 105.8603, terms: ["hai bà trưng", "hai ba trung", "minh khai", "bạch mai", "bach mai", "lò đúc", "lo duc"] },
-    { key: "thanh-xuan", label: "Thanh Xu�n", lat: 20.9946, lng: 105.8074, terms: ["thanh xu�n", "thanh xuan", "nguy?n tr�i", "nguyen trai", "khuong d�nh", "khuong dinh"] },
+    { key: "thanh-xuan", label: "Thanh Xuân", lat: 20.9946, lng: 105.8074, terms: ["thanh xuân", "thanh xuan", "nguyễn trãi", "nguyen trai", "khương đình", "khuong dinh"] },
     { key: "ha-dong", label: "Hà Đông", lat: 20.9712, lng: 105.7788, terms: ["hà đông", "ha dong", "văn quán", "van quan", "mộ lao", "mo lao"] },
-    { key: "tay-ho", label: "T�y H?", lat: 21.0698, lng: 105.8235, terms: ["t�y h?", "tay ho", "xu�n la", "xuan la", "nh?t t�n", "nhat tan"] },
-    { key: "long-bien", label: "Long Bi�n", lat: 21.0478, lng: 105.8910, terms: ["long bi�n", "long bien", "ng?c l�m", "ngoc lam", "gia th?y", "gia thuy"] }
+    { key: "tay-ho", label: "Tây Hồ", lat: 21.0698, lng: 105.8235, terms: ["tây hồ", "tay ho", "xuân la", "xuan la", "nhật tân", "nhat tan"] },
+    { key: "long-bien", label: "Long Biên", lat: 21.0478, lng: 105.8910, terms: ["long biên", "long bien", "ngọc lâm", "ngoc lam", "gia thụy", "gia thuy"] }
 ];
 
 function getDefaultSellerInfo() {
@@ -386,15 +386,7 @@ function getGrabDevNextActionLabel(order) {
 
 function buildGrabShipmentSummary(order, { compact = false } = {}) {
     if (!order?.tracking_code) {
-        return compact ? "" : `
-          <article class="order-shipping-card is-empty">
-            <div>
-              <span>GrabExpress</span>
-              <strong>Chưa tạo vận đơn</strong>
-              <small>Tạo vận đơn Grab để test luồng giao hàng.</small>
-            </div>
-          </article>
-        `;
+        return "";
     }
 
     const providerLabel = getShippingProviderLabel(order);
