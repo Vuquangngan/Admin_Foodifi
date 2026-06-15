@@ -218,11 +218,31 @@ function bindGlobalEvents() {
         handleStatsFilterSubmit(form);
     }, true);
 
+    let isAuthSubmitting = false;
+
+    function showAuthInlineMessage(message, isError = true) {
+        if (!elements.authSubtitle) {
+            showToast(message, isError);
+            return;
+        }
+
+        elements.authSubtitle.textContent = message || "";
+        elements.authSubtitle.classList.toggle("hidden", !message);
+        elements.authSubtitle.classList.toggle("auth-error-message", isError);
+    }
+
     async function submitAuthForm(submitter = null) {
-        elements.authSubtitle.textContent = "";
-        elements.authSubtitle.classList.add("hidden");
-        elements.authSubtitle.classList.remove("auth-error-message");
-        await withLoading(submitter, async () => {
+        if (isAuthSubmitting) return;
+
+        isAuthSubmitting = true;
+        const originalText = submitter?.textContent || "";
+        if (submitter) {
+            submitter.disabled = true;
+            submitter.textContent = "Đang xử lý...";
+        }
+
+        try {
+            showAuthInlineMessage("", false);
             const formData = collectFormData(elements.loginForm);
             state.apiBase = normalizeApiBase(formData.apiBase || state.apiBase || "http://localhost:3000");
 
@@ -263,10 +283,20 @@ function bindGlobalEvents() {
                 return;
             }
             showToast("Đăng nhập thành công.");
-        });
+        } catch (error) {
+            const message = error?.message || "Không đăng nhập được. Vui lòng thử lại.";
+            showAuthInlineMessage(message, true);
+            showToast(message, true);
+        } finally {
+            isAuthSubmitting = false;
+            if (submitter) {
+                submitter.disabled = false;
+                submitter.textContent = originalText;
+            }
+        }
     }
 
-    elements.loginForm.addEventListener("submit", async (event) => {
+    elements.loginForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
         await submitAuthForm(event.submitter || elements.authSubmitButton);
     });
@@ -276,7 +306,7 @@ function bindGlobalEvents() {
         await submitAuthForm(event.currentTarget);
     });
 
-    elements.authTabs.forEach((tab) => {
+    elements.authTabs?.forEach((tab) => {
         tab.addEventListener("click", () => setAuthMode(tab.dataset.authMode));
     });
 

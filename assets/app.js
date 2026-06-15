@@ -1,12 +1,15 @@
-import { loadPartials } from "./js/partials-loader.js";
+const ADMIN_ASSET_VERSION = "20260615-loginfix";
+
+const { loadPartials } = await import(`./js/partials-loader.js?v=${ADMIN_ASSET_VERSION}`);
 
 await loadPartials(document);
 
 function showAuthMessage(message, isError = true) {
     const subtitle = document.querySelector("#authSubtitle");
     if (!subtitle) return;
+
     subtitle.textContent = message;
-    subtitle.classList.remove("hidden");
+    subtitle.classList.toggle("hidden", !message);
     subtitle.classList.toggle("auth-error-message", isError);
 }
 
@@ -28,7 +31,11 @@ function bindLoginFallback() {
         try {
             showAuthMessage("", false);
             const formData = new FormData(form);
-            const apiBase = String(formData.get("apiBase") || "http://localhost:3000").replace(/\/+$/, "").replace(/\/api$/i, "");
+            const apiBase = String(formData.get("apiBase") || "http://localhost:3000")
+                .trim()
+                .replace(/\/+$/, "")
+                .replace(/\/api$/i, "");
+
             const response = await fetch(`${apiBase}/api/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -37,6 +44,7 @@ function bindLoginFallback() {
                     password: String(formData.get("password") || "")
                 })
             });
+
             const payload = await response.json().catch(() => ({}));
             if (!response.ok) {
                 throw new Error(payload?.message || "Không đăng nhập được. Vui lòng kiểm tra email và mật khẩu.");
@@ -45,7 +53,7 @@ function bindLoginFallback() {
             const user = payload.user || payload.data?.user || null;
             const token = payload.token || payload.access_token || payload.data?.token || "";
             if (!token || !user || !["admin", "staff"].includes(user.role)) {
-                throw new Error("Tài khoản không có quyền truy cập admin.");
+                throw new Error("Tài khoản này không có quyền truy cập admin.");
             }
 
             localStorage.setItem("shopfood_admin_api_base", apiBase);
@@ -70,7 +78,7 @@ function bindLoginFallback() {
 bindLoginFallback();
 
 try {
-    await import("./js/main.js");
+    await import(`./js/main.js?v=${ADMIN_ASSET_VERSION}`);
 } catch (error) {
     console.error("Không khởi tạo được admin shell:", error);
     showAuthMessage("Giao diện quản trị chưa khởi tạo đầy đủ, nhưng bạn vẫn có thể thử đăng nhập.", true);
