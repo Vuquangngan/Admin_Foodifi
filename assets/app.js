@@ -1,4 +1,4 @@
-const ADMIN_ASSET_VERSION = "20260615-loginfix";
+const ADMIN_ASSET_VERSION = "20260615-api-base-fix";
 
 const { loadPartials } = await import(`./js/partials-loader.js?v=${ADMIN_ASSET_VERSION}`);
 
@@ -11,6 +11,41 @@ function showAuthMessage(message, isError = true) {
     subtitle.textContent = message;
     subtitle.classList.toggle("hidden", !message);
     subtitle.classList.toggle("auth-error-message", isError);
+}
+
+function isLocalFrontendHost() {
+    const hostname = window.location.hostname;
+    return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "";
+}
+
+function normalizeApiBase(input) {
+    return String(input || "")
+        .trim()
+        .replace(/\/+$/, "")
+        .replace(/\/api$/i, "");
+}
+
+function isLocalApiBase(value) {
+    return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(String(value || ""));
+}
+
+function getFallbackApiBase(formData) {
+    const config = window.SHOPFOOD_ADMIN_CONFIG || {};
+    const runtimeApiBase = normalizeApiBase(
+        (isLocalFrontendHost() ? config.localApiBase : config.productionApiBase)
+        || config.apiBase
+        || (isLocalFrontendHost() ? "http://localhost:3000" : "https://backend-shopfood.onrender.com")
+    );
+    const savedApiBase = normalizeApiBase(localStorage.getItem("shopfood_admin_api_base") || "");
+    const formApiBase = normalizeApiBase(formData.get("apiBase") || "");
+
+    if (!isLocalFrontendHost()) {
+        if (formApiBase && !isLocalApiBase(formApiBase)) return formApiBase;
+        if (savedApiBase && !isLocalApiBase(savedApiBase)) return savedApiBase;
+        return runtimeApiBase;
+    }
+
+    return formApiBase || savedApiBase || runtimeApiBase;
 }
 
 function bindLoginFallback() {
@@ -31,10 +66,7 @@ function bindLoginFallback() {
         try {
             showAuthMessage("", false);
             const formData = new FormData(form);
-            const apiBase = String(formData.get("apiBase") || "http://localhost:3000")
-                .trim()
-                .replace(/\/+$/, "")
-                .replace(/\/api$/i, "");
+            const apiBase = getFallbackApiBase(formData);
 
             const response = await fetch(`${apiBase}/api/auth/login`, {
                 method: "POST",

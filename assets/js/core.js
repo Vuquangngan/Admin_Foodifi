@@ -24,6 +24,10 @@ function isLocalFrontendHost() {
     return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "";
 }
 
+function isLocalApiBase(value) {
+    return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(String(value || ""));
+}
+
 function getRuntimeApiBase() {
     const config = window.SHOPFOOD_ADMIN_CONFIG || {};
     const configuredApiBase = isLocalFrontendHost()
@@ -801,7 +805,8 @@ export function saveSession() {
 
 export function restoreSession() {
     const savedApiBase = normalizeApiBase(localStorage.getItem(STORAGE_KEYS.apiBase) || "");
-    state.apiBase = savedApiBase || getRuntimeApiBase();
+    const shouldIgnoreSavedLocalApi = !isLocalFrontendHost() && isLocalApiBase(savedApiBase);
+    state.apiBase = shouldIgnoreSavedLocalApi ? getRuntimeApiBase() : (savedApiBase || getRuntimeApiBase());
 
     if (elements.apiBaseInput) {
         elements.apiBaseInput.value = state.apiBase;
