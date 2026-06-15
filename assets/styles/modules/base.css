@@ -67,7 +67,21 @@ button {
   align-items: center;
   justify-content: center;
   height: calc(100vh - 48px);
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+
+.app-shell.auth-screen .admin-page-content,
+.app-shell.auth-screen .auth-panel,
+.app-shell.auth-screen .auth-stage,
+.app-shell.auth-screen .auth-card,
+.app-shell.auth-screen .auth-form,
+.app-shell.auth-screen .input-shell,
+.app-shell.auth-screen .password-toggle,
+.app-shell.auth-screen .auth-submit {
+  position: relative;
+  z-index: 2;
 }
 
 .sidebar {

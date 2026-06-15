@@ -40,6 +40,51 @@ function getMenuItem(itemKey) {
     return null;
 }
 
+function closeTransientOverlays() {
+    const persistentModalIds = new Set([
+        "orderDetailModal",
+        "complaintDetailModal",
+        "activityWarningModal",
+        "branchModal",
+        "categoryModal",
+        "productEditorModal",
+        "publishEditorModal",
+        "recipeModal",
+        "recipeCategoryModal",
+        "supplierFormCard",
+        "userFormModal",
+        "customerProfileModal"
+    ]);
+
+    document.querySelectorAll([
+        ".modal-backdrop",
+        ".settings-menu-modal-backdrop",
+        ".shift-modal-backdrop",
+        ".refund-modal-backdrop",
+        ".supplier-return-backdrop",
+        ".warehouse-capacity-modal-backdrop",
+        ".branch-shipment-create-backdrop",
+        ".promotion-form-modal",
+        ".voucher-form-modal"
+    ].join(", ")).forEach((node) => {
+        if (!(node instanceof HTMLElement)) return;
+
+        if (persistentModalIds.has(node.id) || node.classList.contains("promotion-form-modal") || node.classList.contains("voucher-form-modal")) {
+            node.classList.add("hidden");
+            return;
+        }
+
+        node.remove();
+    });
+
+    if (elements.orderDetailContent) {
+        elements.orderDetailContent.innerHTML = "";
+    }
+    if (elements.complaintDetailContent) {
+        elements.complaintDetailContent.innerHTML = "";
+    }
+}
+
 export function renderSidebarMenu() {
     elements.navCard.innerHTML = getVisibleSidebarMenu().map((section) => {
         const isExpanded = Boolean(state.expandedSections[section.key]);
@@ -71,6 +116,10 @@ export function renderSidebarMenu() {
 }
 
 export function setActivePanel(view) {
+    if (view === "login") {
+        closeTransientOverlays();
+    }
+
     Object.entries(elements.panels).forEach(([key, panel]) => {
         panel.classList.toggle("active", key === view);
         panel.classList.toggle("hidden", key !== view);
@@ -107,6 +156,7 @@ export function updateSessionUi() {
         elements.adminQuickAvatar.src = resolveMediaUrl(state.user?.avatar_url, fallback);
     }
     if (!isLoggedIn) {
+        closeTransientOverlays();
         elements.adminAccountDropdown?.classList.add("hidden");
         elements.adminAccountTrigger?.setAttribute("aria-expanded", "false");
         setAdminPageTitle("Đăng nhập hệ thống");
@@ -383,6 +433,7 @@ export function logout(showMessage = true) {
     state.dashboard = null;
     deactivateChatsPanel();
     saveSession();
+    closeTransientOverlays();
     updateSessionUi();
     setActivePanel("login");
     if (showMessage) showToast("Đã đăng xuất.");
