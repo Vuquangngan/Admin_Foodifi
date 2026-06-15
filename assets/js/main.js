@@ -1530,4 +1530,72 @@ async function initialize() {
     }
 }
 
-initialize();
+function bindEmergencyLoginHandler(error) {
+    if (window.__foodifiEmergencyLoginBound) return;
+    window.__foodifiEmergencyLoginBound = true;
+    console.error("Khoi tao admin bi gian doan, kich hoat emergency login:", error);
+
+    const form = document.querySelector("#loginForm");
+    const button = document.querySelector("#authSubmitButton");
+    const subtitle = document.querySelector("#authSubtitle");
+
+    if (!form || !button) return;
+
+    const renderError = (message) => {
+        if (!subtitle) {
+            showToast(message, true);
+            return;
+        }
+
+        subtitle.textContent = message;
+        subtitle.classList.remove("hidden");
+        subtitle.classList.add("auth-error-message");
+    };
+
+    form.addEventListener("submit", async (event) => {
+        if (window.__foodifiMainReady) return;
+        event.preventDefault();
+
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = "Đang xử lý...";
+
+        try {
+            if (subtitle) {
+                subtitle.textContent = "";
+                subtitle.classList.add("hidden");
+                subtitle.classList.remove("auth-error-message");
+            }
+
+            const formData = collectFormData(form);
+            state.apiBase = normalizeApiBase(formData.apiBase || state.apiBase || "http://localhost:3000");
+            await login(formData.email, formData.password);
+            updateSessionUi();
+            setAdminPageTitle("Tổng quan");
+            renderSidebarMenu();
+            setActivePanel("overview");
+            renderOverview();
+            selectSidebarItem("overview-home");
+            await bootstrapAdmin();
+            showToast("Đăng nhập thành công.");
+            window.__foodifiMainReady = true;
+        } catch (submitError) {
+            renderError(submitError?.message || "Không đăng nhập được. Vui lòng thử lại.");
+        } finally {
+            button.disabled = false;
+            button.textContent = originalText;
+        }
+    });
+
+    button.addEventListener("click", (event) => {
+        if (window.__foodifiMainReady) return;
+        event.preventDefault();
+        form.requestSubmit?.(button);
+    });
+}
+
+initialize().catch((error) => {
+    bindEmergencyLoginHandler(error);
+    updateSessionUi();
+    setActivePanel("login");
+});
