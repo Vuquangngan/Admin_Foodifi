@@ -431,7 +431,7 @@ function bindGlobalEvents() {
         }
     });
 
-    elements.statsContent?.addEventListener("submit", (event) => {
+    document.addEventListener("submit", (event) => {
         const form = event.target.closest("[data-stats-filter-form]");
         if (!form) return;
         event.preventDefault();

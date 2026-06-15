@@ -264,13 +264,13 @@ function renderBranchOptions() {
 function renderStatsFilterForm(workspace, fields = "") {
     const filters = getStatsFilters(workspace);
     return `
-      <form class="surface stats-filter-card" data-stats-filter-form="${escapeHtml(workspace)}">
+      <form class="surface stats-filter-card" data-stats-filter-form="${escapeHtml(workspace)}" action="javascript:void(0)" novalidate>
         <strong>Bộ lọc thống kê</strong>
         <div class="stats-filter-grid">
           <label><span>Từ ngày</span><input type="date" name="from_date" value="${escapeHtml(filters.from_date || "")}"></label>
           <label><span>Đến ngày</span><input type="date" name="to_date" value="${escapeHtml(filters.to_date || "")}"></label>
           ${fields}
-          <button class="primary-button stats-filter-apply" type="submit">${renderAppIcon("filter")} Áp dụng</button>
+          <button class="primary-button stats-filter-apply" type="submit" data-stats-filter-apply>${renderAppIcon("filter")} Áp dụng</button>
         </div>
       </form>
     `;
