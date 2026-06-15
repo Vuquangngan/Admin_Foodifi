@@ -22,6 +22,36 @@ const CUSTOMER_TIERS = [
     { key: "kim_cuong", label: "Kim cương" },
     { key: "vip", label: "VIP" }
 ];
+const CUSTOMER_TIER_LABELS = new Map(CUSTOMER_TIERS.filter((tier) => tier.key).map((tier) => [tier.key, tier.label]));
+
+function normalizeCustomerTierKey(value = "") {
+    return String(value || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, "_");
+}
+
+function getCustomerTierLabelByKey(value, fallback = "Đồng") {
+    const normalizedKey = normalizeCustomerTierKey(value);
+    const normalizedFallbackKey = normalizeCustomerTierKey(fallback);
+    return CUSTOMER_TIER_LABELS.get(normalizedKey)
+        || CUSTOMER_TIER_LABELS.get(normalizedFallbackKey)
+        || fallback
+        || "Đồng";
+}
+
+function getCustomerTierLabel(customer) {
+    return getCustomerTierLabelByKey(customer?.membership_tier || customer?.membership_tier_label, customer?.membership_tier_label || "Đồng");
+}
+
+function getCustomerNextTierLabel(customer) {
+    return getCustomerTierLabelByKey(
+        customer?.next_membership_tier || customer?.next_membership_tier_label,
+        customer?.next_membership_tier_label || ""
+    );
+}
 
 let userAvatarFile = null;
 let customerProfileContext = {
@@ -349,8 +379,8 @@ function buildStaffRows() {
 }
 
 function buildTierBadge(customer) {
-    const key = String(customer.membership_tier || "dong");
-    const label = String(customer.membership_tier_label || "Đồng");
+    const key = normalizeCustomerTierKey(customer.membership_tier || customer.membership_tier_label || "dong");
+    const label = getCustomerTierLabel(customer);
     return `<span class="customer-tier-badge ${escapeHtml(key)}">${escapeHtml(label)}</span>`;
 }
 
@@ -383,6 +413,8 @@ function buildCustomerRows() {
                 const toggleLabel = customer.status === "active" ? "Khóa" : "Kích hoạt";
                 const toggleAction = customer.status === "active" ? "block" : "activate";
                 const canDelete = state.user?.role === "admin" && Number(customer.id) !== Number(state.user?.id);
+                const hasNextTier = Boolean(customer.next_membership_tier || customer.next_membership_tier_label);
+                const nextTierLabel = getCustomerNextTierLabel(customer);
 
                 return `
                   <tr>
@@ -399,7 +431,7 @@ function buildCustomerRows() {
                     <td>
                       <div class="customer-tier-stack">
                         ${buildTierBadge(customer)}
-                        <small>${escapeHtml(customer.next_membership_tier_label ? `Còn ${formatNumber(customer.points_to_next_tier || 0)} điểm để lên ${customer.next_membership_tier_label}` : "Đã đạt hạng cao nhất")}</small>
+                        <small>${escapeHtml(hasNextTier ? `Còn ${formatNumber(customer.points_to_next_tier || 0)} điểm để lên ${nextTierLabel}` : "Đã đạt hạng cao nhất")}</small>
                       </div>
                     </td>
                     <td>
@@ -446,6 +478,8 @@ function renderCustomerProfileModal() {
     const progressPercent = nextMin
         ? Math.min(100, Math.max(0, ((points - currentMin) / Math.max(1, nextMin - currentMin)) * 100))
         : 100;
+    const hasNextTier = Boolean(customer.next_membership_tier || customer.next_membership_tier_label);
+    const nextTierLabel = getCustomerNextTierLabel(customer);
 
     if (elements.customerProfileTitle) {
         elements.customerProfileTitle.textContent = customer.username || "Hồ sơ khách hàng";
@@ -479,8 +513,8 @@ function renderCustomerProfileModal() {
           </div>
           <div class="customer-tier-progress">
             <div class="customer-tier-progress-head">
-              <strong>${escapeHtml(customer.membership_tier_label || "Đồng")}</strong>
-              <span>${customer.next_membership_tier_label ? `Còn ${formatNumber(customer.points_to_next_tier || 0)} điểm để lên ${escapeHtml(customer.next_membership_tier_label)}` : "Đã đạt hạng cao nhất"}</span>
+              <strong>${escapeHtml(getCustomerTierLabel(customer))}</strong>
+              <span>${hasNextTier ? `Còn ${formatNumber(customer.points_to_next_tier || 0)} điểm để lên ${escapeHtml(nextTierLabel)}` : "Đã đạt hạng cao nhất"}</span>
             </div>
             <div class="customer-tier-progress-bar"><i style="width:${progressPercent}%"></i></div>
             <p>${lastOrder ? `Đơn gần nhất: ${escapeHtml(lastOrder.order_code || "-")} - ${escapeHtml(formatDate(lastOrder.created_at))}` : "Khách hàng chưa có đơn hàng nào."}</p>

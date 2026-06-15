@@ -2573,7 +2573,7 @@ function buildOrderBranchRoutingCard(order, adminMeta) {
               ${candidates.map((candidate) => {
                   const branchName = getBranchDisplayName(candidate.branch) || candidate.branch.key;
                   const stockSuffix = candidate.stock.checked ? (candidate.stock.hasStock ? "có hàng" : "thiếu hàng") : "chưa kiểm kho";
-                  return `<option value="${escapeHtml(candidate.branch.key)}" ${String(candidate.branch.key) === String(selectedKey) ? "selected" : ""}>${escapeHtml(branchName)} - ${escapeHtml(formatBranchDistance(candidate))} - ${escapeHtml(stockSuffix)}</option>`;
+                  return `<option value="${escapeHtml(candidate.branch.key)}" ${String(candidate.branch.key) === String(selectedKey) ? "selected" : ""}>${escapeHtml(branchName)} - ${escapeHtml(stockSuffix)}</option>`;
               }).join("")}
             </select>
           </label>
