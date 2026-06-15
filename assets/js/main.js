@@ -151,7 +151,7 @@ import {
     handleStaffShiftFieldChange,
     renderStaffShiftWorkspace
 } from "./staff-shifts.js";
-import { renderStats } from "./stats.js";
+import { handleStatsFilterSubmit, renderStats } from "./stats.js";
 import {
     handleEmailMarketingAction,
     handleEmailMarketingFile,
@@ -429,6 +429,13 @@ function bindGlobalEvents() {
             nextInput.focus();
             nextInput.setSelectionRange(state.overviewSearch.length, state.overviewSearch.length);
         }
+    });
+
+    elements.statsContent?.addEventListener("submit", (event) => {
+        const form = event.target.closest("[data-stats-filter-form]");
+        if (!form) return;
+        event.preventDefault();
+        handleStatsFilterSubmit(form);
     });
 
     elements.productFilterForm.addEventListener("submit", async (event) => {

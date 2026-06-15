@@ -13,6 +13,26 @@ import { renderAppIcon } from "./icons.js";
 const COMPLETED_STATUSES = new Set(["completed", "delivered", "paid", "confirmed"]);
 const CANCELLED_STATUSES = new Set(["cancelled", "canceled", "failed"]);
 const PROCESSING_STATUSES = new Set(["pending", "confirmed", "preparing", "shipping"]);
+const ORDER_ADMIN_NOTE_PREFIX = "[[ORDER_ADMIN_META]]";
+const DEFAULT_STATS_FILTERS = {
+    inventory: {
+        from_date: "",
+        to_date: "",
+        warehouse_zone: ""
+    },
+    revenue: {
+        from_date: "",
+        to_date: "",
+        branch_key: "",
+        channel: ""
+    },
+    orders: {
+        from_date: "",
+        to_date: "",
+        compare: "month",
+        status: ""
+    }
+};
 
 function getProducts() {
     return Array.isArray(state.products) ? state.products : [];
@@ -20,6 +40,49 @@ function getProducts() {
 
 function getOrders() {
     return Array.isArray(state.orders) ? state.orders : [];
+}
+
+function getStatsFilters(workspace = state.statsWorkspace || "inventory") {
+    const safeWorkspace = DEFAULT_STATS_FILTERS[workspace] ? workspace : "inventory";
+    state.filters.stats = state.filters.stats || {};
+    state.filters.stats[safeWorkspace] = {
+        ...DEFAULT_STATS_FILTERS[safeWorkspace],
+        ...(state.filters.stats[safeWorkspace] || {})
+    };
+    return state.filters.stats[safeWorkspace];
+}
+
+function isSelected(currentValue, optionValue) {
+    return String(currentValue || "") === String(optionValue || "") ? "selected" : "";
+}
+
+function parseFilterDate(value, endOfDay = false) {
+    const raw = String(value || "").trim();
+    if (!raw) return null;
+
+    const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const viMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    const parts = isoMatch
+        ? [Number(isoMatch[1]), Number(isoMatch[2]), Number(isoMatch[3])]
+        : viMatch
+            ? [Number(viMatch[3]), Number(viMatch[2]), Number(viMatch[1])]
+            : null;
+
+    if (!parts) return null;
+    const [year, month, day] = parts;
+    const date = new Date(year, month - 1, day, endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function isDateInRange(dateValue, filters) {
+    const date = dateValue ? new Date(dateValue) : null;
+    if (!date || Number.isNaN(date.getTime())) return true;
+
+    const fromDate = parseFilterDate(filters.from_date);
+    const toDate = parseFilterDate(filters.to_date, true);
+    if (fromDate && date < fromDate) return false;
+    if (toDate && date > toDate) return false;
+    return true;
 }
 
 function getWarehouseZoneForProduct(product) {
@@ -45,6 +108,55 @@ function getOrderStatus(order) {
 
 function getOrderDate(order) {
     return order?.created_at || order?.createdAt || order?.order_date || "";
+}
+
+function parseOrderAdminMeta(order) {
+    const note = String(order?.note || "");
+    const markerIndex = note.indexOf(ORDER_ADMIN_NOTE_PREFIX);
+    if (markerIndex < 0) return {};
+
+    const payloadText = note.slice(markerIndex + ORDER_ADMIN_NOTE_PREFIX.length).trim();
+    try {
+        return JSON.parse(payloadText)?.seller || {};
+    } catch (error) {
+        return {};
+    }
+}
+
+function getOrderBranchKey(order) {
+    return String(
+        order?.branch_key ||
+        order?.store_key ||
+        order?.branch?.key ||
+        parseOrderAdminMeta(order)?.branch_key ||
+        ""
+    );
+}
+
+function getOrderChannel(order) {
+    return String(order?.channel || order?.sales_channel || order?.source || "online").trim().toLowerCase();
+}
+
+function getFilteredInventoryProducts() {
+    const filters = getStatsFilters("inventory");
+    return getProducts()
+        .filter((product) => isDateInRange(product?.created_at || product?.createdAt || product?.updated_at, filters))
+        .filter((product) => !filters.warehouse_zone || getWarehouseZoneForProduct(product) === filters.warehouse_zone);
+}
+
+function getFilteredRevenueOrders() {
+    const filters = getStatsFilters("revenue");
+    return getOrders()
+        .filter((order) => isDateInRange(getOrderDate(order), filters))
+        .filter((order) => !filters.branch_key || getOrderBranchKey(order) === filters.branch_key)
+        .filter((order) => !filters.channel || getOrderChannel(order) === filters.channel);
+}
+
+function getFilteredStatsOrders() {
+    const filters = getStatsFilters("orders");
+    return getOrders()
+        .filter((order) => isDateInRange(getOrderDate(order), filters))
+        .filter((order) => !filters.status || getOrderStatus(order) === filters.status);
 }
 
 function getPaymentLabel(order) {
@@ -146,6 +258,30 @@ function renderBranchOptions() {
             .filter(Boolean)
             .join(" - ");
         return `<option value="${escapeHtml(branch.key)}">${escapeHtml(label || branch.key)}</option>`;
+    }).join("")}`;
+}
+
+function renderStatsFilterForm(workspace, fields = "") {
+    const filters = getStatsFilters(workspace);
+    return `
+      <form class="surface stats-filter-card" data-stats-filter-form="${escapeHtml(workspace)}">
+        <strong>Bộ lọc thống kê</strong>
+        <div class="stats-filter-grid">
+          <label><span>Từ ngày</span><input type="date" name="from_date" value="${escapeHtml(filters.from_date || "")}"></label>
+          <label><span>Đến ngày</span><input type="date" name="to_date" value="${escapeHtml(filters.to_date || "")}"></label>
+          ${fields}
+          <button class="primary-button stats-filter-apply" type="submit">${renderAppIcon("filter")} Áp dụng</button>
+        </div>
+      </form>
+    `;
+}
+
+function renderStatsBranchOptions(selectedValue = "") {
+    return `<option value="" ${isSelected(selectedValue, "")}>Tất cả chi nhánh</option>${STORE_BRANCHES.map((branch) => {
+        const label = [branch.label, branch.name && branch.name !== branch.label ? branch.name : ""]
+            .filter(Boolean)
+            .join(" - ");
+        return `<option value="${escapeHtml(branch.key)}" ${isSelected(selectedValue, branch.key)}>${escapeHtml(label || branch.key)}</option>`;
     }).join("")}`;
 }
 
@@ -265,8 +401,49 @@ function renderStatsShell(eyebrow, title, body) {
     `;
 }
 
+function renderFilter() {
+    const workspace = DEFAULT_STATS_FILTERS[state.statsWorkspace] ? state.statsWorkspace : "inventory";
+    const filters = getStatsFilters(workspace);
+    let fields = "";
+
+    if (workspace === "inventory") {
+        fields = `<label><span>Chọn kho</span><select name="warehouse_zone"><option value="" ${isSelected(filters.warehouse_zone, "")}>Tất cả kho</option>${WAREHOUSE_ZONES.map((zone) => `<option value="${escapeHtml(zone.key)}" ${isSelected(filters.warehouse_zone, zone.key)}>${escapeHtml(zone.label)} - ${escapeHtml(zone.name)}</option>`).join("")}</select></label>`;
+    } else if (workspace === "orders") {
+        fields = `
+          <label><span>So sánh với</span><select name="compare">
+            <option value="month" ${isSelected(filters.compare, "month")}>Tháng trước</option>
+            <option value="week" ${isSelected(filters.compare, "week")}>Tuần trước</option>
+          </select></label>
+          <label><span>Trạng thái đơn hàng</span><select name="status">
+            <option value="" ${isSelected(filters.status, "")}>Tất cả trạng thái</option>
+            <option value="pending" ${isSelected(filters.status, "pending")}>Chờ xác nhận</option>
+            <option value="confirmed" ${isSelected(filters.status, "confirmed")}>Đã xác nhận</option>
+            <option value="preparing" ${isSelected(filters.status, "preparing")}>Đang xử lý</option>
+            <option value="shipping" ${isSelected(filters.status, "shipping")}>Đang giao</option>
+            <option value="completed" ${isSelected(filters.status, "completed")}>Hoàn thành</option>
+            <option value="cancelled" ${isSelected(filters.status, "cancelled")}>Đã hủy</option>
+          </select></label>
+        `;
+    }
+
+    return renderStatsFilterForm(workspace, fields);
+}
+
+function renderRevenueFilter() {
+    const filters = getStatsFilters("revenue");
+    return renderStatsFilterForm("revenue", `
+      <label><span>Chi nhánh</span><select name="branch_key">${renderStatsBranchOptions(filters.branch_key)}</select></label>
+      <label><span>Kênh bán</span><select name="channel">
+        <option value="" ${isSelected(filters.channel, "")}>Tất cả kênh</option>
+        <option value="online" ${isSelected(filters.channel, "online")}>Ứng dụng mobile</option>
+        <option value="store" ${isSelected(filters.channel, "store")}>Tại cửa hàng</option>
+      </select></label>
+    `);
+}
+
 function renderInventoryStats() {
-    const products = getProducts();
+    const filters = getStatsFilters("inventory");
+    const products = getFilteredInventoryProducts();
     const totalStock = products.reduce((sum, product) => sum + getStock(product), 0);
     const lowStock = products.filter((product) => getStock(product) > 0 && getStock(product) <= 5);
     const outStock = products.filter((product) => getStock(product) <= 0);
@@ -333,7 +510,7 @@ function renderInventoryStats() {
 }
 
 function renderRevenueStats() {
-    const orders = getOrders();
+    const orders = getFilteredRevenueOrders();
     const paidOrders = orders.filter((order) => COMPLETED_STATUSES.has(getOrderStatus(order)));
     const totalRevenue = paidOrders.reduce((sum, order) => sum + getOrderTotal(order), 0);
     const averageOrder = paidOrders.length ? totalRevenue / paidOrders.length : 0;
@@ -368,7 +545,7 @@ function renderRevenueStats() {
 }
 
 function renderRevenueDashboard() {
-    const orders = getOrders();
+    const orders = getFilteredRevenueOrders();
     const paidOrders = orders.filter((order) => COMPLETED_STATUSES.has(getOrderStatus(order)));
     const products = getProducts();
     const rawRevenue = paidOrders.reduce((sum, order) => sum + getOrderTotal(order), 0);
@@ -421,7 +598,7 @@ function renderRevenueDashboard() {
 }
 
 function renderOrderStats() {
-    const orders = getOrders();
+    const orders = getFilteredStatsOrders();
     const completed = orders.filter((order) => COMPLETED_STATUSES.has(getOrderStatus(order)));
     const processing = orders.filter((order) => PROCESSING_STATUSES.has(getOrderStatus(order)));
     const cancelled = orders.filter((order) => CANCELLED_STATUSES.has(getOrderStatus(order)));
@@ -470,4 +647,17 @@ export function renderStats() {
         return;
     }
     renderInventoryStats();
+}
+
+export function handleStatsFilterSubmit(form) {
+    const workspace = form?.dataset?.statsFilterForm || state.statsWorkspace || "inventory";
+    if (!DEFAULT_STATS_FILTERS[workspace]) return;
+
+    const formData = Object.fromEntries(new FormData(form).entries());
+    state.filters.stats = state.filters.stats || {};
+    state.filters.stats[workspace] = {
+        ...DEFAULT_STATS_FILTERS[workspace],
+        ...formData
+    };
+    renderStats();
 }
