@@ -6,7 +6,7 @@ export async function loadPartials(root = document) {
         const url = target.dataset.partial;
         if (!url) return;
 
-        const response = await fetch(url, { cache: "no-cache" });
+        const response = await fetch(`${url}?v=${Date.now()}`, { cache: "no-store" });
         if (!response.ok) {
             throw new Error(`Không tải được giao diện module: ${url}`);
         }

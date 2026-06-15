@@ -181,6 +181,14 @@ import {
 
 let complaintFilterRenderTimer = null;
 
+function handleStatsFilterEvent(event) {
+    const form = event.target.closest?.("[data-stats-filter-form]");
+    if (!form) return;
+    event.preventDefault();
+    event.stopPropagation();
+    handleStatsFilterSubmit(form);
+}
+
 async function performLogout() {
     try {
         if (state.refreshToken) {
@@ -198,6 +206,17 @@ async function performLogout() {
 
 function bindGlobalEvents() {
     bindMoneyInputFormatting(document);
+
+    document.addEventListener("submit", handleStatsFilterEvent, true);
+    document.addEventListener("click", (event) => {
+        const button = event.target.closest?.("[data-stats-filter-apply]");
+        if (!button) return;
+        const form = button.closest("[data-stats-filter-form]");
+        if (!form) return;
+        event.preventDefault();
+        event.stopPropagation();
+        handleStatsFilterSubmit(form);
+    }, true);
 
     elements.loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -429,13 +448,6 @@ function bindGlobalEvents() {
             nextInput.focus();
             nextInput.setSelectionRange(state.overviewSearch.length, state.overviewSearch.length);
         }
-    });
-
-    document.addEventListener("submit", (event) => {
-        const form = event.target.closest("[data-stats-filter-form]");
-        if (!form) return;
-        event.preventDefault();
-        handleStatsFilterSubmit(form);
     });
 
     elements.productFilterForm.addEventListener("submit", async (event) => {
