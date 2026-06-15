@@ -218,12 +218,11 @@ function bindGlobalEvents() {
         handleStatsFilterSubmit(form);
     }, true);
 
-    elements.loginForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
+    async function submitAuthForm(submitter = null) {
         elements.authSubtitle.textContent = "";
         elements.authSubtitle.classList.add("hidden");
         elements.authSubtitle.classList.remove("auth-error-message");
-        await withLoading(event.submitter, async () => {
+        await withLoading(submitter, async () => {
             const formData = collectFormData(elements.loginForm);
             state.apiBase = normalizeApiBase(formData.apiBase || state.apiBase || "http://localhost:3000");
 
@@ -265,6 +264,16 @@ function bindGlobalEvents() {
             }
             showToast("Đăng nhập thành công.");
         });
+    }
+
+    elements.loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        await submitAuthForm(event.submitter || elements.authSubmitButton);
+    });
+
+    elements.authSubmitButton?.addEventListener("click", async (event) => {
+        event.preventDefault();
+        await submitAuthForm(event.currentTarget);
     });
 
     elements.authTabs.forEach((tab) => {
