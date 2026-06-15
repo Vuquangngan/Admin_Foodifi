@@ -2,29 +2,6 @@ import { loadPartials } from "./js/partials-loader.js";
 
 await loadPartials(document);
 
-function isLocalFrontendHost() {
-    const hostname = window.location.hostname;
-    return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "";
-}
-
-function normalizeApiBase(input) {
-    return String(input || "")
-        .trim()
-        .replace(/\/+$/, "")
-        .replace(/\/api$/i, "");
-}
-
-function getFallbackApiBase() {
-    const config = window.SHOPFOOD_ADMIN_CONFIG || {};
-    const configuredApiBase = isLocalFrontendHost()
-        ? config.localApiBase
-        : config.productionApiBase;
-
-    return normalizeApiBase(configuredApiBase || config.apiBase || (
-        isLocalFrontendHost() ? "http://localhost:3000" : "https://backend-shopfood.onrender.com"
-    ));
-}
-
 function showAuthMessage(message, isError = true) {
     const subtitle = document.querySelector("#authSubtitle");
     if (!subtitle) return;
@@ -36,11 +13,6 @@ function showAuthMessage(message, isError = true) {
 function bindLoginFallback() {
     const form = document.querySelector("#loginForm");
     if (!form) return;
-
-    const apiBaseInput = document.querySelector("#apiBaseInput");
-    if (apiBaseInput && !apiBaseInput.value) {
-        apiBaseInput.value = getFallbackApiBase();
-    }
 
     form.addEventListener("submit", async (event) => {
         if (window.__foodifiMainReady) return;
@@ -56,7 +28,7 @@ function bindLoginFallback() {
         try {
             showAuthMessage("", false);
             const formData = new FormData(form);
-            const apiBase = normalizeApiBase(formData.get("apiBase") || getFallbackApiBase());
+            const apiBase = String(formData.get("apiBase") || "http://localhost:3000").replace(/\/+$/, "").replace(/\/api$/i, "");
             const response = await fetch(`${apiBase}/api/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -85,12 +57,7 @@ function bindLoginFallback() {
             showAuthMessage("Đăng nhập thành công. Đang mở trang quản trị...", false);
             window.location.reload();
         } catch (error) {
-            if (error instanceof TypeError) {
-                const apiBase = normalizeApiBase(new FormData(form).get("apiBase") || getFallbackApiBase());
-                showAuthMessage(`Không kết nối được backend tại ${apiBase}. Hãy kiểm tra backend/CORS.`, true);
-            } else {
-                showAuthMessage(error.message || "Có lỗi xảy ra khi đăng nhập.", true);
-            }
+            showAuthMessage(error.message || "Có lỗi xảy ra khi đăng nhập.", true);
         } finally {
             if (button) {
                 button.disabled = false;
