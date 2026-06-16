@@ -151,7 +151,7 @@ import {
     handleStaffShiftFieldChange,
     renderStaffShiftWorkspace
 } from "./staff-shifts.js";
-import { handleStatsFilterSubmit, renderStats } from "./stats.js";
+import { handleStatsFilterSubmit, renderStats } from "./stats.js?v=20260616-stats-fix";
 import {
     handleEmailMarketingAction,
     handleEmailMarketingFile,

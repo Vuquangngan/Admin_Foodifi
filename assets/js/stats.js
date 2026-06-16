@@ -401,7 +401,7 @@ function renderStatsShell(eyebrow, title, body) {
     `;
 }
 
-function renderFilter() {
+function renderStatsWorkspaceFilter() {
     const workspace = DEFAULT_STATS_FILTERS[state.statsWorkspace] ? state.statsWorkspace : "inventory";
     const filters = getStatsFilters(workspace);
     let fields = "";
@@ -429,7 +429,7 @@ function renderFilter() {
     return renderStatsFilterForm(workspace, fields);
 }
 
-function renderRevenueFilter() {
+function renderRevenueWorkspaceFilter() {
     const filters = getStatsFilters("revenue");
     return renderStatsFilterForm("revenue", `
       <label><span>Chi nhánh</span><select name="branch_key">${renderStatsBranchOptions(filters.branch_key)}</select></label>
@@ -468,7 +468,7 @@ function renderInventoryStats() {
     const watchList = [...lowStock, ...outStock].slice(0, 8);
 
     renderStatsShell("Kho hàng", "Thống kê kho hàng", `
-      ${renderFilter("", `<label><span>Chọn kho</span><select><option>Tất cả kho</option>${WAREHOUSE_ZONES.map((zone) => `<option>${escapeHtml(zone.label)} - ${escapeHtml(zone.name)}</option>`).join("")}</select></label>`)}
+      ${renderStatsWorkspaceFilter()}
       <div class="stats-metric-grid">
         ${metricCard("package", "Tổng tồn kho", formatNumber(totalStock), `${formatNumber(products.length)} sản phẩm`, "green")}
         ${metricCard("cart", "Sắp hết hàng", formatNumber(lowStock.length), "Tồn kho từ 1-5", "orange")}
@@ -524,7 +524,7 @@ function renderRevenueStats() {
     }));
 
     renderStatsShell("Doanh thu", "Thống kê doanh thu", `
-      ${renderFilter("", `<label><span>Chi nhánh</span><select>${renderBranchOptions()}</select></label><label><span>Kênh bán</span><select><option>Tất cả kênh</option><option>Online</option><option>Tại cửa hàng</option></select></label>`)}
+      ${renderStatsWorkspaceFilter()}
       <div class="stats-metric-grid">
         ${metricCard("chart", "Tổng doanh thu", formatCurrency(totalRevenue), "Theo đơn hoàn thành", "green")}
         ${metricCard("cart", "Tổng đơn hàng", formatNumber(orders.length), "Tất cả trạng thái", "blue")}
@@ -575,7 +575,7 @@ function renderRevenueDashboard() {
 
     renderStatsShell("DOANH THU", "Thống kê doanh thu", `
       <div class="stats-revenue-page">
-        ${renderRevenueFilter()}
+        ${renderRevenueWorkspaceFilter()}
         <div class="revenue-summary-grid">
           ${revenueMetric("chart", "Tổng doanh thu", formatCurrency(totalRevenue), "Theo đơn hoàn thành", "green")}
           ${revenueMetric("cart", "Tổng đơn hàng", formatNumber(totalOrders), "Tất cả trạng thái", "blue")}
@@ -614,7 +614,7 @@ function renderOrderStats() {
     }, new Map());
 
     renderStatsShell("Thống kê", "Thống kê đơn hàng", `
-      ${renderFilter("", `<label><span>So sánh với</span><select><option>Tháng trước</option></select></label><label><span>Trạng thái đơn hàng</span><select><option>Tất cả trạng thái</option></select></label>`)}
+      ${renderStatsWorkspaceFilter()}
       <div class="stats-metric-grid stats-order-metrics">
         ${metricCard("basket", "Tổng đơn hàng", formatNumber(orders.length), "Tất cả đơn", "green")}
         ${metricCard("receipt", "Đơn hoàn thành", formatNumber(completed.length), "Đã hoàn tất", "blue")}
