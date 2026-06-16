@@ -84,6 +84,78 @@ function getAvatarSource(user) {
     return resolveMediaUrl(user?.avatar_url, defaultUserAvatar(user?.username || user?.email || "User"));
 }
 
+function normalizeEmail(value = "") {
+    return String(value || "").trim().toLowerCase();
+}
+
+function normalizePhone(value = "") {
+    return String(value || "").replace(/\D+/g, "");
+}
+
+function sortOrdersByNewest(orders = []) {
+    return [...orders].sort((left, right) => {
+        const leftTime = new Date(left?.created_at || 0).getTime();
+        const rightTime = new Date(right?.created_at || 0).getTime();
+        return rightTime - leftTime;
+    });
+}
+
+function filterOrdersForCustomer(orders = [], customer = null) {
+    if (!customer) return [];
+    const customerId = Number(customer.id);
+    const customerEmail = normalizeEmail(customer.email);
+    const customerPhone = normalizePhone(customer.phone);
+
+    return orders.filter((order) => {
+        const orderUserId = Number(order?.user_id || order?.user?.id || order?.customer_id);
+        const orderEmail = normalizeEmail(order?.customer_email || order?.user?.email);
+        const orderPhone = normalizePhone(order?.customer_phone || order?.shipping_phone || order?.user?.phone);
+
+        if (customerId && orderUserId && customerId === orderUserId) {
+            return true;
+        }
+
+        if (customerEmail && orderEmail && customerEmail === orderEmail) {
+            return true;
+        }
+
+        if (customerPhone && orderPhone && customerPhone === orderPhone) {
+            return true;
+        }
+
+        return false;
+    });
+}
+
+async function loadCustomerOrders(customer) {
+    const customerId = Number(customer?.id || 0);
+    let orders = [];
+
+    if (customerId) {
+        try {
+            const response = await apiFetch(`/api/orders?user_id=${customerId}`);
+            orders = Array.isArray(response) ? response : [];
+        } catch (error) {
+            orders = [];
+        }
+    }
+
+    if (!orders.length) {
+        orders = filterOrdersForCustomer(Array.isArray(state.orders) ? state.orders : [], customer);
+    }
+
+    if (!orders.length) {
+        try {
+            const response = await apiFetch("/api/orders");
+            orders = filterOrdersForCustomer(Array.isArray(response) ? response : [], customer);
+        } catch (error) {
+            orders = [];
+        }
+    }
+
+    return sortOrdersByNewest(orders);
+}
+
 function getActiveCollection() {
     return isCustomerWorkspace() ? (state.customers || []) : (state.users || []);
 }
@@ -714,7 +786,7 @@ export async function openCustomerProfile(userId) {
         throw new Error("Không tìm thấy khách hàng cần xem hồ sơ.");
     }
 
-    const orders = await apiFetch(`/api/orders?user_id=${customer.id}`);
+    const orders = await loadCustomerOrders(customer);
     customerProfileContext = {
         customer,
         orders: Array.isArray(orders) ? orders : []
