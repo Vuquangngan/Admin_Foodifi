@@ -330,16 +330,22 @@
   display: grid;
   gap: 10px;
   align-items: end;
+  position: relative;
   overflow: visible;
 }
 
 .recipe-ingredient-row {
   grid-template-columns: minmax(220px, 1fr) 140px 150px 42px;
+  z-index: 1;
+}
+
+.recipe-ingredient-row:focus-within {
+  z-index: 40;
 }
 
 .recipe-ingredient-picker {
   position: relative;
-  z-index: 20;
+  z-index: 30;
 }
 
 .recipe-ingredient-suggestions {
@@ -347,7 +353,7 @@
   left: 0;
   right: 0;
   top: calc(100% + 8px);
-  z-index: 1000;
+  z-index: 9999;
   max-height: 216px;
   overflow: auto;
   padding: 8px;

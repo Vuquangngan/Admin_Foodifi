@@ -1351,14 +1351,28 @@
   gap: 4px;
 }
 
-.branch-shipment-picker header span {
-  color: #0b7f45;
+.branch-shipment-picker header h3 {
+  margin: 0;
+  color: #152818;
+  font-size: 1.85rem;
   font-weight: 900;
 }
 
-.branch-shipment-picker header strong {
+.branch-shipment-picker header p {
+  margin: 0;
   color: #617665;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.branch-shipment-picker header strong {
+  justify-self: start;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #eef7ef;
+  color: #0f8b48;
   font-size: 0.88rem;
+  font-weight: 900;
 }
 
 .branch-shipment-picker header button {
@@ -1376,6 +1390,7 @@
   display: grid;
   gap: 8px;
   font-weight: 900;
+  color: #152818;
 }
 
 .branch-shipment-picker-search input {

@@ -452,14 +452,15 @@ function renderBranchShipmentProductPicker() {
         <div class="branch-shipment-picker">
           <header>
             <div>
-              <span>Chọn sản phẩm trong kho</span>
-              <strong>${formatNumber(products.length)} sản phẩm khả dụng${selectedIds.length ? ` • Đã chọn ${formatNumber(selectedIds.length)}` : ""}</strong>
+              <h3>Chọn sản phẩm trong kho</h3>
+              <p>${formatNumber(products.length)} sản phẩm khả dụng</p>
+              ${selectedIds.length ? `<strong>Đã chọn ${formatNumber(selectedIds.length)} sản phẩm</strong>` : ""}
             </div>
             <button type="button" data-branch-shipment-draft-action="close-product-picker" aria-label="Đóng chọn sản phẩm">×</button>
           </header>
           <label class="branch-shipment-picker-search">
-            <span>Tìm sản phẩm</span>
-            <input value="${escapeHtml(state.branchShipmentProductPickerKeyword || "")}" placeholder="Nhập tên sản phẩm hoặc SKU..." data-branch-shipment-picker-keyword>
+            <span>Tìm kiếm sản phẩm</span>
+            <input value="${escapeHtml(state.branchShipmentProductPickerKeyword || "")}" placeholder="Nhập tên sản phẩm hoặc mã SKU..." data-branch-shipment-picker-keyword>
           </label>
           <div class="branch-shipment-picker-list">
             ${products.map((product) => `
@@ -468,7 +469,7 @@ function renderBranchShipmentProductPicker() {
                 <div>
                   <strong>${escapeHtml(product.name || "Sản phẩm")}</strong>
                   <span>SKU: ${escapeHtml(product.sku || "Chưa có")}</span>
-                  <small>Kho tổng còn ${formatNumber(product.stock_quantity || 0)} ${escapeHtml(getProductUnit(product))}</small>
+                  <small>Kho tổng còn: ${formatNumber(product.stock_quantity || 0)} ${escapeHtml(getProductUnit(product))}</small>
                 </div>
                 <button type="button" data-branch-shipment-draft-action="toggle-product-selection" data-product-id="${escapeHtml(String(product.id))}">${selectedIds.includes(String(product.id)) ? "Đã chọn" : "Chọn"}</button>
               </article>
