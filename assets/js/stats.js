@@ -433,11 +433,6 @@ function renderRevenueWorkspaceFilter() {
     const filters = getStatsFilters("revenue");
     return renderStatsFilterForm("revenue", `
       <label><span>Chi nhánh</span><select name="branch_key">${renderStatsBranchOptions(filters.branch_key)}</select></label>
-      <label><span>Kênh bán</span><select name="channel">
-        <option value="" ${isSelected(filters.channel, "")}>Tất cả kênh</option>
-        <option value="online" ${isSelected(filters.channel, "online")}>Ứng dụng mobile</option>
-        <option value="store" ${isSelected(filters.channel, "store")}>Tại cửa hàng</option>
-      </select></label>
     `);
 }
 
