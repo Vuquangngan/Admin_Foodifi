@@ -1232,17 +1232,30 @@ export async function apiFetch(path, options = {}) {
         headers.set("Authorization", `Bearer ${state.token}`);
     }
 
+    const timeoutMs = options.timeoutMs ?? 30000;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
     let response;
     try {
         response = await fetch(`${state.apiBase}${path}`, {
             ...options,
-            headers
+            headers,
+            signal: controller.signal
         });
     } catch (_error) {
+        clearTimeout(timeoutId);
+        if (_error?.name === "AbortError") {
+            const err = new Error("Yêu cầu quá thời gian chờ. Vui lòng thử lại.");
+            err.isNetworkError = true;
+            throw err;
+        }
         const error = new Error(`Không kết nối được backend tại ${state.apiBase}. Hãy kiểm tra server backend đã chạy và API base URL đúng.`);
         error.isNetworkError = true;
         throw error;
     }
+
+    clearTimeout(timeoutId);
 
     const contentType = response.headers.get("content-type") || "";
     const payload = contentType.includes("application/json")
