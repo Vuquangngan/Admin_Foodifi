@@ -383,7 +383,7 @@ function bindGlobalEvents() {
                 method: "POST",
                 body: JSON.stringify({ email })
             });
-            showToast("Nếu email tồn tại, hệ thống sẽ gửi mật khẩu tạm thời.");
+            showToast("Hệ thống đã gửi email đặt lại mật khẩu. Vui lòng kiểm tra hộp thư đến của bạn.");
         });
     });
 
