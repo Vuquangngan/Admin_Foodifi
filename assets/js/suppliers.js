@@ -981,33 +981,63 @@ async function submitSupplierReturnTicket() {
 }
 
 function exportSupplierReturnReport() {
-    const products = getExpiringSupplierProducts();
-    if (!products.length) {
-        showToast("Không có dữ liệu để xuất báo cáo.");
+    const allTickets = readSupplierReturns();
+    const filters = state.supplierReturnFilters || {};
+    const keyword = normalizeText(filters.keyword);
+    const supplierFilter = normalizeText(filters.supplier);
+    const untilDate = filters.until ? new Date(filters.until) : null;
+    if (untilDate && !Number.isNaN(untilDate.getTime())) untilDate.setHours(23, 59, 59, 999);
+
+    const tickets = allTickets.filter((ticket) => {
+        if (supplierFilter && normalizeText(ticket.supplier_name) !== supplierFilter) return false;
+        if (untilDate) {
+            const retDate = new Date(ticket.return_date);
+            if (!Number.isNaN(retDate.getTime()) && retDate > untilDate) return false;
+        }
+        if (keyword) {
+            const haystack = normalizeText(`${ticket.code || ""} ${ticket.product_name || ""} ${ticket.supplier_name || ""}`);
+            if (!haystack.includes(keyword)) return false;
+        }
+        return true;
+    });
+
+    if (!tickets.length) {
+        showToast("Không có phiếu trả hàng nào để xuất báo cáo.");
         return;
     }
 
     const rows = [
-        ["Sản phẩm", "SKU", "Nhà cung cấp", "Ngày hết hạn", "Tồn kho", "Đơn vị", "Trạng thái"],
-        ...products.map((product) => {
-            const expiration = getProductExpirationMeta(product);
+        ["Mã phiếu", "Nhà cung cấp", "Sản phẩm", "SKU", "Số lượng", "Đơn vị", "Kho xuất", "Ngày trả", "Lý do", "Trạng thái", "Ghi chú"],
+        ...tickets.map((ticket) => {
+            const reasonLabels = {
+                near_expiry: "Hàng gần hết hạn",
+                damaged: "Hàng dập nát",
+                bad_package: "Bao bì hư hỏng",
+                quality_issue: "Không đạt chất lượng",
+                other: "Lý do khác"
+            };
             return [
-                product.name || "",
-                product.sku || "",
-                getSupplierNameFromProduct(product) || "Chưa xác định",
-                product.expiration_date || "",
-                getProductStock(product),
-                product.stock_unit || product.unit || "đơn vị",
-                expiration?.status || "Gan het han"
+                ticket.code || `#${ticket.id}`,
+                ticket.supplier_name || "Chưa xác định",
+                ticket.product_name || "",
+                ticket.sku || "",
+                ticket.quantity_total || ticket.quantity || 0,
+                ticket.unit || "đơn vị",
+                ticket.warehouse_name || "Kho tổng",
+                ticket.return_date || "",
+                reasonLabels[ticket.reason] || ticket.reason || "",
+                ticket.status === "resolved" ? "Đã xử lý" : "Chờ xử lý",
+                ticket.note || ""
             ];
         })
     ];
+
     const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
     const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `supplier-return-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `phieu-tra-hang-${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
 }

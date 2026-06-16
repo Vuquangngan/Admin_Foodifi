@@ -345,7 +345,12 @@ export function getVisibleSidebarMenu() {
             const visibleItems = (section.items || []).filter((item) => {
                 const itemState = menuState.get(String(item.key));
                 return !itemState || itemState.isActive;
-            }).sort((left, right) => getMenuSortPosition(left) - getMenuSortPosition(right));
+            }).sort((left, right) => getMenuSortPosition(left) - getMenuSortPosition(right))
+            .map((item) => {
+                const itemState = menuState.get(String(item.key));
+                if (!itemState || !itemState.label) return item;
+                return { ...item, label: cleanMenuText(itemState.label) };
+            });
 
             return {
                 ...section,
