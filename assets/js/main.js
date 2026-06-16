@@ -381,6 +381,7 @@ function bindGlobalEvents() {
         await withLoading(elements.forgotPasswordButton, async () => {
             await apiFetch("/api/auth/forgot-password", {
                 method: "POST",
+                body: JSON.stringify({ email })
             });
             showToast("Nếu email tồn tại, hệ thống sẽ gửi mật khẩu tạm thời.");
         });
