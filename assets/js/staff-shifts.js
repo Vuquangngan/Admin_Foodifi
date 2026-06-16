@@ -473,7 +473,7 @@ function buildShiftCell(dateKey, shift) {
           ${records.length ? records.map((item) => buildShiftMember(item, dateKey, shift.id)).join("") : '<div class="shift-cell-empty-copy">Chưa có nhân sự</div>'}
         </div>
         <div class="shift-cell-actions">
-          ${canSelfRegister ? `<button type="button" class="chip-button" data-shift-action="self-register" data-date="${dateKey}" data-shift-id="${shift.id}">Đăng ký tôi</button>` : ""}
+          ${canSelfRegister ? `<button type="button" class="chip-button" data-shift-action="self-register" data-date="${dateKey}" data-shift-id="${shift.id}">Đăng ký: ${escapeHtml(state.user?.username || "Tôi")}</button>` : ""}
           ${isFull ? `<span class="shift-self-note">Ca đã đủ tối đa ${MAX_STAFF_PER_SHIFT} nhân viên</span>` : ""}
           ${existingSelfRecord?.status === "pending" ? '<span class="shift-self-note">Bạn đã đăng ký, chờ quản lý xác nhận</span>' : ""}
           <button type="button" class="chip-button" data-shift-action="open-assign-modal" data-date="${dateKey}" data-shift-id="${shift.id}">${records.length ? "Sửa nhân sự" : "Thêm nhân sự"}</button>
