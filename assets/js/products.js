@@ -418,7 +418,6 @@ function getLowStockProducts() {
             if (!categoryIds) return true;
             return categoryIds.has(Number(product.category_id || product.category?.id || 0));
         })
-        .filter((product) => zone === "all" || getWarehouseZoneForProduct(product) === zone)
         .filter((product) => status === "all" || product.low_stock_status.key === status)
         .sort((left, right) => Number(left.stock_quantity || 0) - Number(right.stock_quantity || 0));
 }
@@ -662,13 +661,6 @@ function renderLowStockWorkspace(items) {
             <span>Danh mục con</span>
             <select data-low-stock-filter="category_id">
               ${childCategoryOptions}
-            </select>
-          </label>
-          <label>
-            <span>Kho hàng</span>
-            <select data-low-stock-filter="zone">
-              <option value="all" ${String(filters.zone || "all") === "all" ? "selected" : ""}>Tất cả kho hàng</option>
-              ${WAREHOUSE_ZONES.map((zone) => `<option value="${escapeHtml(zone.key)}" ${String(filters.zone || "all") === zone.key ? "selected" : ""}>${escapeHtml(zone.label)} - ${escapeHtml(zone.name)}</option>`).join("")}
             </select>
           </label>
           <label>
