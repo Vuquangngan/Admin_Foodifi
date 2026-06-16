@@ -1,4 +1,4 @@
-const ADMIN_ASSET_VERSION = "20260616-suppliers-fix2";
+const ADMIN_ASSET_VERSION = "20260617-a";
 
 const { loadPartials } = await import(`./js/partials-loader.js?v=${ADMIN_ASSET_VERSION}`);
 
