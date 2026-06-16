@@ -229,12 +229,22 @@ function buildSupplierReturnDraftItem(product, overrides = {}) {
     const stock = getProductStock(product);
     return {
         product_id: String(overrides.product_id ?? product?.id ?? "").trim(),
-        quantity: String(overrides.quantity ?? Math.max(1, Math.min(stock, 1))).trim(),
+        quantity: String(overrides.quantity ?? (product ? Math.max(1, Math.min(stock, 1)) : "")).trim(),
         reason: String(overrides.reason || "near_expiry").trim() || "near_expiry"
     };
 }
 
 function createSupplierReturnDraft(productId) {
+    if (!productId || productId === "new") {
+        return {
+            supplier_name: "",
+            warehouse_name: "Kho tong",
+            return_date: new Date().toISOString().slice(0, 10),
+            note: "",
+            items: [buildSupplierReturnDraftItem(null)]
+        };
+    }
+
     const product = (state.products || []).find((item) => Number(item.id) === Number(productId));
     if (!product) return null;
 
@@ -287,7 +297,7 @@ function syncSupplierReturnDraftFromForm() {
                 quantity: String(quantities[index] || "").trim(),
                 reason: String(reasons[index] || "near_expiry").trim()
             });
-        }).filter((item) => item.product_id)
+        })
     };
 
     return state.supplierReturnDraft;
@@ -303,13 +313,7 @@ function addSupplierReturnDraftItem() {
         return;
     }
 
-    const selectedIds = new Set(draft.items.map((item) => String(item.product_id)));
-    const nextProduct = options.find((item) => !selectedIds.has(String(item.id)));
-    if (!nextProduct) {
-        showToast("Tat ca san pham co san da duoc them vao phieu tra.");
-        return;
-    }
-    draft.items.push(buildSupplierReturnDraftItem(nextProduct));
+    draft.items.push(buildSupplierReturnDraftItem(null));
 }
 
 function removeSupplierReturnDraftItem(index) {
@@ -323,6 +327,7 @@ function renderSupplierReturnItemRow(item, index, selectableProducts) {
     const product = (state.products || []).find((entry) => Number(entry.id) === Number(item.product_id));
     const stock = getProductStock(product);
     const unit = product?.stock_unit || product?.unit || "don vi";
+    const quantityValue = item.quantity || "";
 
     return `
       <div class="supplier-return-item-row">
@@ -330,14 +335,15 @@ function renderSupplierReturnItemRow(item, index, selectableProducts) {
           <span class="supplier-return-thumb small">${renderSupplierProductThumb(product)}</span>
           <div class="supplier-return-product-copy">
             <select name="item_product_id" data-return-field="product" aria-label="San pham tra hang">
+              <option value="">Chon san pham tu kho</option>
               ${selectableProducts.map((option) => `<option value="${escapeHtml(option.id)}" ${Number(option.id) === Number(item.product_id) ? "selected" : ""}>${escapeHtml(option.name || "-")} (${escapeHtml(option.sku || "Khong co SKU")})</option>`).join("")}
             </select>
-            <small>SKU: ${escapeHtml(product?.sku || "-")}</small>
+            <small>SKU: ${escapeHtml(product?.sku || "Chua chon san pham")}</small>
           </div>
         </div>
         <strong>${formatNumber(stock)} ${escapeHtml(unit)}</strong>
         <label class="supplier-return-quantity">
-          <input name="item_quantity" type="number" min="1" max="${escapeHtml(stock || 1)}" value="${escapeHtml(item.quantity || "1")}" required>
+          <input name="item_quantity" type="number" min="1" max="${escapeHtml(stock || 1)}" value="${escapeHtml(quantityValue)}" required>
           <span>${escapeHtml(unit)}</span>
         </label>
         <select name="item_reason" required>
@@ -443,14 +449,16 @@ function renderSupplierReturnSheet() {
     const productId = state.supplierReturnModalProductId;
     if (!productId) return "";
 
-    const product = (state.products || []).find((item) => Number(item.id) === Number(productId));
-    if (!product) return "";
+    const product = productId === "new"
+        ? null
+        : (state.products || []).find((item) => Number(item.id) === Number(productId));
+    if (productId !== "new" && !product) return "";
 
-    const draft = ensureSupplierReturnDraft(product.id);
-    const existing = getSupplierReturnTicketByProduct(product.id);
-    const previewProductId = draft?.items?.[0]?.product_id || product.id;
+    const draft = ensureSupplierReturnDraft(productId);
+    const existing = product ? getSupplierReturnTicketByProduct(product.id) : null;
+    const previewProductId = draft?.items?.[0]?.product_id || product?.id || "";
     const previewProduct = (state.products || []).find((item) => Number(item.id) === Number(previewProductId)) || product;
-    const supplierName = draft?.supplier_name || getSupplierNameFromProduct(product) || "Chua xac dinh";
+    const supplierName = draft?.supplier_name || getSupplierNameFromProduct(product) || "";
     const returnDate = draft?.return_date || new Date().toISOString().slice(0, 10);
     const warehouseName = draft?.warehouse_name || "Kho tong";
     const supplierOptions = getSupplierFilterOptions();
@@ -468,13 +476,13 @@ function renderSupplierReturnSheet() {
               <h2>${existing ? "Cap nhat phieu tra hang" : "Tao phieu tra hang"}</h2>
             </div>
             <div class="supplier-return-head-actions">
-              <button class="ghost-button" type="button" data-supplier-action="close-return-modal" data-id="${escapeHtml(product.id)}">Huy</button>
-              <button class="primary-button" type="button" data-supplier-action="submit-return-ticket" data-id="${escapeHtml(product.id)}">Xac nhan tra hang</button>
+              <button class="ghost-button" type="button" data-supplier-action="close-return-modal" data-id="${escapeHtml(productId)}">Huy</button>
+              <button class="primary-button" type="button" data-supplier-action="submit-return-ticket" data-id="${escapeHtml(productId)}">Xac nhan tra hang</button>
             </div>
           </div>
 
           <form id="supplierReturnTicketForm" class="supplier-return-form">
-            <input type="hidden" name="product_id" value="${escapeHtml(product.id)}">
+            <input type="hidden" name="product_id" value="${escapeHtml(product?.id || draft?.items?.[0]?.product_id || "")}">
 
             <section class="supplier-return-section">
               <h3>Thong tin chung</h3>
@@ -569,7 +577,7 @@ function renderSupplierReturns() {
             <input id="supplierReturnUntil" type="date" value="${escapeHtml(filters.until || "")}">
           </label>
           <button class="primary-button" type="button" data-supplier-action="filter-returns">Lọc dữ liệu</button>
-          <button class="primary-button" type="button" data-supplier-action="open-return-ticket" data-id="${products[0]?.id || ""}" ${products[0] ? "" : "disabled"}>Tạo phiếu trả hàng</button>
+          <button class="primary-button" type="button" data-supplier-action="open-return-ticket" data-id="new">Tạo phiếu trả hàng</button>
           <button class="secondary-button" type="button" data-supplier-action="export-returns">Xuất báo cáo</button>
         </div>
         <div class="suppliers-table-wrap">
@@ -932,8 +940,9 @@ async function submitSupplierReturnTicketV2() {
     if (!form) return;
 
     const raw = Object.fromEntries(new FormData(form).entries());
-    const draft = syncSupplierReturnDraftFromForm() || ensureSupplierReturnDraft(raw.product_id);
-    const anchorProduct = (state.products || []).find((item) => Number(item.id) === Number(raw.product_id));
+    const draft = syncSupplierReturnDraftFromForm() || ensureSupplierReturnDraft(raw.product_id || state.supplierReturnModalProductId);
+    const anchorProductId = raw.product_id || draft?.items?.find((item) => item.product_id)?.product_id || "";
+    const anchorProduct = (state.products || []).find((item) => Number(item.id) === Number(anchorProductId));
     if (!anchorProduct) throw new Error("Khong tim thay san pham can tra.");
     if (!draft?.items?.length) {
         throw new Error("Vui long them it nhat 1 san pham vao phieu tra.");
@@ -945,6 +954,9 @@ async function submitSupplierReturnTicketV2() {
     const savedItems = [];
 
     for (const item of draft.items) {
+        if (!item.product_id) {
+            throw new Error("Vui long chon san pham tu kho truoc khi luu phieu tra.");
+        }
         const product = (state.products || []).find((entry) => Number(entry.id) === Number(item.product_id));
         if (!product) {
             throw new Error("Co san pham trong phieu tra khong ton tai.");
@@ -1075,7 +1087,7 @@ function renderSupplierReturnsV2() {
             <input id="supplierReturnUntil" type="date" value="${escapeHtml(filters.until || "")}">
           </label>
           <button class="primary-button" type="button" data-supplier-action="filter-returns">Lọc dữ liệu</button>
-          <button class="primary-button" type="button" data-supplier-action="open-return-ticket" data-id="${products[0]?.id || ""}" ${products[0] ? "" : "disabled"}>Tạo phiếu trả hàng</button>
+          <button class="primary-button" type="button" data-supplier-action="open-return-ticket" data-id="new">Tạo phiếu trả hàng</button>
           <button class="secondary-button" type="button" data-supplier-action="export-returns">Xuất báo cáo</button>
         </div>
         <div class="suppliers-table-wrap">
@@ -1227,6 +1239,7 @@ export function bindSupplierMediaEvents() {
         reader.readAsDataURL(file);
     });
 }
+
 
 
 
