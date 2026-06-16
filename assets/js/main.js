@@ -118,7 +118,7 @@ import {
     renderSuppliers,
     resetSupplierForm,
     submitSupplierForm
-} from "./suppliers.js";
+} from "./suppliers.js?v=20260616";
 import {
     autoGenerateVoucherCode,
     closeVoucherForm,

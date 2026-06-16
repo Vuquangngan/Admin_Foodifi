@@ -1333,8 +1333,8 @@ lierFilterCard?.classList.remove("hidden");
     if (state.supplierView !== "form") {
         elements.supplierFormCard?.classList.add("hidden");
     }
-
-
+  
+  
 export function bindSupplierMediaEvents() {
     if (!elements.supplierLogoFile) return;
 
