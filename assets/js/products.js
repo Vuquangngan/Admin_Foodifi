@@ -791,15 +791,6 @@ function renderLowStockWorkspace(items) {
               ${childCategoryOptions}
             </select>
           </label>
-          <label>
-            <span>Trạng thái</span>
-            <select data-low-stock-filter="status">
-              <option value="all" ${String(filters.status || "all") === "all" ? "selected" : ""}>Tất cả trạng thái</option>
-              <option value="low" ${String(filters.status || "all") === "low" ? "selected" : ""}>Sắp hết</option>
-              <option value="urgent" ${String(filters.status || "all") === "urgent" ? "selected" : ""}>Khẩn cấp</option>
-              <option value="out" ${String(filters.status || "all") === "out" ? "selected" : ""}>Hết hàng</option>
-            </select>
-          </label>
           <button class="low-stock-filter-button" type="button" data-low-stock-action="filter">Lọc dữ liệu</button>
         </section>
 
