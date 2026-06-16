@@ -130,7 +130,6 @@ export const SIDEBAR_MENU = [
         icon: "megaphone",
         defaultExpanded: false,
         items: [
-            { key: "promotions", label: "Khuyến mãi", panel: "vouchers", workspace: "promotions" },
             { key: "vouchers-list", label: "Voucher", panel: "vouchers", workspace: "list" },
             { key: "email-campaign-create", label: "Tạo chiến dịch Email", panel: "emailMarketing", workspace: "campaign" }
         ]
