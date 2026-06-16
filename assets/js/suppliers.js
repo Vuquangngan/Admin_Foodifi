@@ -238,7 +238,7 @@ function createSupplierReturnDraft(productId) {
     if (!productId || productId === "new") {
         return {
             supplier_name: "",
-            warehouse_name: "Kho tong",
+            warehouse_name: "Kho tổng",
             return_date: new Date().toISOString().slice(0, 10),
             note: "",
             items: [buildSupplierReturnDraftItem(null)]
@@ -257,8 +257,8 @@ function createSupplierReturnDraft(productId) {
         : [buildSupplierReturnDraftItem(product, existing || {})];
 
     return {
-        supplier_name: String(existing?.supplier_name || getSupplierNameFromProduct(product) || "Chua xac dinh").trim(),
-        warehouse_name: String(existing?.warehouse_name || "Kho tong").trim(),
+        supplier_name: String(existing?.supplier_name || getSupplierNameFromProduct(product) || "Chưa xác định").trim(),
+        warehouse_name: String(existing?.warehouse_name || "Kho tổng").trim(),
         return_date: String(existing?.return_date || new Date().toISOString().slice(0, 10)).trim(),
         note: String(existing?.note || "").trim(),
         items
@@ -303,17 +303,93 @@ function syncSupplierReturnDraftFromForm() {
     return state.supplierReturnDraft;
 }
 
-function addSupplierReturnDraftItem() {
+function addSupplierReturnDraftItem(productIds = []) {
     const draft = syncSupplierReturnDraftFromForm() || ensureSupplierReturnDraft();
     if (!draft) return;
 
     const options = getSupplierReturnSelectableProducts();
     if (!options.length) {
-        showToast("Khong con san pham nao de them vao phieu tra.");
+        showToast("Không còn sản phẩm nào để thêm vào phiếu trả.");
         return;
     }
 
-    draft.items.push(buildSupplierReturnDraftItem(null));
+    if (productIds.length > 0) {
+        for (const pid of productIds) {
+            const product = options.find((p) => String(p.id) === String(pid));
+            draft.items.push(buildSupplierReturnDraftItem(product || null, product ? { product_id: product.id } : {}));
+        }
+    } else {
+        draft.items.push(buildSupplierReturnDraftItem(null));
+    }
+}
+
+function renderProductSelectModal() {
+    const products = getSupplierReturnSelectableProducts();
+    const selected = state.productSelectModalSelected || [];
+    const keyword = state.productSelectModalKeyword || "";
+    const filtered = keyword
+        ? products.filter((p) => {
+              const kw = keyword.toLowerCase();
+              return (p.name || "").toLowerCase().includes(kw) || (p.sku || "").toLowerCase().includes(kw);
+          })
+        : products;
+
+    return `
+      <div class="modal-backdrop product-select-backdrop" data-supplier-action="close-product-select" style="z-index:1100">
+        <div class="modal-card product-select-modal" role="dialog" aria-modal="true" onclick="event.stopPropagation()" style="max-width:540px;width:100%;max-height:80vh;display:flex;flex-direction:column;padding:0;overflow:hidden">
+          <div style="padding:20px 24px 12px;border-bottom:1px solid var(--border)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div>
+                <strong style="font-size:1.05rem">Chọn sản phẩm trong kho</strong><br>
+                <small style="color:var(--text-muted)">${filtered.length} sản phẩm khả dụng</small>
+              </div>
+              <button class="icon-button" type="button" data-supplier-action="close-product-select" style="font-size:1.2rem">✕</button>
+            </div>
+            <div style="position:relative">
+              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted)">🔍</span>
+              <input
+                id="productSelectSearch"
+                type="text"
+                placeholder="Nhập tên sản phẩm hoặc SKU..."
+                value="${escapeHtml(keyword)}"
+                data-supplier-action="search-product-select"
+                style="width:100%;padding:8px 10px 8px 32px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem"
+                oninput="this.setAttribute('data-val',this.value)"
+              >
+            </div>
+          </div>
+          <div style="overflow-y:auto;flex:1;padding:12px 24px">
+            ${filtered.length === 0
+                ? `<p style="text-align:center;color:var(--text-muted);padding:24px 0">Không tìm thấy sản phẩm</p>`
+                : filtered.map((p) => {
+                    const stock = getProductStock(p);
+                    const unit = p.stock_unit || p.unit || "đơn vị";
+                    const isSelected = selected.includes(String(p.id));
+                    return `
+                      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-light,#f0f0f0)">
+                        <span class="supplier-return-thumb small" style="flex-shrink:0">${renderSupplierProductThumb(p)}</span>
+                        <div style="flex:1;min-width:0">
+                          <div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(p.name || "-")}</div>
+                          <small style="color:var(--text-muted)">SKU: ${escapeHtml(p.sku || "—")}</small><br>
+                          <small style="color:var(--text-muted)">Kho tổng còn ${formatNumber(stock)} ${escapeHtml(unit)}</small>
+                        </div>
+                        <button
+                          class="${isSelected ? "primary-button" : "chip-button"}"
+                          type="button"
+                          data-supplier-action="toggle-product-select"
+                          data-id="${escapeHtml(p.id)}"
+                          style="flex-shrink:0"
+                        >${isSelected ? "✓ Đã chọn" : "Chọn"}</button>
+                      </div>`;
+                }).join("")}
+          </div>
+          <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px">
+            <button class="ghost-button" type="button" data-supplier-action="close-product-select">Hủy</button>
+            <button class="primary-button" type="button" data-supplier-action="confirm-product-select">Thêm ${selected.length} sản phẩm</button>
+          </div>
+        </div>
+      </div>
+    `;
 }
 
 function removeSupplierReturnDraftItem(index) {
@@ -326,7 +402,7 @@ function removeSupplierReturnDraftItem(index) {
 function renderSupplierReturnItemRow(item, index, selectableProducts) {
     const product = (state.products || []).find((entry) => Number(entry.id) === Number(item.product_id));
     const stock = getProductStock(product);
-    const unit = product?.stock_unit || product?.unit || "don vi";
+    const unit = product?.stock_unit || product?.unit || "đơn vị";
     const quantityValue = item.quantity || "";
 
     return `
@@ -334,11 +410,11 @@ function renderSupplierReturnItemRow(item, index, selectableProducts) {
         <div class="supplier-return-product-info">
           <span class="supplier-return-thumb small">${renderSupplierProductThumb(product)}</span>
           <div class="supplier-return-product-copy">
-            <select name="item_product_id" data-return-field="product" aria-label="San pham tra hang">
-              <option value="">Chon san pham tu kho</option>
-              ${selectableProducts.map((option) => `<option value="${escapeHtml(option.id)}" ${Number(option.id) === Number(item.product_id) ? "selected" : ""}>${escapeHtml(option.name || "-")} (${escapeHtml(option.sku || "Khong co SKU")})</option>`).join("")}
+            <select name="item_product_id" data-return-field="product" aria-label="Sản phẩm trả hàng">
+              <option value="">Chọn sản phẩm từ kho</option>
+              ${selectableProducts.map((option) => `<option value="${escapeHtml(option.id)}" ${Number(option.id) === Number(item.product_id) ? "selected" : ""}>${escapeHtml(option.name || "-")} (${escapeHtml(option.sku || "Không có SKU")})</option>`).join("")}
             </select>
-            <small>SKU: ${escapeHtml(product?.sku || "Chua chon san pham")}</small>
+            <small>SKU: ${escapeHtml(product?.sku || "Chưa chọn sản phẩm")}</small>
           </div>
         </div>
         <strong>${formatNumber(stock)} ${escapeHtml(unit)}</strong>
@@ -349,7 +425,7 @@ function renderSupplierReturnItemRow(item, index, selectableProducts) {
         <select name="item_reason" required>
           ${["near_expiry", "damaged", "bad_package", "quality_issue", "other"].map((reason) => `<option value="${reason}" ${reason === String(item.reason || "near_expiry") ? "selected" : ""}>${escapeHtml(getSupplierReturnReasonLabel(reason))}</option>`).join("")}
         </select>
-        <button class="icon-button soft-danger" type="button" data-supplier-action="remove-return-item" data-id="${escapeHtml(index)}" aria-label="Xoa san pham">🗑</button>
+        <button class="icon-button soft-danger" type="button" data-supplier-action="remove-return-item" data-id="${escapeHtml(index)}" aria-label="Xóa sản phẩm">🗑</button>
       </div>
     `;
 }
@@ -460,12 +536,12 @@ function renderSupplierReturnSheet() {
     const previewProduct = (state.products || []).find((item) => Number(item.id) === Number(previewProductId)) || product;
     const supplierName = draft?.supplier_name || getSupplierNameFromProduct(product) || "";
     const returnDate = draft?.return_date || new Date().toISOString().slice(0, 10);
-    const warehouseName = draft?.warehouse_name || "Kho tong";
+    const warehouseName = draft?.warehouse_name || "Kho tổng";
     const supplierOptions = getSupplierFilterOptions();
     const selectableProducts = getSupplierReturnSelectableProducts();
     const itemsMarkup = draft?.items?.length
         ? draft.items.map((item, index) => renderSupplierReturnItemRow(item, index, selectableProducts)).join("")
-        : `<div class="supplier-return-empty">Chua co san pham nao trong phieu tra. Bam "Them san pham" de bo sung.</div>`;
+        : `<div class="supplier-return-empty">Chưa có sản phẩm nào trong phiếu trả. Bấm "Thêm sản phẩm" để bổ sung.</div>`;
 
     return `
       <div class="modal-backdrop supplier-return-backdrop" data-supplier-action="close-return-modal">
@@ -473,11 +549,11 @@ function renderSupplierReturnSheet() {
           <div class="supplier-return-sheet-head">
             <div>
               <p class="eyebrow">Inventory / Returns</p>
-              <h2>${existing ? "Cap nhat phieu tra hang" : "Tao phieu tra hang"}</h2>
+              <h2>${existing ? "Cập nhật phiếu trả hàng" : "Tạo phiếu trả hàng"}</h2>
             </div>
             <div class="supplier-return-head-actions">
-              <button class="ghost-button" type="button" data-supplier-action="close-return-modal" data-id="${escapeHtml(productId)}">Huy</button>
-              <button class="primary-button" type="button" data-supplier-action="submit-return-ticket" data-id="${escapeHtml(productId)}">Xac nhan tra hang</button>
+              <button class="ghost-button" type="button" data-supplier-action="close-return-modal" data-id="${escapeHtml(productId)}">Hủy</button>
+              <button class="primary-button" type="button" data-supplier-action="submit-return-ticket" data-id="${escapeHtml(productId)}">Xác nhận trả hàng</button>
             </div>
           </div>
 
@@ -485,24 +561,24 @@ function renderSupplierReturnSheet() {
             <input type="hidden" name="product_id" value="${escapeHtml(product?.id || draft?.items?.[0]?.product_id || "")}">
 
             <section class="supplier-return-section">
-              <h3>Thong tin chung</h3>
+              <h3>Thông tin chung</h3>
               <div class="supplier-return-general-grid">
                 <label>
-                  <span>Nha cung cap</span>
+                  <span>Nhà cung cấp</span>
                   <select name="supplier_name">
-                    <option value="">Chon nha cung cap</option>
+                    <option value="">Chọn nhà cung cấp</option>
                     ${supplierOptions.map((name) => `<option value="${escapeHtml(name)}" ${name === supplierName ? "selected" : ""}>${escapeHtml(name)}</option>`).join("")}
                     ${supplierOptions.includes(supplierName) || !supplierName ? "" : `<option value="${escapeHtml(supplierName)}" selected>${escapeHtml(supplierName)}</option>`}
                   </select>
                 </label>
                 <label>
-                  <span>Kho xuat hang</span>
+                  <span>Kho xuất hàng</span>
                   <select name="warehouse_name">
-                    ${["Kho tong", "Kho 1 - Dong lanh", "Kho 2 - Rau cu", "Kho 3 - Do kho"].map((name) => `<option value="${escapeHtml(name)}" ${name === warehouseName ? "selected" : ""}>${escapeHtml(name)}</option>`).join("")}
+                    ${["Kho tổng", "Kho 1 - Đông lạnh", "Kho 2 - Rau củ", "Kho 3 - Đồ khô"].map((name) => `<option value="${escapeHtml(name)}" ${name === warehouseName ? "selected" : ""}>${escapeHtml(name)}</option>`).join("")}
                   </select>
                 </label>
                 <label>
-                  <span>Ngay tra hang</span>
+                  <span>Ngày trả hàng</span>
                   <input name="return_date" type="date" value="${escapeHtml(returnDate)}">
                 </label>
               </div>
@@ -510,15 +586,15 @@ function renderSupplierReturnSheet() {
 
             <section class="supplier-return-section">
               <div class="supplier-return-section-title">
-                <h3>Danh sach san pham tra</h3>
-                <button class="text-button" type="button" data-supplier-action="add-return-item">+ Them san pham</button>
+                <h3>Danh sách sản phẩm trả</h3>
+                <button class="text-button" type="button" data-supplier-action="add-return-item">+ Thêm sản phẩm</button>
               </div>
               <div class="supplier-return-items">
                 <div class="supplier-return-items-head">
-                  <span>San pham</span>
-                  <span>Ton kho hien tai</span>
-                  <span>So luong tra</span>
-                  <span>Ly do</span>
+                  <span>Sản phẩm</span>
+                  <span>Tồn kho hiện tại</span>
+                  <span>Số lượng trả</span>
+                  <span>Lý do</span>
                   <span></span>
                 </div>
                 ${itemsMarkup}
@@ -527,22 +603,23 @@ function renderSupplierReturnSheet() {
 
             <section class="supplier-return-bottom-grid">
               <div class="supplier-return-section">
-                <h3>Bang chung & Hinh anh</h3>
+                <h3>Bằng chứng &amp; Hình ảnh</h3>
                 <div class="supplier-return-evidence">
                   <label class="supplier-return-upload">
                     <input name="evidence_images" type="file" accept="image/*" multiple hidden>
                     <span>+</span>
-                    <strong>Tai len</strong>
+                    <strong>Tải lên</strong>
                   </label>
                   <span class="supplier-return-proof">${renderSupplierProductThumb(previewProduct)}</span>
                   <span class="supplier-return-proof sample"></span>
                 </div>
               </div>
               <label class="supplier-return-section">
-                <span>Ghi chu them</span>
-                <textarea name="note" rows="5" placeholder="Nhap them chi tiet ve tinh trang hang hoa hoac yeu cau boi thuong...">${escapeHtml(draft?.note || "")}</textarea>
+                <span>Ghi chú thêm</span>
+                <textarea name="note" rows="5" placeholder="Nhập thêm chi tiết về tình trạng hàng hóa hoặc yêu cầu bồi thường...">${escapeHtml(draft?.note || "")}</textarea>
               </label>
             </section>
+            ${state.productSelectModalOpen ? renderProductSelectModal() : ""}
           </form>
         </div>
       </div>
@@ -911,16 +988,16 @@ function exportSupplierReturnReport() {
     }
 
     const rows = [
-        ["San pham", "SKU", "Nha cung cap", "Ngay het han", "Ton kho", "Don vi", "Trang thai"],
+        ["Sản phẩm", "SKU", "Nhà cung cấp", "Ngày hết hạn", "Tồn kho", "Đơn vị", "Trạng thái"],
         ...products.map((product) => {
             const expiration = getProductExpirationMeta(product);
             return [
                 product.name || "",
                 product.sku || "",
-                getSupplierNameFromProduct(product) || "Chua xac dinh",
+                getSupplierNameFromProduct(product) || "Chưa xác định",
                 product.expiration_date || "",
                 getProductStock(product),
-                product.stock_unit || product.unit || "don vi",
+                product.stock_unit || product.unit || "đơn vị",
                 expiration?.status || "Gan het han"
             ];
         })
@@ -975,7 +1052,7 @@ async function submitSupplierReturnTicketV2() {
             throw new Error(`So luong tra cua ${product.name || "san pham"} khong duoc lon hon ton kho hien tai.`);
         }
 
-        const unit = product.stock_unit || product.unit || "don vi";
+        const unit = product.stock_unit || product.unit || "đơn vị";
         const nextStock = alreadyResolved ? stock : Math.max(0, stock - quantity);
         const productPayload = {
             category_id: Number(product.category_id || product.category?.id || 0),
@@ -1027,8 +1104,8 @@ async function submitSupplierReturnTicketV2() {
         product_id: primaryItem.product_id,
         product_name: primaryItem.product_name,
         sku: primaryItem.sku,
-        supplier_name: String(draft.supplier_name || getSupplierNameFromProduct(anchorProduct) || "Chua xac dinh").trim(),
-        warehouse_name: String(draft.warehouse_name || "Kho tong").trim(),
+        supplier_name: String(draft.supplier_name || getSupplierNameFromProduct(anchorProduct) || "Chưa xác định").trim(),
+        warehouse_name: String(draft.warehouse_name || "Kho tổng").trim(),
         return_date: String(draft.return_date || new Date().toISOString().slice(0, 10)).trim(),
         expiration_date: primaryItem.expiration_date || "",
         quantity: primaryItem.quantity,
@@ -1054,8 +1131,8 @@ async function submitSupplierReturnTicketV2() {
     state.supplierReturnDraft = null;
     renderSuppliers();
     showToast(alreadyResolved
-        ? "Phieu tra hang nay da duoc xu ly truoc do."
-        : `Da xac nhan tra ${formatNumber(totalQuantity)} don vi tu ${savedItems.length} dong san pham.`
+        ? "Phiếu trả hàng này đã được xử lý trước đó."
+        : `Đã xác nhận trả ${formatNumber(totalQuantity)} đơn vị từ ${savedItems.length} dòng sản phẩm.`
     );
 }
 function renderSupplierReturnsV2() {
@@ -1106,7 +1183,7 @@ function renderSupplierReturnsV2() {
               ${products.map((product) => {
                   const expiration = getProductExpirationMeta(product);
                   const supplierName = getSupplierNameFromProduct(product) || "Chưa xác định";
-                  const ticket = getSupplierReturnTicketByProduct(product.id);
+                     const ticket = getSupplierReturnTicketByProduct(product.id);
                   const unit = product.stock_unit || product.unit || "đơn vị";
                   const tone = ticket?.status === "resolved" ? "active" : expiration?.daysLeft < 0 ? "inactive" : "pending";
                   const label = getSupplierReturnStatusLabel(ticket, expiration?.status || "Gần hết hạn");
@@ -1142,6 +1219,10 @@ function renderSupplierReturnsV2() {
 }
 
 async function handleSupplierReturnAction(action, supplierId) {
+    if (action === "open-return-ticket") {
+        openSupplierReturnModal(supplierId);
+        return true;
+    }
     if (action === "filter-returns") {
         applySupplierReturnFilters();
         return true;
@@ -1150,16 +1231,43 @@ async function handleSupplierReturnAction(action, supplierId) {
         exportSupplierReturnReport();
         return true;
     }
-    if (action === "open-return-ticket") {
-        openSupplierReturnModal(supplierId);
-        return true;
-    }
     if (action === "close-return-modal") {
         closeSupplierReturnModal();
         return true;
     }
     if (action === "add-return-item") {
-        addSupplierReturnDraftItem();
+        syncSupplierReturnDraftFromForm();
+        state.productSelectModalOpen = true;
+        state.productSelectModalSelected = [];
+        state.productSelectModalKeyword = "";
+        renderSuppliers();
+        return true;
+    }
+    if (action === "close-product-select") {
+        state.productSelectModalOpen = false;
+        state.productSelectModalSelected = [];
+        state.productSelectModalKeyword = "";
+        renderSuppliers();
+        return true;
+    }
+    if (action === "toggle-product-select") {
+        const sel = state.productSelectModalSelected || [];
+        const sid = String(supplierId);
+        state.productSelectModalSelected = sel.includes(sid) ? sel.filter((x) => x !== sid) : [...sel, sid];
+        renderSuppliers();
+        return true;
+    }
+    if (action === "search-product-select") {
+        return true;
+    }
+    if (action === "confirm-product-select") {
+        const selected = state.productSelectModalSelected || [];
+        if (selected.length > 0) {
+            addSupplierReturnDraftItem(selected);
+        }
+        state.productSelectModalOpen = false;
+        state.productSelectModalSelected = [];
+        state.productSelectModalKeyword = "";
         renderSuppliers();
         return true;
     }
@@ -1216,6 +1324,10 @@ export function renderSuppliers() {
     }
 
     elements.supplierFilterCard?.classList.remove("hidden");
+    renderSupplierSummary();
+    renderSupplierTable();
+}
+lierFilterCard?.classList.remove("hidden");
     renderSupplierSummary();
     renderSupplierTable();
     if (state.supplierView !== "form") {

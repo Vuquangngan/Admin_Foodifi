@@ -1050,6 +1050,12 @@ function bindGlobalEvents() {
         handleSupplierReturnFieldChange(event.target);
     }, true);
 
+    document.addEventListener("input", (event) => {
+        if (event.target.id !== "productSelectSearch") return;
+        state.productSelectModalKeyword = event.target.value || "";
+        renderSuppliers();
+    }, true);
+
     elements.voucherFilterForm?.addEventListener("submit", async (event) => {
         event.preventDefault();
         state.filters.vouchers = collectFormData(elements.voucherFilterForm);
