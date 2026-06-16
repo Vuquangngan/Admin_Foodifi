@@ -435,11 +435,7 @@ function buildShiftMember(item, dateKey, shiftId) {
 
     return `
       <article class="shift-member-pill is-${statusClass}">
-        <span class="shift-member-avatar">${escapeHtml((item.user.username || "U").trim().charAt(0).toUpperCase())}</span>
-        <div class="shift-member-copy">
-          <strong>${escapeHtml(item.user.username || item.user.email || "Nhân viên")}</strong>
-          <span>${escapeHtml(employeeCode)}</span>
-        </div>
+        <strong>${escapeHtml(item.user.username || item.user.email || "Nhân viên")}</strong>
         <button type="button" class="shift-member-remove" title="${escapeHtml(statusLabel)}" aria-label="Xóa nhân viên khỏi ca" data-shift-action="remove-assignment" data-date="${dateKey}" data-shift-id="${shiftId}" data-user-id="${item.user.id}">×</button>
       </article>
     `;
@@ -473,7 +469,7 @@ function buildShiftCell(dateKey, shift) {
           ${records.length ? records.map((item) => buildShiftMember(item, dateKey, shift.id)).join("") : '<div class="shift-cell-empty-copy">Chưa có nhân sự</div>'}
         </div>
         <div class="shift-cell-actions">
-          ${canSelfRegister ? `<button type="button" class="chip-button" data-shift-action="self-register" data-date="${dateKey}" data-shift-id="${shift.id}">Đăng ký: ${escapeHtml(state.user?.username || "Tôi")}</button>` : ""}
+          ${canSelfRegister ? `<button type="button" class="chip-button" data-shift-action="self-register" data-date="${dateKey}" data-shift-id="${shift.id}">Đăng ký tôi</button>` : ""}
           ${isFull ? `<span class="shift-self-note">Ca đã đủ tối đa ${MAX_STAFF_PER_SHIFT} nhân viên</span>` : ""}
           ${existingSelfRecord?.status === "pending" ? '<span class="shift-self-note">Bạn đã đăng ký, chờ quản lý xác nhận</span>' : ""}
           <button type="button" class="chip-button" data-shift-action="open-assign-modal" data-date="${dateKey}" data-shift-id="${shift.id}">${records.length ? "Sửa nhân sự" : "Thêm nhân sự"}</button>
