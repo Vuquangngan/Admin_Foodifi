@@ -1092,7 +1092,6 @@ function renderBranchImportWorkspace() {
           <article class="surface branch-import-card">
             <div class="section-head">
               <h3>Cảnh báo tồn kho của chi nhánh</h3>
-              <span class="branch-import-muted">Hiển thị ${formatNumber(lowStockProducts.length)} sản phẩm sắp hết</span>
             </div>
             <div class="branch-import-table-wrap">
               <table class="list-table branch-import-table">

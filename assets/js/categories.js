@@ -307,7 +307,7 @@ export function renderCategories() {
     const totalCategories = allCategories.length;
     const visibleCategories = categoryRows.length;
 
-    elements.categoriesMeta.textContent = `${formatNumber(visibleCategories)} danh mục phù hợp`;
+    elements.categoriesMeta.textContent = "";
     elements.categoriesSummary.innerHTML = buildCategoryFilterForm(filters);
 
     const rows = categoryRows.map(({ category, level, childCount, parent }) => {

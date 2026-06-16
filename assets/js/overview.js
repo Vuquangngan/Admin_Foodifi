@@ -84,7 +84,6 @@ export function renderOverview() {
             <button class="range-chip ${rangeDays === 30 ? "active" : ""}" type="button" data-overview-range="30">30 ngày qua</button>
             <button class="range-chip ${rangeDays === 7 ? "active" : ""}" type="button" data-overview-range="7">7 ngày qua</button>
           </div>
-          <button class="overview-export" type="button" data-export-overview="true">Xuất báo cáo</button>
         </div>
       </section>
 
