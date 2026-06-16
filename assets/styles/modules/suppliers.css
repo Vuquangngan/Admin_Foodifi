@@ -141,7 +141,7 @@
 }
 
 .suppliers-table {
-  min-width: 1380px;
+  min-width: 1200px;
 }
 
 .suppliers-table th,
@@ -154,8 +154,8 @@
 
 .suppliers-table th:first-child,
 .suppliers-table td:first-child {
-  min-width: 340px;
-  width: 32%;
+  min-width: 280px;
+  width: 24%;
 }
 
 .suppliers-table th:nth-child(2),
@@ -167,7 +167,7 @@
 
 .suppliers-table th:nth-child(4),
 .suppliers-table td:nth-child(4) {
-  min-width: 230px;
+  min-width: 150px;
 }
 
 .suppliers-table th:nth-child(5),
@@ -182,7 +182,7 @@
 
 .suppliers-table th:nth-child(7),
 .suppliers-table td:nth-child(7) {
-  min-width: 220px;
+  min-width: 170px;
 }
 
 .suppliers-table th:last-child,
@@ -541,6 +541,16 @@
   display: block;
 }
 
+.supplier-return-product-copy {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.supplier-return-product-copy select {
+  width: 100%;
+}
+
 .supplier-return-product-info strong {
   color: #263b2f;
 }
@@ -636,6 +646,15 @@
 .supplier-return-bottom-grid textarea {
   min-height: 112px;
   resize: vertical;
+}
+
+.supplier-return-empty {
+  padding: 18px;
+  border: 1px dashed #bdd8c6;
+  border-radius: 14px;
+  background: #f7fbf5;
+  color: #5f7265;
+  font-weight: 700;
 }
 
 @media (max-width: 860px) {

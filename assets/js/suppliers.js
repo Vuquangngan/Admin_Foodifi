@@ -198,7 +198,11 @@ function getExpiringSupplierProducts() {
 function getSupplierReturnTicketByProduct(productId) {
     const product = (state.products || []).find((item) => Number(item.id) === Number(productId));
     if (!product) return null;
-    const existing = readSupplierReturns().find((ticket) => Number(ticket.product_id) === Number(product.id));
+    const existing = readSupplierReturns().find((ticket) => {
+        if (Number(ticket.product_id) === Number(product.id)) return true;
+        if (!Array.isArray(ticket.items)) return false;
+        return ticket.items.some((item) => Number(item.product_id) === Number(product.id));
+    });
     return existing || null;
 }
 
@@ -213,6 +217,135 @@ function buildSupplierReturnCode() {
         String(now.getSeconds()).padStart(2, "0")
     ].join("");
     return `RTN-${stamp}`;
+}
+
+function getSupplierReturnSelectableProducts() {
+    return (state.products || [])
+        .filter((product) => getProductStock(product) > 0)
+        .sort((a, b) => String(a?.name || "").localeCompare(String(b?.name || ""), "vi"));
+}
+
+function buildSupplierReturnDraftItem(product, overrides = {}) {
+    const stock = getProductStock(product);
+    return {
+        product_id: String(overrides.product_id ?? product?.id ?? "").trim(),
+        quantity: String(overrides.quantity ?? Math.max(1, Math.min(stock, 1))).trim(),
+        reason: String(overrides.reason || "near_expiry").trim() || "near_expiry"
+    };
+}
+
+function createSupplierReturnDraft(productId) {
+    const product = (state.products || []).find((item) => Number(item.id) === Number(productId));
+    if (!product) return null;
+
+    const existing = getSupplierReturnTicketByProduct(product.id);
+    const items = Array.isArray(existing?.items) && existing.items.length
+        ? existing.items.map((item) => {
+            const selectedProduct = (state.products || []).find((entry) => Number(entry.id) === Number(item.product_id)) || product;
+            return buildSupplierReturnDraftItem(selectedProduct, item);
+        })
+        : [buildSupplierReturnDraftItem(product, existing || {})];
+
+    return {
+        supplier_name: String(existing?.supplier_name || getSupplierNameFromProduct(product) || "Chua xac dinh").trim(),
+        warehouse_name: String(existing?.warehouse_name || "Kho tong").trim(),
+        return_date: String(existing?.return_date || new Date().toISOString().slice(0, 10)).trim(),
+        note: String(existing?.note || "").trim(),
+        items
+    };
+}
+
+function ensureSupplierReturnDraft(productId = state.supplierReturnModalProductId) {
+    if (!productId) return null;
+    if (state.supplierReturnDraft && String(state.supplierReturnDraftSourceId || "") === String(productId)) {
+        return state.supplierReturnDraft;
+    }
+
+    state.supplierReturnDraftSourceId = String(productId);
+    state.supplierReturnDraft = createSupplierReturnDraft(productId);
+    return state.supplierReturnDraft;
+}
+
+function syncSupplierReturnDraftFromForm() {
+    const form = document.querySelector("#supplierReturnTicketForm");
+    if (!form || !state.supplierReturnDraft) return state.supplierReturnDraft;
+
+    const data = new FormData(form);
+    const productIds = data.getAll("item_product_id");
+    const quantities = data.getAll("item_quantity");
+    const reasons = data.getAll("item_reason");
+
+    state.supplierReturnDraft = {
+        supplier_name: String(data.get("supplier_name") || "").trim(),
+        warehouse_name: String(data.get("warehouse_name") || "").trim(),
+        return_date: String(data.get("return_date") || "").trim(),
+        note: String(data.get("note") || "").trim(),
+        items: productIds.map((productId, index) => {
+            const product = (state.products || []).find((item) => Number(item.id) === Number(productId));
+            return buildSupplierReturnDraftItem(product, {
+                product_id: String(productId || "").trim(),
+                quantity: String(quantities[index] || "").trim(),
+                reason: String(reasons[index] || "near_expiry").trim()
+            });
+        }).filter((item) => item.product_id)
+    };
+
+    return state.supplierReturnDraft;
+}
+
+function addSupplierReturnDraftItem() {
+    const draft = syncSupplierReturnDraftFromForm() || ensureSupplierReturnDraft();
+    if (!draft) return;
+
+    const options = getSupplierReturnSelectableProducts();
+    if (!options.length) {
+        showToast("Khong con san pham nao de them vao phieu tra.");
+        return;
+    }
+
+    const selectedIds = new Set(draft.items.map((item) => String(item.product_id)));
+    const nextProduct = options.find((item) => !selectedIds.has(String(item.id)));
+    if (!nextProduct) {
+        showToast("Tat ca san pham co san da duoc them vao phieu tra.");
+        return;
+    }
+    draft.items.push(buildSupplierReturnDraftItem(nextProduct));
+}
+
+function removeSupplierReturnDraftItem(index) {
+    const draft = syncSupplierReturnDraftFromForm() || ensureSupplierReturnDraft();
+    if (!draft) return;
+
+    draft.items = draft.items.filter((_, itemIndex) => itemIndex !== Number(index));
+}
+
+function renderSupplierReturnItemRow(item, index, selectableProducts) {
+    const product = (state.products || []).find((entry) => Number(entry.id) === Number(item.product_id));
+    const stock = getProductStock(product);
+    const unit = product?.stock_unit || product?.unit || "don vi";
+
+    return `
+      <div class="supplier-return-item-row">
+        <div class="supplier-return-product-info">
+          <span class="supplier-return-thumb small">${renderSupplierProductThumb(product)}</span>
+          <div class="supplier-return-product-copy">
+            <select name="item_product_id" data-return-field="product" aria-label="San pham tra hang">
+              ${selectableProducts.map((option) => `<option value="${escapeHtml(option.id)}" ${Number(option.id) === Number(item.product_id) ? "selected" : ""}>${escapeHtml(option.name || "-")} (${escapeHtml(option.sku || "Khong co SKU")})</option>`).join("")}
+            </select>
+            <small>SKU: ${escapeHtml(product?.sku || "-")}</small>
+          </div>
+        </div>
+        <strong>${formatNumber(stock)} ${escapeHtml(unit)}</strong>
+        <label class="supplier-return-quantity">
+          <input name="item_quantity" type="number" min="1" max="${escapeHtml(stock || 1)}" value="${escapeHtml(item.quantity || "1")}" required>
+          <span>${escapeHtml(unit)}</span>
+        </label>
+        <select name="item_reason" required>
+          ${["near_expiry", "damaged", "bad_package", "quality_issue", "other"].map((reason) => `<option value="${reason}" ${reason === String(item.reason || "near_expiry") ? "selected" : ""}>${escapeHtml(getSupplierReturnReasonLabel(reason))}</option>`).join("")}
+        </select>
+        <button class="icon-button soft-danger" type="button" data-supplier-action="remove-return-item" data-id="${escapeHtml(index)}" aria-label="Xoa san pham">🗑</button>
+      </div>
+    `;
 }
 
 function getSupplierReturnReasonLabel(reason) {
@@ -313,14 +446,18 @@ function renderSupplierReturnSheet() {
     const product = (state.products || []).find((item) => Number(item.id) === Number(productId));
     if (!product) return "";
 
+    const draft = ensureSupplierReturnDraft(product.id);
     const existing = getSupplierReturnTicketByProduct(product.id);
-    const supplierName = existing?.supplier_name || getSupplierNameFromProduct(product) || "Chưa xác định";
-    const stock = getProductStock(product);
-    const unit = product.stock_unit || product.unit || "đơn vị";
-    const quantity = existing?.quantity || Math.max(1, Math.min(stock, 1));
-    const returnDate = existing?.return_date || new Date().toISOString().slice(0, 10);
-    const warehouseName = existing?.warehouse_name || "Kho tổng";
+    const previewProductId = draft?.items?.[0]?.product_id || product.id;
+    const previewProduct = (state.products || []).find((item) => Number(item.id) === Number(previewProductId)) || product;
+    const supplierName = draft?.supplier_name || getSupplierNameFromProduct(product) || "Chua xac dinh";
+    const returnDate = draft?.return_date || new Date().toISOString().slice(0, 10);
+    const warehouseName = draft?.warehouse_name || "Kho tong";
     const supplierOptions = getSupplierFilterOptions();
+    const selectableProducts = getSupplierReturnSelectableProducts();
+    const itemsMarkup = draft?.items?.length
+        ? draft.items.map((item, index) => renderSupplierReturnItemRow(item, index, selectableProducts)).join("")
+        : `<div class="supplier-return-empty">Chua co san pham nao trong phieu tra. Bam "Them san pham" de bo sung.</div>`;
 
     return `
       <div class="modal-backdrop supplier-return-backdrop" data-supplier-action="close-return-modal">
@@ -328,11 +465,11 @@ function renderSupplierReturnSheet() {
           <div class="supplier-return-sheet-head">
             <div>
               <p class="eyebrow">Inventory / Returns</p>
-              <h2>${existing ? "Cập nhật phiếu trả hàng" : "Tạo phiếu trả hàng"}</h2>
+              <h2>${existing ? "Cap nhat phieu tra hang" : "Tao phieu tra hang"}</h2>
             </div>
             <div class="supplier-return-head-actions">
-              <button class="ghost-button" type="button" data-supplier-action="close-return-modal" data-id="${escapeHtml(product.id)}">Hủy</button>
-              <button class="primary-button" type="button" data-supplier-action="submit-return-ticket" data-id="${escapeHtml(product.id)}">Xác nhận trả hàng</button>
+              <button class="ghost-button" type="button" data-supplier-action="close-return-modal" data-id="${escapeHtml(product.id)}">Huy</button>
+              <button class="primary-button" type="button" data-supplier-action="submit-return-ticket" data-id="${escapeHtml(product.id)}">Xac nhan tra hang</button>
             </div>
           </div>
 
@@ -340,24 +477,24 @@ function renderSupplierReturnSheet() {
             <input type="hidden" name="product_id" value="${escapeHtml(product.id)}">
 
             <section class="supplier-return-section">
-              <h3>Thông tin chung</h3>
+              <h3>Thong tin chung</h3>
               <div class="supplier-return-general-grid">
                 <label>
-                  <span>Nhà cung cấp</span>
+                  <span>Nha cung cap</span>
                   <select name="supplier_name">
-                    <option value="">Chọn nhà cung cấp</option>
+                    <option value="">Chon nha cung cap</option>
                     ${supplierOptions.map((name) => `<option value="${escapeHtml(name)}" ${name === supplierName ? "selected" : ""}>${escapeHtml(name)}</option>`).join("")}
                     ${supplierOptions.includes(supplierName) || !supplierName ? "" : `<option value="${escapeHtml(supplierName)}" selected>${escapeHtml(supplierName)}</option>`}
                   </select>
                 </label>
                 <label>
-                  <span>Kho xuất hàng</span>
+                  <span>Kho xuat hang</span>
                   <select name="warehouse_name">
-                    ${["Kho tổng", "Kho 1 - Đông lạnh", "Kho 2 - Rau củ", "Kho 3 - Đồ khô"].map((name) => `<option value="${escapeHtml(name)}" ${name === warehouseName ? "selected" : ""}>${escapeHtml(name)}</option>`).join("")}
+                    ${["Kho tong", "Kho 1 - Dong lanh", "Kho 2 - Rau cu", "Kho 3 - Do kho"].map((name) => `<option value="${escapeHtml(name)}" ${name === warehouseName ? "selected" : ""}>${escapeHtml(name)}</option>`).join("")}
                   </select>
                 </label>
                 <label>
-                  <span>Ngày trả hàng</span>
+                  <span>Ngay tra hang</span>
                   <input name="return_date" type="date" value="${escapeHtml(returnDate)}">
                 </label>
               </div>
@@ -365,54 +502,37 @@ function renderSupplierReturnSheet() {
 
             <section class="supplier-return-section">
               <div class="supplier-return-section-title">
-                <h3>Danh sách sản phẩm trả</h3>
-                <button class="text-button" type="button" disabled>+ Thêm sản phẩm</button>
+                <h3>Danh sach san pham tra</h3>
+                <button class="text-button" type="button" data-supplier-action="add-return-item">+ Them san pham</button>
               </div>
               <div class="supplier-return-items">
                 <div class="supplier-return-items-head">
-                  <span>Sản phẩm</span>
-                  <span>Tồn kho hiện tại</span>
-                  <span>Số lượng trả</span>
-                  <span>Lý do</span>
+                  <span>San pham</span>
+                  <span>Ton kho hien tai</span>
+                  <span>So luong tra</span>
+                  <span>Ly do</span>
                   <span></span>
                 </div>
-                <div class="supplier-return-item-row">
-                  <div class="supplier-return-product-info">
-                    <span class="supplier-return-thumb small">${renderSupplierProductThumb(product)}</span>
-                    <div>
-                      <strong>${escapeHtml(product.name || "-")}</strong>
-                      <small>SKU: ${escapeHtml(product.sku || "-")}</small>
-                    </div>
-                  </div>
-                  <strong>${formatNumber(stock)} ${escapeHtml(unit)}</strong>
-                  <label class="supplier-return-quantity">
-                    <input name="quantity" type="number" min="1" max="${escapeHtml(stock)}" value="${escapeHtml(quantity)}" required>
-                    <span>${escapeHtml(unit)}</span>
-                  </label>
-                  <select name="reason" required>
-                    ${["near_expiry", "damaged", "bad_package", "quality_issue", "other"].map((reason) => `<option value="${reason}" ${reason === (existing?.reason || "near_expiry") ? "selected" : ""}>${escapeHtml(getSupplierReturnReasonLabel(reason))}</option>`).join("")}
-                  </select>
-                  <button class="icon-button soft-danger" type="button" disabled aria-label="Xóa sản phẩm">🗑</button>
-                </div>
+                ${itemsMarkup}
               </div>
             </section>
 
             <section class="supplier-return-bottom-grid">
               <div class="supplier-return-section">
-                <h3>Bằng chứng & Hình ảnh</h3>
+                <h3>Bang chung & Hinh anh</h3>
                 <div class="supplier-return-evidence">
                   <label class="supplier-return-upload">
                     <input name="evidence_images" type="file" accept="image/*" multiple hidden>
-                    <span>📷</span>
-                    <strong>Tải lên</strong>
+                    <span>+</span>
+                    <strong>Tai len</strong>
                   </label>
-                  <span class="supplier-return-proof">${renderSupplierProductThumb(product)}</span>
+                  <span class="supplier-return-proof">${renderSupplierProductThumb(previewProduct)}</span>
                   <span class="supplier-return-proof sample"></span>
                 </div>
               </div>
               <label class="supplier-return-section">
-                <span>Ghi chú thêm</span>
-                <textarea name="note" rows="5" placeholder="Nhập thêm chi tiết về tình trạng hàng hóa hoặc yêu cầu bồi thường...">${escapeHtml(existing?.note || "")}</textarea>
+                <span>Ghi chu them</span>
+                <textarea name="note" rows="5" placeholder="Nhap them chi tiet ve tinh trang hang hoa hoac yeu cau boi thuong...">${escapeHtml(draft?.note || "")}</textarea>
               </label>
             </section>
           </form>
@@ -420,7 +540,6 @@ function renderSupplierReturnSheet() {
       </div>
     `;
 }
-
 function renderSupplierReturns() {
     if (!elements.suppliersContent) return;
 
@@ -469,7 +588,7 @@ function renderSupplierReturns() {
               ${products.map((product) => {
                   const expiration = getProductExpirationMeta(product);
                   const supplierName = getSupplierNameFromProduct(product) || "Chưa xác định";
-                  const ticket = tickets.find((item) => Number(item.product_id) === Number(product.id));
+                  const ticket = getSupplierReturnTicketByProduct(product.id);
                   const unit = product.stock_unit || product.unit || "đơn vị";
                   return `
                     <tr>
@@ -675,12 +794,26 @@ function applySupplierReturnFilters() {
 
 function openSupplierReturnModal(productId) {
     state.supplierReturnModalProductId = productId;
+    state.supplierReturnDraftSourceId = String(productId || "");
+    state.supplierReturnDraft = createSupplierReturnDraft(productId);
     renderSuppliers();
 }
 
 function closeSupplierReturnModal() {
     state.supplierReturnModalProductId = "";
+    state.supplierReturnDraftSourceId = "";
+    state.supplierReturnDraft = null;
     renderSuppliers();
+}
+
+export function handleSupplierReturnFieldChange(target) {
+    if (!target || !target.closest(".supplier-return-backdrop")) return;
+    if (!["supplier_name", "warehouse_name", "return_date", "note", "item_product_id", "item_quantity", "item_reason"].includes(target.name)) return;
+
+    syncSupplierReturnDraftFromForm();
+    if (target.name === "item_product_id") {
+        renderSuppliers();
+    }
 }
 
 async function submitSupplierReturnTicket() {
@@ -799,65 +932,100 @@ async function submitSupplierReturnTicketV2() {
     if (!form) return;
 
     const raw = Object.fromEntries(new FormData(form).entries());
-    const product = (state.products || []).find((item) => Number(item.id) === Number(raw.product_id));
-    if (!product) throw new Error("Không tìm thấy sản phẩm cần trả.");
+    const draft = syncSupplierReturnDraftFromForm() || ensureSupplierReturnDraft(raw.product_id);
+    const anchorProduct = (state.products || []).find((item) => Number(item.id) === Number(raw.product_id));
+    if (!anchorProduct) throw new Error("Khong tim thay san pham can tra.");
+    if (!draft?.items?.length) {
+        throw new Error("Vui long them it nhat 1 san pham vao phieu tra.");
+    }
 
-    const existing = getSupplierReturnTicketByProduct(product.id);
+    const existing = getSupplierReturnTicketByProduct(anchorProduct.id);
     const alreadyResolved = existing?.status === "resolved";
-    const quantity = Number(raw.quantity || 0);
-    const stock = getProductStock(product);
-    if (!Number.isFinite(quantity) || quantity <= 0) {
-        throw new Error("Số lượng trả phải lớn hơn 0.");
-    }
-    if (!alreadyResolved && quantity > stock) {
-        throw new Error("Số lượng trả không được lớn hơn tồn kho chính.");
-    }
+    const seenProductIds = new Set();
+    const savedItems = [];
 
-    const nextStock = alreadyResolved ? stock : Math.max(0, stock - quantity);
-    const unit = product.stock_unit || product.unit || "đơn vị";
-    const productPayload = {
-        category_id: Number(product.category_id || product.category?.id || 0),
-        name: String(product.name || "").trim(),
-        price: Number(product.price || product.current_price || 0),
-        sale_price: product.sale_price ? Number(product.sale_price) : null,
-        stock_quantity: nextStock,
-        stock_unit: String(product.stock_unit || product.unit || product.sale_unit || unit).trim(),
-        sale_unit: String(product.sale_unit || product.unit || product.stock_unit || unit).trim(),
-        stock_per_sale_unit: product.stock_per_sale_unit ? Number(product.stock_per_sale_unit) : 1,
-        production_date: product.production_date || null,
-        expiration_date: product.expiration_date || null,
-        thumbnail_url: String(product.thumbnail_url || "").trim(),
-        short_description: String(product.short_description || "").trim(),
-        description: String(product.description || "").trim(),
-        status: nextStock > 0 ? (product.status || "active") : "out_of_stock",
-        is_published: Boolean(product.is_published),
-        is_featured: Boolean(product.is_featured)
-    };
-    if (String(product.slug || "").trim()) productPayload.slug = String(product.slug).trim();
-    if (String(product.sku || "").trim()) productPayload.sku = String(product.sku).trim();
+    for (const item of draft.items) {
+        const product = (state.products || []).find((entry) => Number(entry.id) === Number(item.product_id));
+        if (!product) {
+            throw new Error("Co san pham trong phieu tra khong ton tai.");
+        }
+        if (seenProductIds.has(String(product.id))) {
+            throw new Error(`San pham ${product.name || product.sku || product.id} dang bi trung.`);
+        }
+        seenProductIds.add(String(product.id));
 
-    if (!alreadyResolved) {
-        await apiFetch(`/api/products/${product.id}`, {
-            method: "PUT",
-            body: JSON.stringify(productPayload)
+        const quantity = Number(item.quantity || 0);
+        const stock = getProductStock(product);
+        if (!Number.isFinite(quantity) || quantity <= 0) {
+            throw new Error(`So luong tra cua ${product.name || "san pham"} phai lon hon 0.`);
+        }
+        if (!alreadyResolved && quantity > stock) {
+            throw new Error(`So luong tra cua ${product.name || "san pham"} khong duoc lon hon ton kho hien tai.`);
+        }
+
+        const unit = product.stock_unit || product.unit || "don vi";
+        const nextStock = alreadyResolved ? stock : Math.max(0, stock - quantity);
+        const productPayload = {
+            category_id: Number(product.category_id || product.category?.id || 0),
+            name: String(product.name || "").trim(),
+            price: Number(product.price || product.current_price || 0),
+            sale_price: product.sale_price ? Number(product.sale_price) : null,
+            stock_quantity: nextStock,
+            stock_unit: String(product.stock_unit || product.unit || product.sale_unit || unit).trim(),
+            sale_unit: String(product.sale_unit || product.unit || product.stock_unit || unit).trim(),
+            stock_per_sale_unit: product.stock_per_sale_unit ? Number(product.stock_per_sale_unit) : 1,
+            production_date: product.production_date || null,
+            expiration_date: product.expiration_date || null,
+            thumbnail_url: String(product.thumbnail_url || "").trim(),
+            short_description: String(product.short_description || "").trim(),
+            description: String(product.description || "").trim(),
+            status: nextStock > 0 ? (product.status || "active") : "out_of_stock",
+            is_published: Boolean(product.is_published),
+            is_featured: Boolean(product.is_featured)
+        };
+        if (String(product.slug || "").trim()) productPayload.slug = String(product.slug).trim();
+        if (String(product.sku || "").trim()) productPayload.sku = String(product.sku).trim();
+
+        if (!alreadyResolved) {
+            await apiFetch(`/api/products/${product.id}`, {
+                method: "PUT",
+                body: JSON.stringify(productPayload)
+            });
+            product.stock_quantity = nextStock;
+            product.status = productPayload.status;
+        }
+
+        savedItems.push({
+            product_id: product.id,
+            product_name: product.name || "",
+            sku: product.sku || "",
+            quantity,
+            unit,
+            reason: String(item.reason || "near_expiry"),
+            expiration_date: product.expiration_date || ""
         });
     }
 
     const tickets = readSupplierReturns();
+    const primaryItem = savedItems[0];
+    const totalQuantity = savedItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
     const payload = {
         id: existing?.id || Date.now(),
         code: existing?.code || buildSupplierReturnCode(),
-        product_id: product.id,
-        product_name: product.name || "",
-        sku: product.sku || "",
-        supplier_name: String(raw.supplier_name || getSupplierNameFromProduct(product) || "Chưa xác định").trim(),
-        warehouse_name: String(raw.warehouse_name || "Kho tổng").trim(),
-        return_date: String(raw.return_date || new Date().toISOString().slice(0, 10)).trim(),
-        expiration_date: product.expiration_date || "",
-        quantity,
-        unit,
-        reason: String(raw.reason || "near_expiry"),
-        note: String(raw.note || "").trim(),
+        product_id: primaryItem.product_id,
+        product_name: primaryItem.product_name,
+        sku: primaryItem.sku,
+        supplier_name: String(draft.supplier_name || getSupplierNameFromProduct(anchorProduct) || "Chua xac dinh").trim(),
+        warehouse_name: String(draft.warehouse_name || "Kho tong").trim(),
+        return_date: String(draft.return_date || new Date().toISOString().slice(0, 10)).trim(),
+        expiration_date: primaryItem.expiration_date || "",
+        quantity: primaryItem.quantity,
+        quantity_total: totalQuantity,
+        unit: primaryItem.unit,
+        reason: String(primaryItem.reason || "near_expiry"),
+        note: String(draft.note || "").trim(),
+        item_count: savedItems.length,
+        items: savedItems,
         status: "resolved",
         resolved_at: new Date().toISOString(),
         created_at: existing?.created_at || new Date().toISOString(),
@@ -869,18 +1037,15 @@ async function submitSupplierReturnTicketV2() {
         : [payload, ...tickets];
     saveSupplierReturns(nextTickets);
 
-    if (!alreadyResolved) {
-        product.stock_quantity = nextStock;
-        product.status = productPayload.status;
-    }
     state.supplierReturnModalProductId = "";
+    state.supplierReturnDraftSourceId = "";
+    state.supplierReturnDraft = null;
     renderSuppliers();
     showToast(alreadyResolved
-        ? "Phiếu trả hàng này đã được xử lý trước đó."
-        : `Đã xác nhận trả hàng và trừ ${formatNumber(quantity)} ${unit} khỏi kho chính.`
+        ? "Phieu tra hang nay da duoc xu ly truoc do."
+        : `Da xac nhan tra ${formatNumber(totalQuantity)} don vi tu ${savedItems.length} dong san pham.`
     );
 }
-
 function renderSupplierReturnsV2() {
     if (!elements.suppliersContent) return;
 
@@ -929,7 +1094,7 @@ function renderSupplierReturnsV2() {
               ${products.map((product) => {
                   const expiration = getProductExpirationMeta(product);
                   const supplierName = getSupplierNameFromProduct(product) || "Chưa xác định";
-                  const ticket = tickets.find((item) => Number(item.product_id) === Number(product.id));
+                  const ticket = getSupplierReturnTicketByProduct(product.id);
                   const unit = product.stock_unit || product.unit || "đơn vị";
                   const tone = ticket?.status === "resolved" ? "active" : expiration?.daysLeft < 0 ? "inactive" : "pending";
                   const label = getSupplierReturnStatusLabel(ticket, expiration?.status || "Gần hết hạn");
@@ -979,6 +1144,16 @@ async function handleSupplierReturnAction(action, supplierId) {
     }
     if (action === "close-return-modal") {
         closeSupplierReturnModal();
+        return true;
+    }
+    if (action === "add-return-item") {
+        addSupplierReturnDraftItem();
+        renderSuppliers();
+        return true;
+    }
+    if (action === "remove-return-item") {
+        removeSupplierReturnDraftItem(supplierId);
+        renderSuppliers();
         return true;
     }
     if (action === "submit-return-ticket") {
@@ -1052,3 +1227,7 @@ export function bindSupplierMediaEvents() {
         reader.readAsDataURL(file);
     });
 }
+
+
+
+

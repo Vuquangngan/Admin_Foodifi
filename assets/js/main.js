@@ -113,6 +113,7 @@ import {
     bindSupplierMediaEvents,
     closeSupplierForm,
     handleSupplierAction,
+    handleSupplierReturnFieldChange,
     openSupplierForm,
     renderSuppliers,
     resetSupplierForm,
@@ -1043,6 +1044,10 @@ function bindGlobalEvents() {
         if (!button) return;
         event.preventDefault();
         await withLoading(button, () => handleSupplierAction(button.dataset.supplierAction, button.dataset.id));
+    }, true);
+    document.addEventListener("change", (event) => {
+        if (!event.target.closest(".supplier-return-backdrop")) return;
+        handleSupplierReturnFieldChange(event.target);
     }, true);
 
     elements.voucherFilterForm?.addEventListener("submit", async (event) => {
