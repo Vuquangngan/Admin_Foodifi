@@ -92,6 +92,23 @@ function normalizePhone(value = "") {
     return String(value || "").replace(/\D+/g, "");
 }
 
+function normalizeName(value = "") {
+    return String(value || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, " ");
+}
+
+function normalizeOrderCollection(payload) {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.orders)) return payload.orders;
+    if (Array.isArray(payload?.data)) return payload.data;
+    if (Array.isArray(payload?.items)) return payload.items;
+    return [];
+}
+
 function sortOrdersByNewest(orders = []) {
     return [...orders].sort((left, right) => {
         const leftTime = new Date(left?.created_at || 0).getTime();
@@ -105,11 +122,13 @@ function filterOrdersForCustomer(orders = [], customer = null) {
     const customerId = Number(customer.id);
     const customerEmail = normalizeEmail(customer.email);
     const customerPhone = normalizePhone(customer.phone);
+    const customerName = normalizeName(customer.username || customer.full_name || customer.name);
 
     return orders.filter((order) => {
         const orderUserId = Number(order?.user_id || order?.user?.id || order?.customer_id);
         const orderEmail = normalizeEmail(order?.customer_email || order?.user?.email);
         const orderPhone = normalizePhone(order?.customer_phone || order?.shipping_phone || order?.user?.phone);
+        const orderName = normalizeName(order?.customer_name || order?.user?.username || order?.user?.name);
 
         if (customerId && orderUserId && customerId === orderUserId) {
             return true;
@@ -120,6 +139,10 @@ function filterOrdersForCustomer(orders = [], customer = null) {
         }
 
         if (customerPhone && orderPhone && customerPhone === orderPhone) {
+            return true;
+        }
+
+        if (customerName && orderName && customerName === orderName) {
             return true;
         }
 
@@ -134,7 +157,7 @@ async function loadCustomerOrders(customer) {
     if (customerId) {
         try {
             const response = await apiFetch(`/api/orders?user_id=${customerId}`);
-            orders = Array.isArray(response) ? response : [];
+            orders = normalizeOrderCollection(response);
         } catch (error) {
             orders = [];
         }
@@ -147,7 +170,7 @@ async function loadCustomerOrders(customer) {
     if (!orders.length) {
         try {
             const response = await apiFetch("/api/orders");
-            orders = filterOrdersForCustomer(Array.isArray(response) ? response : [], customer);
+            orders = filterOrdersForCustomer(normalizeOrderCollection(response), customer);
         } catch (error) {
             orders = [];
         }

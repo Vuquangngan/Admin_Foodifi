@@ -382,6 +382,9 @@
 .customer-history-card {
   padding: 0;
   overflow: hidden;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
 }
 
 .customer-history-card .section-head {
@@ -389,6 +392,8 @@
 }
 
 .customer-history-table-wrap {
+  flex: 1 1 auto;
+  min-height: 220px;
   max-height: min(42vh, 420px);
   overflow: auto;
   border-radius: 18px;
