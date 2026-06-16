@@ -1,4 +1,4 @@
-const ADMIN_ASSET_VERSION = "20260616-login-overlay-fix";
+const ADMIN_ASSET_VERSION = "20260616-suppliers-fix";
 
 const { loadPartials } = await import(`./js/partials-loader.js?v=${ADMIN_ASSET_VERSION}`);
 
