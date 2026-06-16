@@ -757,6 +757,13 @@ function bindGlobalEvents() {
             return;
         }
 
+        const lowStockTabButton = event.target.closest("[data-low-stock-action='tab']");
+        if (lowStockTabButton) {
+            state.lowStockTab = lowStockTabButton.dataset.tab || "stock";
+            renderProducts();
+            return;
+        }
+
         const publishFilterButton = event.target.closest("[data-publish-filter]");
         if (publishFilterButton) {
             state.publishStatusFilter = publishFilterButton.dataset.publishFilter || "all";

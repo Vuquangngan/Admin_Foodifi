@@ -385,6 +385,46 @@ function getLowStockStatus(product) {
     return { key: "low", label: "Sắp hết", tone: "warning" };
 }
 
+function getExpiryStatus(product) {
+    const rawDate = product?.expiration_date || product?.expiry_date || product?.expires_at || "";
+    if (!rawDate) return null;
+    const date = new Date(rawDate);
+    if (Number.isNaN(date.getTime())) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+    const daysLeft = Math.ceil((date.getTime() - today.getTime()) / 86400000);
+    if (daysLeft < 0) return { key: "expired", label: "Đã hết hạn", tone: "danger", daysLeft, date };
+    if (daysLeft <= 7) return { key: "urgent", label: "Khẩn cấp", tone: "danger", daysLeft, date };
+    if (daysLeft <= 30) return { key: "near", label: "Sắp hết hạn", tone: "warning", daysLeft, date };
+    return null;
+}
+
+function getExpiringProducts() {
+    const filters = state.lowStockFilters || {};
+    const keyword = String(filters.keyword || "").trim().toLowerCase();
+    const childCategoryId = Number(filters.category_id || 0);
+    const parentCategoryId = Number(filters.parent_category_id || 0);
+    const categoryId = childCategoryId || parentCategoryId;
+    const categoryIds = childCategoryId
+        ? new Set([childCategoryId])
+        : (categoryId ? new Set([categoryId, ...getCategoryDescendantIds(categoryId)]) : null);
+
+    return (state.products || [])
+        .filter((product) => getExpiryStatus(product) !== null && Number(product.stock_quantity || 0) > 0)
+        .map((product) => ({ ...product, expiry_status: getExpiryStatus(product) }))
+        .filter((product) => {
+            if (!keyword) return true;
+            return [product.name, product.sku, product.category_name, product.category?.name]
+                .some((value) => String(value || "").toLowerCase().includes(keyword));
+        })
+        .filter((product) => {
+            if (!categoryIds) return true;
+            return categoryIds.has(Number(product.category_id || product.category?.id || 0));
+        })
+        .sort((a, b) => (a.expiry_status?.daysLeft || 0) - (b.expiry_status?.daysLeft || 0));
+}
+
 function getLowStockProducts() {
     const filters = state.lowStockFilters || {};
     const keyword = String(filters.keyword || "").trim().toLowerCase();
@@ -608,8 +648,11 @@ function renderWarehouseWorkspace() {
 
 function renderLowStockWorkspace(items) {
     const filters = state.lowStockFilters || {};
+    const activeTab = state.lowStockTab || "stock";
     const allLowStock = (state.products || []).filter((product) => Number(product.stock_quantity || 0) <= getProductReorderLevel(product));
     const urgentCount = allLowStock.filter((product) => getLowStockStatus(product).key === "urgent" || getLowStockStatus(product).key === "out").length;
+    const allExpiring = getExpiringProducts();
+    const expiredCount = allExpiring.filter((product) => product.expiry_status?.key === "expired").length;
     const categories = Array.isArray(state.categories) ? state.categories : [];
     const parentCategoryOptions = `<option value="">Tất cả danh mục cha</option>${categories
         .filter((category) => !isChildCategory(category))
@@ -624,7 +667,84 @@ function renderLowStockWorkspace(items) {
         .map((category) => `<option value="${escapeHtml(String(category.id))}" ${String(filters.category_id || "") === String(category.id) ? "selected" : ""}>${escapeHtml(category.name || category.label || category.id)}</option>`)
         .join("")}`;
 
-    elements.productsMeta.textContent = `Hiển thị ${formatNumber(items.length)} trong số ${formatNumber(allLowStock.length)} sản phẩm cần theo dõi`;
+    const totalCount = activeTab === "stock" ? allLowStock.length : allExpiring.length;
+    const shownCount = activeTab === "stock" ? items.length : allExpiring.length;
+    elements.productsMeta.textContent = `Hiển thị ${formatNumber(shownCount)} trong số ${formatNumber(totalCount)} sản phẩm cần theo dõi`;
+
+    const stockTableRows = items.map((product) => {
+        const zone = WAREHOUSE_ZONES.find((item) => item.key === getWarehouseZoneForProduct(product));
+        const unit = getProductUnit(product);
+        const status = product.low_stock_status || getLowStockStatus(product);
+        const stock = Number(product.stock_quantity || 0);
+        const threshold = Number(product.low_stock_threshold || getProductReorderLevel(product));
+        return `
+          <tr>
+            <td>
+              <div class="product-cell">
+                ${renderProductThumb(product)}
+                <div><strong>${escapeHtml(product.name || "Sản phẩm")}</strong></div>
+              </div>
+            </td>
+            <td><span class="low-stock-category">${escapeHtml(product.category_name || product.category?.name || "-")}</span></td>
+            <td>${escapeHtml(zone ? `${zone.label} - ${zone.name}` : "Chưa phân kho")}</td>
+            <td>
+              <div class="low-stock-meter">
+                <strong>${formatNumber(stock)} ${escapeHtml(unit)}</strong>
+                <span>Ngưỡng: ${formatNumber(threshold)} ${escapeHtml(unit)}</span>
+                <div><i class="${escapeHtml(status.tone)}" style="width:${product.low_stock_percent}%"></i></div>
+              </div>
+            </td>
+            <td><span class="low-stock-status ${escapeHtml(status.tone)}">${escapeHtml(status.label)}</span></td>
+            <td>
+              <div class="low-stock-actions">
+                <button class="primary-button" type="button" data-low-stock-action="import" data-product-id="${escapeHtml(String(product.id))}">Nhập hàng</button>
+                <button class="chip-button" type="button" data-action="edit-product" data-id="${escapeHtml(String(product.id))}">${renderAppIcon("edit")}</button>
+              </div>
+            </td>
+          </tr>
+        `;
+    }).join("") || '<tr><td colspan="6">Không có sản phẩm nào dưới ngưỡng cảnh báo.</td></tr>';
+
+    const expiryTableRows = allExpiring.map((product) => {
+        const zone = WAREHOUSE_ZONES.find((item) => item.key === getWarehouseZoneForProduct(product));
+        const unit = getProductUnit(product);
+        const expiryStatus = product.expiry_status;
+        const stock = Number(product.stock_quantity || 0);
+        const daysLabel = expiryStatus.daysLeft < 0
+            ? `Quá hạn ${Math.abs(expiryStatus.daysLeft)} ngày`
+            : expiryStatus.daysLeft === 0
+                ? "Hết hạn hôm nay"
+                : `Còn ${expiryStatus.daysLeft} ngày`;
+        const expDateStr = expiryStatus.date
+            ? expiryStatus.date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })
+            : "-";
+        return `
+          <tr>
+            <td>
+              <div class="product-cell">
+                ${renderProductThumb(product)}
+                <div><strong>${escapeHtml(product.name || "Sản phẩm")}</strong></div>
+              </div>
+            </td>
+            <td><span class="low-stock-category">${escapeHtml(product.category_name || product.category?.name || "-")}</span></td>
+            <td>${escapeHtml(zone ? `${zone.label} - ${zone.name}` : "Chưa phân kho")}</td>
+            <td>
+              <div class="low-stock-meter">
+                <strong>${escapeHtml(expDateStr)}</strong>
+                <span>${escapeHtml(daysLabel)}</span>
+              </div>
+            </td>
+            <td><strong>${formatNumber(stock)}</strong> ${escapeHtml(unit)}</td>
+            <td><span class="low-stock-status ${escapeHtml(expiryStatus.tone)}">${escapeHtml(expiryStatus.label)}</span></td>
+            <td>
+              <div class="low-stock-actions">
+                <button class="chip-button" type="button" data-action="edit-product" data-id="${escapeHtml(String(product.id))}">${renderAppIcon("edit")}</button>
+              </div>
+            </td>
+          </tr>
+        `;
+    }).join("") || '<tr><td colspan="7">Không có sản phẩm nào sắp hết hạn.</td></tr>';
+
     elements.productsContent.innerHTML = `
       <section class="low-stock-shell">
         <div class="low-stock-summary-grid">
@@ -638,9 +758,17 @@ function renderLowStockWorkspace(items) {
           </article>
           <article class="low-stock-summary-card surface danger">
             <div>
-              <span>Cảnh báo khẩn cấp</span>
+              <span>Cảnh báo khẩn cấp (tồn kho)</span>
               <strong>${formatNumber(urgentCount)}</strong>
               <small>Cần nhập hàng sớm để không gián đoạn bán hàng</small>
+            </div>
+            <i>${renderAppIcon("warning")}</i>
+          </article>
+          <article class="low-stock-summary-card surface danger">
+            <div>
+              <span>Sản phẩm sắp / đã hết hạn</span>
+              <strong>${formatNumber(allExpiring.length)}</strong>
+              <small>${formatNumber(expiredCount)} đã quá hạn cần xử lý ngay</small>
             </div>
             <i>${renderAppIcon("warning")}</i>
           </article>
@@ -675,8 +803,18 @@ function renderLowStockWorkspace(items) {
           <button class="low-stock-filter-button" type="button" data-low-stock-action="filter">Lọc dữ liệu</button>
         </section>
 
+        <div class="low-stock-tabs">
+          <button class="low-stock-tab ${activeTab === "stock" ? "is-active" : ""}" type="button" data-low-stock-action="tab" data-tab="stock">
+            Tồn kho thấp <span class="low-stock-tab-badge">${formatNumber(allLowStock.length)}</span>
+          </button>
+          <button class="low-stock-tab ${activeTab === "expiry" ? "is-active" : ""}" type="button" data-low-stock-action="tab" data-tab="expiry">
+            Sắp hết hạn <span class="low-stock-tab-badge ${expiredCount > 0 ? "danger" : ""}">${formatNumber(allExpiring.length)}</span>
+          </button>
+        </div>
+
         <article class="low-stock-table-card surface">
           <div class="low-stock-table-scroll">
+            ${activeTab === "stock" ? `
             <table class="list-table low-stock-table">
               <thead>
                 <tr>
@@ -688,44 +826,24 @@ function renderLowStockWorkspace(items) {
                   <th>Thao tác</th>
                 </tr>
               </thead>
-              <tbody>
-                ${items.map((product) => {
-                    const zone = WAREHOUSE_ZONES.find((item) => item.key === getWarehouseZoneForProduct(product));
-                    const unit = getProductUnit(product);
-                    const status = product.low_stock_status || getLowStockStatus(product);
-                    const stock = Number(product.stock_quantity || 0);
-                    const threshold = Number(product.low_stock_threshold || getProductReorderLevel(product));
-                    return `
-                      <tr>
-                        <td>
-                          <div class="product-cell">
-                            ${renderProductThumb(product)}
-                            <div>
-                              <strong>${escapeHtml(product.name || "Sản phẩm")}</strong>
-                            </div>
-                          </div>
-                        </td>
-                        <td><span class="low-stock-category">${escapeHtml(product.category_name || product.category?.name || "-")}</span></td>
-                        <td>${escapeHtml(zone ? `${zone.label} - ${zone.name}` : "Chưa phân kho")}</td>
-                        <td>
-                          <div class="low-stock-meter">
-                            <strong>${formatNumber(stock)} ${escapeHtml(unit)}</strong>
-                            <span>Ngưỡng: ${formatNumber(threshold)} ${escapeHtml(unit)}</span>
-                            <div><i class="${escapeHtml(status.tone)}" style="width:${product.low_stock_percent}%"></i></div>
-                          </div>
-                        </td>
-                        <td><span class="low-stock-status ${escapeHtml(status.tone)}">${escapeHtml(status.label)}</span></td>
-                        <td>
-                          <div class="low-stock-actions">
-                            <button class="primary-button" type="button" data-low-stock-action="import" data-product-id="${escapeHtml(String(product.id))}">Nhập hàng</button>
-                            <button class="chip-button" type="button" data-action="edit-product" data-id="${escapeHtml(String(product.id))}">${renderAppIcon("edit")}</button>
-                          </div>
-                        </td>
-                      </tr>
-                    `;
-                }).join("") || '<tr><td colspan="6">Không có sản phẩm nào dưới ngưỡng cảnh báo.</td></tr>'}
-              </tbody>
+              <tbody>${stockTableRows}</tbody>
             </table>
+            ` : `
+            <table class="list-table low-stock-table">
+              <thead>
+                <tr>
+                  <th>Sản phẩm</th>
+                  <th>Danh mục</th>
+                  <th>Kho</th>
+                  <th>Ngày hết hạn</th>
+                  <th>Tồn kho</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>${expiryTableRows}</tbody>
+            </table>
+            `}
           </div>
         </article>
       </section>

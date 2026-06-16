@@ -5,7 +5,7 @@
 
 .low-stock-summary-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -227,4 +227,56 @@
   .low-stock-filter-panel {
     grid-template-columns: 1fr;
   }
+}
+
+/* Tabs */
+.low-stock-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 20px;
+  background: #ecf3e8;
+  align-self: start;
+  width: fit-content;
+}
+
+.low-stock-tab {
+  min-height: 44px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 14px;
+  background: transparent;
+  color: #3a5444;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.low-stock-tab.is-active {
+  background: #fff;
+  color: #0d7f42;
+  box-shadow: 0 4px 14px rgba(17, 123, 63, 0.12);
+}
+
+.low-stock-tab-badge {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(17, 123, 63, 0.1);
+  color: #0d7f42;
+  font-size: 0.82rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.low-stock-tab-badge.danger {
+  background: rgba(203, 60, 30, 0.12);
+  color: #b93220;
 }
