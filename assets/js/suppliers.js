@@ -1327,14 +1327,7 @@ export function renderSuppliers() {
     renderSupplierSummary();
     renderSupplierTable();
 }
-lierFilterCard?.classList.remove("hidden");
-    renderSupplierSummary();
-    renderSupplierTable();
-    if (state.supplierView !== "form") {
-        elements.supplierFormCard?.classList.add("hidden");
-    }
-  
-  
+
 export function bindSupplierMediaEvents() {
     if (!elements.supplierLogoFile) return;
 
