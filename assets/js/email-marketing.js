@@ -32,16 +32,40 @@ const AUDIENCES = [
         description: "Gửi cho toàn bộ khách có email hợp lệ."
     },
     {
-        key: "loyal",
+        key: "dong",
         icon: "shield",
-        title: "Khách hàng thân thiết",
-        description: "Ưu tiên khách mua nhiều hoặc có hạng thành viên cao."
+        title: "Hạng Đồng",
+        description: "Khách hàng ở hạng thành viên Đồng."
     },
     {
-        key: "inactive",
-        icon: "calendar",
-        title: "Chưa mua 30 ngày",
-        description: "Nhắc lại khách lâu chưa phát sinh đơn."
+        key: "bac",
+        icon: "shield",
+        title: "Hạng Bạc",
+        description: "Khách hàng ở hạng thành viên Bạc."
+    },
+    {
+        key: "vang",
+        icon: "shield",
+        title: "Hạng Vàng",
+        description: "Khách hàng ở hạng thành viên Vàng."
+    },
+    {
+        key: "bach_kim",
+        icon: "shield",
+        title: "Hạng Bạch kim",
+        description: "Khách hàng ở hạng thành viên Bạch kim."
+    },
+    {
+        key: "kim_cuong",
+        icon: "shield",
+        title: "Hạng Kim cương",
+        description: "Khách hàng ở hạng thành viên Kim cương."
+    },
+    {
+        key: "vip",
+        icon: "shield",
+        title: "Hạng VIP",
+        description: "Khách hàng ở hạng thành viên VIP."
     }
 ];
 
@@ -80,13 +104,9 @@ function isActiveCustomer(customer) {
 function getAudienceCustomers(audienceKey) {
     const customers = getCustomers().filter((customer) => hasEmail(customer) && isActiveCustomer(customer));
 
-    if (audienceKey === "loyal") {
-        const loyalTiers = new Set(["vang", "bach_kim", "kim_cuong", "vip", "gold", "platinum", "diamond"]);
-        return customers.filter((customer) => loyalTiers.has(String(customer.membership_tier || "")) || Number(customer.completed_orders_count || 0) >= 2);
-    }
-
-    if (audienceKey === "inactive") {
-        return customers.filter((customer) => Number(customer.completed_orders_count || 0) === 0 || Number(customer.total_spent || 0) === 0);
+    const tierKeys = new Set(["dong", "bac", "vang", "bach_kim", "kim_cuong", "vip"]);
+    if (tierKeys.has(audienceKey)) {
+        return customers.filter((customer) => String(customer.membership_tier || "dong") === audienceKey);
     }
 
     return customers;
@@ -218,7 +238,7 @@ export function renderEmailMarketing() {
         <div class="email-marketing-head">
           <div class="email-marketing-actions">
             <button class="secondary-button" type="button" data-email-action="save-draft">Lưu nháp</button>
-            <button class="secondary-button" type="button" data-email-action="send-test">Gửi thử</button>
+
             <button class="primary-button" type="button" data-email-action="send-now">${renderAppIcon("mail")} Gửi ngay</button>
           </div>
         </div>
@@ -291,10 +311,6 @@ export function renderEmailMarketing() {
                 <label>
                   <span>Nút kêu gọi</span>
                   <input name="cta_label" value="${escapeHtml(draft.cta_label)}" placeholder="Mua ngay">
-                </label>
-                <label>
-                  <span>Đường dẫn nút</span>
-                  <input name="cta_url" value="${escapeHtml(draft.cta_url)}" placeholder="https://...">
                 </label>
                 <label class="span-2">
                   <span>Email gửi thử</span>
