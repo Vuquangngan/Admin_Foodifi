@@ -1037,7 +1037,12 @@ export function resolveMediaUrl(path, fallback = "") {
     const value = String(path || "").trim();
     if (!value) return fallback;
 
-    if (/^https?:\/\//i.test(value) || value.startsWith("data:")) {
+    if (value.startsWith("data:")) return value;
+    if (/^https?:\/\//i.test(value)) {
+        // Upgrade http:// to https:// for non-localhost URLs
+        if (value.startsWith("http://") && !value.includes("localhost") && !value.includes("127.0.0.1")) {
+            return "https://" + value.slice(7);
+        }
         return value;
     }
 

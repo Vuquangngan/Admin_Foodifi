@@ -5,6 +5,7 @@ import {
     elements,
     escapeHtml,
     formatNumber,
+    resolveMediaUrl,
     showToast,
     state
 } from "./core.js";
@@ -197,7 +198,7 @@ function getAudienceDescription(audienceKey) {
 
 function renderPreview(draft) {
     const banner = draft.banner_url
-        ? `<img src="${escapeHtml(draft.banner_url)}" alt="Banner chiến dịch">`
+        ? `<img src="${escapeHtml(resolveMediaUrl(draft.banner_url))}" alt="Banner chiến dịch">`
         : `<div class="email-preview-hero"><strong>FOODIFI</strong><span>Fresh summer harvest</span></div>`;
 
     return `
