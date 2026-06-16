@@ -299,40 +299,53 @@
   table-layout: fixed;
 }
 
-.supplier-return-table th:first-child,
-.supplier-return-table td:first-child {
-  min-width: 220px;
-  width: 26%;
+/* Col 1: Mã phiếu */
+.supplier-return-table th:nth-child(1),
+.supplier-return-table td:nth-child(1) {
+  min-width: 130px;
+  width: 14%;
 }
 
+/* Col 2: Nhà cung cấp */
 .supplier-return-table th:nth-child(2),
 .supplier-return-table td:nth-child(2) {
   min-width: 130px;
-  width: 16%;
+  width: 15%;
 }
 
+/* Col 3: Sản phẩm */
 .supplier-return-table th:nth-child(3),
 .supplier-return-table td:nth-child(3) {
-  min-width: 150px;
-  width: 18%;
+  min-width: 160px;
+  width: 22%;
 }
 
+/* Col 4: Số lượng */
 .supplier-return-table th:nth-child(4),
 .supplier-return-table td:nth-child(4) {
-  min-width: 100px;
-  width: 12%;
+  min-width: 90px;
+  width: 10%;
 }
 
+/* Col 5: Ngày trả */
 .supplier-return-table th:nth-child(5),
 .supplier-return-table td:nth-child(5) {
-  min-width: 110px;
-  width: 14%;
+  min-width: 100px;
+  width: 13%;
 }
 
+/* Col 6: Trạng thái */
+.supplier-return-table th:nth-child(6),
+.supplier-return-table td:nth-child(6) {
+  min-width: 100px;
+  width: 13%;
+}
+
+/* Col 7: Thao tác */
 .supplier-return-table th:last-child,
 .supplier-return-table td:last-child {
-  min-width: 110px;
-  width: 14%;
+  min-width: 100px;
+  width: 13%;
 }
 
 .supplier-return-table td {

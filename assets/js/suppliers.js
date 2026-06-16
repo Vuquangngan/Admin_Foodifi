@@ -1138,19 +1138,38 @@ async function submitSupplierReturnTicketV2() {
 function renderSupplierReturnsV2() {
     if (!elements.suppliersContent) return;
 
-    const products = getExpiringSupplierProducts();
-    const tickets = readSupplierReturns();
+    const allTickets = readSupplierReturns();
     const supplierOptions = getSupplierFilterOptions();
     const filters = state.supplierReturnFilters || {};
+
+    // Filter tickets
+    const keyword = normalizeText(filters.keyword);
+    const supplierFilter = normalizeText(filters.supplier);
+    const untilDate = filters.until ? new Date(filters.until) : null;
+    if (untilDate && !Number.isNaN(untilDate.getTime())) untilDate.setHours(23, 59, 59, 999);
+
+    const tickets = allTickets.filter((ticket) => {
+        if (supplierFilter && normalizeText(ticket.supplier_name) !== supplierFilter) return false;
+        if (untilDate) {
+            const retDate = new Date(ticket.return_date);
+            if (!Number.isNaN(retDate.getTime()) && retDate > untilDate) return false;
+        }
+        if (keyword) {
+            const haystack = normalizeText(`${ticket.code || ""} ${ticket.product_name || ""} ${ticket.supplier_name || ""}`);
+            if (!haystack.includes(keyword)) return false;
+        }
+        return true;
+    });
+
     elements.suppliersMeta.closest(".section-head")?.classList.remove("hidden");
-    elements.suppliersMeta.textContent = `${formatNumber(products.length)} sản phẩm cần theo dõi`;
+    elements.suppliersMeta.textContent = `${formatNumber(tickets.length)} phiếu trả hàng`;
     elements.suppliersSummary.innerHTML = "";
     elements.suppliersContent.innerHTML = `
       <div class="supplier-return-page">
         <div class="supplier-return-toolbar">
           <label>
-            <span>Tìm kiếm sản phẩm</span>
-            <input id="supplierReturnKeyword" value="${escapeHtml(filters.keyword || "")}" placeholder="Tên sản phẩm hoặc SKU...">
+            <span>Tìm kiếm phiếu</span>
+            <input id="supplierReturnKeyword" value="${escapeHtml(filters.keyword || "")}" placeholder="Mã phiếu, sản phẩm hoặc nhà cung cấp...">
           </label>
           <label>
             <span>Nhà cung cấp</span>
@@ -1160,7 +1179,7 @@ function renderSupplierReturnsV2() {
             </select>
           </label>
           <label>
-            <span>Hạn trước ngày</span>
+            <span>Trả trước ngày</span>
             <input id="supplierReturnUntil" type="date" value="${escapeHtml(filters.until || "")}">
           </label>
           <button class="primary-button" type="button" data-supplier-action="filter-returns">Lọc dữ liệu</button>
@@ -1171,45 +1190,39 @@ function renderSupplierReturnsV2() {
           <table class="list-table suppliers-table supplier-return-table">
             <thead>
               <tr>
-                <th>Sản phẩm & SKU</th>
+                <th>Mã phiếu</th>
                 <th>Nhà cung cấp</th>
-                <th>Ngày hết hạn</th>
-                <th>Tồn kho</th>
+                <th>Sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Ngày trả</th>
                 <th>Trạng thái</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              ${products.map((product) => {
-                  const expiration = getProductExpirationMeta(product);
-                  const supplierName = getSupplierNameFromProduct(product) || "Chưa xác định";
-                     const ticket = getSupplierReturnTicketByProduct(product.id);
-                  const unit = product.stock_unit || product.unit || "đơn vị";
-                  const tone = ticket?.status === "resolved" ? "active" : expiration?.daysLeft < 0 ? "inactive" : "pending";
-                  const label = getSupplierReturnStatusLabel(ticket, expiration?.status || "Gần hết hạn");
+              ${tickets.map((ticket) => {
+                  const unit = ticket.unit || "đơn vị";
+                  const statusTone = ticket.status === "resolved" ? "active" : "pending";
+                  const statusLabel = ticket.status === "resolved" ? "Đã xử lý" : "Chờ xử lý";
+                  const productLabel = ticket.item_count > 1
+                      ? `${escapeHtml(ticket.product_name || "-")} <span style="color:var(--text-muted);font-size:0.9em">+${ticket.item_count - 1} SP</span>`
+                      : escapeHtml(ticket.product_name || "-");
                   return `
                     <tr>
-                      <td>
-                        <div class="supplier-name-cell">
-                          <span class="supplier-avatar supplier-product-avatar">${renderSupplierProductThumb(product, "supplier-product-avatar-img")}</span>
-                          <div>
-                            <strong>${escapeHtml(product.name || "-")}</strong>
-                            <span>SKU: ${escapeHtml(product.sku || "-")}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>${escapeHtml(supplierName)}</td>
-                      <td class="${expiration?.daysLeft <= 7 ? "supplier-return-danger" : ""}">${escapeHtml(formatDate(expiration?.date))}</td>
-                      <td><strong>${formatNumber(getProductStock(product))}</strong> ${escapeHtml(unit)}</td>
-                      <td>${statusPill(tone, label)}</td>
+                      <td><strong>${escapeHtml(ticket.code || `#${ticket.id}`)}</strong></td>
+                      <td>${escapeHtml(ticket.supplier_name || "Chưa xác định")}</td>
+                      <td>${productLabel}</td>
+                      <td><strong>${formatNumber(ticket.quantity_total || ticket.quantity || 0)}</strong> ${escapeHtml(unit)}</td>
+                      <td>${escapeHtml(ticket.return_date || "-")}</td>
+                      <td>${statusPill(statusTone, statusLabel)}</td>
                       <td>
                         <div class="categories-actions">
-                          <button class="chip-button" type="button" data-supplier-action="open-return-ticket" data-id="${product.id}">${ticket ? "Xem phiếu" : "Tạo phiếu"}</button>
+                          <button class="chip-button" type="button" data-supplier-action="open-return-ticket" data-id="${escapeHtml(String(ticket.product_id))}">Xem phiếu</button>
                         </div>
                       </td>
                     </tr>
                   `;
-              }).join("") || '<tr><td colspan="6">Chưa có sản phẩm nào còn dưới 1 tháng hạn sử dụng.</td></tr>'}
+              }).join("") || '<tr><td colspan="7">Chưa có phiếu trả hàng nào.</td></tr>'}
             </tbody>
           </table>
         </div>
