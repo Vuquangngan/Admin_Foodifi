@@ -17,6 +17,7 @@
 let promotionComboboxUid = 0;
 let promotionRulesLoaded = false;
 let promotionRulesLoading = null;
+let editingCampaignId = null;
 
 function getVoucherById(id) {
     return (state.vouchers || []).find((coupon) => Number(coupon.id) === Number(id))
@@ -836,6 +837,7 @@ function openPromotionRuleDetail(ruleId) {
     const rule = (state.promotionRules || []).find((item) => String(item.id) === String(ruleId));
     if (!rule || !elements.promotionForm) return;
 
+    editingCampaignId = rule.id;
     resetPromotionForm();
     elements.promotionFormView?.classList.remove("hidden");
 
@@ -861,6 +863,7 @@ function openPromotionRuleDetail(ruleId) {
 function closePromotionForm() {
     closePromotionComboboxes();
     elements.promotionFormView?.classList.add("hidden");
+    editingCampaignId = null;
 }
 
 export function addPromotionAppliedProduct(value = "") {
@@ -943,10 +946,17 @@ export async function submitPromotionForm(raw) {
     if (!payload.name) throw new Error("Vui lòng nhập tên chiến dịch khuyến mãi.");
 
     try {
-        await apiFetch("/api/promotions", {
-            method: "POST",
-            body: JSON.stringify(payload)
-        });
+        if (editingCampaignId) {
+            await apiFetch(`/api/promotions/${editingCampaignId}`, {
+                method: "PUT",
+                body: JSON.stringify(payload)
+            });
+        } else {
+            await apiFetch("/api/promotions", {
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+        }
     } catch (error) {
         if (error.status === 404) {
             throw new Error(`Backend hiện tại chưa có API /api/promotions tại ${state.apiBase}. Cần deploy backend mới rồi lưu lại chiến dịch.`);
