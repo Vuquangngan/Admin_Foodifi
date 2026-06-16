@@ -782,10 +782,15 @@ export function showToast(message, isError = false) {
 }
 
 export function normalizeApiBase(input) {
-    return String(input || "")
+    let url = String(input || "")
         .trim()
         .replace(/\/+$/, "")
         .replace(/\/api$/i, "");
+    // Upgrade http:// to https:// for non-localhost URLs (prevents Mixed Content errors)
+    if (url.startsWith("http://") && !url.includes("localhost") && !url.includes("127.0.0.1")) {
+        url = "https://" + url.slice(7);
+    }
+    return url;
 }
 
 export function saveSession() {

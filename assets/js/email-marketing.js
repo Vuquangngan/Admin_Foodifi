@@ -312,10 +312,7 @@ export function renderEmailMarketing() {
                   <span>Nút kêu gọi</span>
                   <input name="cta_label" value="${escapeHtml(draft.cta_label)}" placeholder="Mua ngay">
                 </label>
-                <label class="span-2">
-                  <span>Email gửi thử</span>
-                  <input name="test_email" type="email" value="${escapeHtml(draft.test_email || state.user?.email || "")}" placeholder="admin@example.com">
-                </label>
+                <input name="test_email" type="hidden" value="vuquangngan312@gmail.com">
               </div>
               <div class="email-quick-actions">
                 <button type="button" data-email-action="insert-text" data-text="Hàng mới về trong hôm nay, số lượng có hạn.">Thêm hàng mới</button>
@@ -403,9 +400,6 @@ async function sendEmailCampaign(mode, button) {
         throw new Error("Vui lòng nhập đủ tên chiến dịch, tiêu đề email và nội dung.");
     }
 
-    if (mode === "test" && !draft.test_email) {
-        throw new Error("Vui lòng nhập email gửi thử.");
-    }
 
     const payload = await apiFetch("/api/email-campaigns/send", {
         method: "POST",
