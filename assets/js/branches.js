@@ -951,7 +951,6 @@ function renderBranchListWorkspace() {
     elements.branchesContent.innerHTML = `
       <section class="branches-shell">
         <form class="branches-filter-card" data-branch-filter-form>
-          <div class="branch-filter-title">${renderAppIcon("grid")} <strong>Bộ lọc</strong></div>
           <label>
             <span>Tìm kiếm</span>
             <input id="branchSearchInput" name="keyword" value="${escapeHtml(state.branchSearch || "")}" placeholder="Tìm kiếm chi nhánh...">
