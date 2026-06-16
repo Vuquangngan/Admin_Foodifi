@@ -10,20 +10,20 @@
 const PAGE_SIZE = 10;
 
 const ACTION_LABELS = {
-    all: "Táº¥t cáº£",
-    create: "ThÃªm má»›i",
-    update: "Chá»‰nh sá»­a",
-    delete: "XÃ³a",
-    login: "ÄÄƒng nháº­p",
-    logout: "ÄÄƒng xuáº¥t",
-    order: "ÄÆ¡n hÃ ng"
+    all: "Tất cả",
+    create: "Thêm mới",
+    update: "Chỉnh sửa",
+    delete: "Xóa",
+    login: "Đăng nhập",
+    logout: "Đăng xuất",
+    order: "Đơn hàng"
 };
 
 const ROLE_LABELS = {
-    admin: "Quáº£n trá»‹ viÃªn",
-    staff: "NhÃ¢n viÃªn",
-    customer: "KhÃ¡ch hÃ ng",
-    system: "Há»‡ thá»‘ng"
+    admin: "Quản trị viên",
+    staff: "Nhân viên",
+    customer: "Khách hàng",
+    system: "Hệ thống"
 };
 
 function asArray(value) {
@@ -57,7 +57,7 @@ function isSameDateTime(first, second) {
 function getCurrentActor() {
     const user = state.user || {};
     return {
-        name: user.username || user.full_name || user.name || user.email || "Quáº£n trá»‹ viÃªn",
+        name: user.username || user.full_name || user.name || user.email || "Quản trị viên",
         email: user.email || "",
         role: user.role || "admin"
     };
@@ -80,7 +80,7 @@ function isApiPathTarget(value) {
 }
 
 function formatActivityTarget(entry) {
-    const targetType = String(entry?.targetType || "KhÃƒÂ´ng rÃƒÂµ").trim();
+    const targetType = String(entry?.targetType || "Không rõ").trim();
     const targetName = String(entry?.targetName || "").trim();
     if (!targetName || isApiPathTarget(targetName)) return targetType;
     return `${targetType}: ${targetName}`;
@@ -107,7 +107,7 @@ function createEntry({
         actor: actor || getCurrentActor(),
         action,
         targetType,
-        targetName: String(targetName || "KhÃ´ng rÃµ"),
+        targetName: String(targetName || "Không rõ"),
         detail: String(detail || ""),
         status,
         warning: Boolean(warning || finalWarningNote),
@@ -131,7 +131,7 @@ function pushEntityEntries(entries, collection, options) {
                 action: "create",
                 targetType: options.targetType,
                 targetName: name,
-                detail: options.createDetail || `Táº¡o ${options.targetType.toLowerCase()} má»›i`,
+                detail: options.createDetail || `Tạo ${options.targetType.toLowerCase()} mới`,
                 status: "success"
             }));
         }
@@ -144,7 +144,7 @@ function pushEntityEntries(entries, collection, options) {
                 action: "update",
                 targetType: options.targetType,
                 targetName: name,
-                detail: options.updateDetail || `Cáº­p nháº­t ${options.targetType.toLowerCase()}`,
+                detail: options.updateDetail || `Cập nhật ${options.targetType.toLowerCase()}`,
                 status: "success"
             }));
         }
@@ -154,11 +154,11 @@ function pushEntityEntries(entries, collection, options) {
 function buildOrderEntries(entries) {
     asArray(state.orders).forEach((order) => {
         const actor = {
-            name: order.customer_name || order.user?.username || order.user?.email || "KhÃ¡ch hÃ ng",
+            name: order.customer_name || order.user?.username || order.user?.email || "Khách hàng",
             email: order.customer_email || order.user?.email || "",
             role: "customer"
         };
-        const code = order.order_code || order.code || `ÄÆ¡n #${order.id}`;
+        const code = order.order_code || order.code || `Đơn #${order.id}`;
         const status = order.status || order.order_status || "";
         const hasWarning = ["cancelled", "failed", "refunded", "refund_pending"].includes(String(status).toLowerCase());
 
@@ -167,12 +167,12 @@ function buildOrderEntries(entries) {
             time: order.updated_at || order.created_at,
             actor,
             action: "order",
-            targetType: "ÄÆ¡n hÃ ng",
+            targetType: "Đơn hàng",
             targetName: code,
-            detail: status ? `Tráº¡ng thÃ¡i: ${status}` : "Cáº­p nháº­t Ä‘Æ¡n hÃ ng",
+            detail: status ? `Trạng thái: ${status}` : "Cập nhật đơn hàng",
             status: hasWarning ? "warning" : "success",
             warning: hasWarning,
-            warningNote: hasWarning ? `ÄÆ¡n hÃ ng Ä‘ang á»Ÿ tráº¡ng thÃ¡i cáº§n theo dÃµi: ${status}.` : ""
+            warningNote: hasWarning ? `Đơn hàng đang ở trạng thái cần theo dõi: ${status}.` : ""
         }));
     });
 }
@@ -202,39 +202,39 @@ export function buildActivityHistoryEntries() {
             time: new Date().toISOString(),
             actor,
             action: "login",
-            targetType: "Há»‡ thá»‘ng",
+            targetType: "Hệ thống",
             targetName: "Web Admin",
-            detail: "PhiÃªn Ä‘Äƒng nháº­p hiá»‡n táº¡i",
+            detail: "Phiên đăng nhập hiện tại",
             status: "success"
         }));
     }
 
     pushEntityEntries(entries, state.products, {
         key: "product",
-        targetType: "Sáº£n pháº©m",
+        targetType: "Sản phẩm",
         actor,
-        createDetail: "ThÃªm sáº£n pháº©m vÃ o há»‡ thá»‘ng",
-        updateDetail: "Cáº­p nháº­t thÃ´ng tin hoáº·c tá»“n kho sáº£n pháº©m"
+        createDetail: "Thêm sản phẩm vào hệ thống",
+        updateDetail: "Cập nhật thông tin hoặc tồn kho sản phẩm"
     });
     pushEntityEntries(entries, state.categories, {
         key: "category",
-        targetType: "Danh má»¥c sáº£n pháº©m",
+        targetType: "Danh mục sản phẩm",
         actor
     });
     pushEntityEntries(entries, state.suppliers, {
         key: "supplier",
-        targetType: "NhÃ  cung cáº¥p",
+        targetType: "Nhà cung cấp",
         actor
     });
     pushEntityEntries(entries, state.users, {
         key: "staff",
-        targetType: "TÃ i khoáº£n nhÃ¢n sá»±",
+        targetType: "Tài khoản nhân sự",
         actor
     });
     pushEntityEntries(entries, state.customers, {
         key: "customer",
-        targetType: "TÃ i khoáº£n khÃ¡ch hÃ ng",
-        actor: { name: "Há»‡ thá»‘ng", email: "", role: "system" }
+        targetType: "Tài khoản khách hàng",
+        actor: { name: "Hệ thống", email: "", role: "system" }
     });
     pushEntityEntries(entries, state.vouchers.length ? state.vouchers : state.coupons, {
         key: "voucher",
@@ -243,12 +243,12 @@ export function buildActivityHistoryEntries() {
     });
     pushEntityEntries(entries, state.recipes, {
         key: "recipe",
-        targetType: "CÃ´ng thá»©c",
+        targetType: "Công thức",
         actor
     });
     pushEntityEntries(entries, state.recipeCategories, {
         key: "recipe-category",
-        targetType: "Danh má»¥c cÃ´ng thá»©c",
+        targetType: "Danh mục công thức",
         actor
     });
     buildOrderEntries(entries);
@@ -287,13 +287,13 @@ export function getFilteredActivityEntries() {
 function renderActivityRows(entries) {
     return entries.map((entry) => {
         const date = parseDate(entry.time);
-        const actorName = entry.actor.name || "KhÃ´ng rÃµ";
-        const roleLabel = ROLE_LABELS[entry.actor.role] || entry.actor.role || "KhÃ´ng rÃµ";
+        const actorName = entry.actor.name || "Không rõ";
+        const roleLabel = ROLE_LABELS[entry.actor.role] || entry.actor.role || "Không rõ";
         const actionLabel = ACTION_LABELS[entry.action] || entry.action;
         const hasWarning = Boolean(entry.warning || entry.warningNote);
         const targetLabel = formatActivityTarget(entry);
-        const warningNote = entry.warningNote || (hasWarning ? entry.detail : "KhÃ´ng cÃ³ ghi chÃº cáº£nh bÃ¡o cho thao tÃ¡c nÃ y.");
-        const statusLabel = entry.status === "failed" ? "Tháº¥t báº¡i" : entry.status === "warning" ? "Cáº§n chÃº Ã½" : "ThÃ nh cÃ´ng";
+        const warningNote = entry.warningNote || (hasWarning ? entry.detail : "Không có ghi chú cảnh báo cho thao tác này.");
+        const statusLabel = entry.status === "failed" ? "Thất bại" : entry.status === "warning" ? "Cần chú ý" : "Thành công";
 
         return `
           <tr>
@@ -306,7 +306,7 @@ function renderActivityRows(entries) {
                 <span class="activity-avatar">${escapeHtml(getInitials(actorName))}</span>
                 <span>
                   <strong>${escapeHtml(actorName)}</strong>
-                  <small>${escapeHtml(roleLabel)}${entry.actor.email ? ` â€¢ ${escapeHtml(entry.actor.email)}` : ""}</small>
+                  <small>${escapeHtml(roleLabel)}${entry.actor.email ? ` • ${escapeHtml(entry.actor.email)}` : ""}</small>
                 </span>
               </div>
             </td>
@@ -315,14 +315,14 @@ function renderActivityRows(entries) {
               <strong>${escapeHtml(targetLabel)}</strong>
               <small>${escapeHtml(entry.detail)}</small>
             </td>
-            <td><span class="activity-status ${escapeHtml(entry.status)}">â— ${escapeHtml(statusLabel)}</span></td>
-            <td><span class="activity-flag ${entry.warning ? "warning" : ""}">${entry.warning ? "âš‘" : "âš"}</span></td>
+            <td><span class="activity-status ${escapeHtml(entry.status)}">● ${escapeHtml(statusLabel)}</span></td>
+            <td><span class="activity-flag ${entry.warning ? "warning" : ""}">${entry.warning ? "⚑" : "⚐"}</span></td>
           </tr>
           ${state.activityWarningOpenId === entry.id ? `
             <tr class="activity-warning-note-row">
               <td colspan="6">
                 <div class="activity-warning-note ${hasWarning ? "warning" : ""}">
-                  <strong>Ghi chÃº cáº£nh bÃ¡o</strong>
+                  <strong>Ghi chú cảnh báo</strong>
                   <span>${escapeHtml(warningNote)}</span>
                 </div>
               </td>
@@ -340,15 +340,15 @@ function renderPagination(total, page, pageCount) {
 
     return `
       <div class="activity-footer">
-        <p class="section-copy">Hiá»ƒn thá»‹ ${total ? ((page - 1) * PAGE_SIZE) + 1 : 0} - ${Math.min(page * PAGE_SIZE, total)} trÃªn tá»•ng sá»‘ ${total} thao tÃ¡c</p>
+        <p class="section-copy">Hiển thị ${total ? ((page - 1) * PAGE_SIZE) + 1 : 0} - ${Math.min(page * PAGE_SIZE, total)} trên tổng số ${total} thao tác</p>
         <div class="activity-pagination">
-          <button class="activity-page-button" type="button" data-activity-page="${page - 1}" ${page <= 1 ? "disabled" : ""}>â€¹</button>
+          <button class="activity-page-button" type="button" data-activity-page="${page - 1}" ${page <= 1 ? "disabled" : ""}>‹</button>
           ${compactPages.map((item, index) => {
               const previous = compactPages[index - 1];
               const gap = previous && item - previous > 1 ? `<span class="section-copy">...</span>` : "";
               return `${gap}<button class="activity-page-button ${item === page ? "active" : ""}" type="button" data-activity-page="${item}">${item}</button>`;
           }).join("")}
-          <button class="activity-page-button" type="button" data-activity-page="${page + 1}" ${page >= pageCount ? "disabled" : ""}>â€º</button>
+          <button class="activity-page-button" type="button" data-activity-page="${page + 1}" ${page >= pageCount ? "disabled" : ""}>›</button>
         </div>
       </div>
     `;
@@ -374,14 +374,10 @@ export function renderActivityHistory() {
     const page = Math.min(Math.max(1, state.activityHistoryPage || 1), pageCount);
     state.activityHistoryPage = page;
 
-    if (elements.activityHistoryMeta) {
-        elements.activityHistoryMeta.textContent = `${entries.length} thao tÃ¡c`;
-    }
-
     if (!elements.activityHistoryContent) return;
 
     if (!entries.length) {
-        elements.activityHistoryContent.innerHTML = '<div class="activity-empty">ChÆ°a cÃ³ thao tÃ¡c phÃ¹ há»£p vá»›i bá»™ lá»c hiá»‡n táº¡i.</div>';
+        elements.activityHistoryContent.innerHTML = '<div class="activity-empty">Chưa có thao tác phù hợp với bộ lọc hiện tại.</div>';
         return;
     }
 
@@ -391,12 +387,12 @@ export function renderActivityHistory() {
         <table class="list-table activity-table">
           <thead>
             <tr>
-              <th>Thá»i gian</th>
-              <th>NgÆ°á»i thá»±c hiá»‡n</th>
-              <th>Thao tÃ¡c</th>
-              <th>Äá»‘i tÆ°á»£ng</th>
-              <th>Tráº¡ng thÃ¡i</th>
-              <th>Cáº£nh bÃ¡o</th>
+              <th>Thời gian</th>
+              <th>Người thực hiện</th>
+              <th>Thao tác</th>
+              <th>Đối tượng</th>
+              <th>Trạng thái</th>
+              <th>Cảnh báo</th>
             </tr>
           </thead>
           <tbody>${renderActivityRows(pageEntries)}</tbody>
@@ -489,7 +485,7 @@ export function submitActivityWarningForm() {
     const note = String(form.elements.note.value || "").trim();
     if (!entryId) return;
     if (!note) {
-        showToast("Vui lÃ²ng nháº­p ghi chÃº cáº£nh bÃ¡o.", true);
+        showToast("Vui lòng nhập ghi chú cảnh báo.", true);
         return;
     }
 
@@ -500,7 +496,7 @@ export function submitActivityWarningForm() {
     saveActivityWarningNotes();
     closeActivityWarningModal();
     renderActivityHistory();
-    showToast("ÄÃ£ lÆ°u ghi chÃº vÃ  Ä‘Ã¡nh dáº¥u cáº£nh bÃ¡o.");
+    showToast("Đã lưu ghi chú và đánh dấu cảnh báo.");
 }
 
 export function clearActivityWarningNote() {
@@ -513,7 +509,7 @@ export function clearActivityWarningNote() {
     saveActivityWarningNotes();
     closeActivityWarningModal();
     renderActivityHistory();
-    showToast("ÄÃ£ bá» Ä‘Ã¡nh dáº¥u cáº£nh bÃ¡o.");
+    showToast("Đã bỏ đánh dấu cảnh báo.");
 }
 
 function escapeExcelCell(value) {
