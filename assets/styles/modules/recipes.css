@@ -12,17 +12,19 @@
 
 .recipes-filter-card {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(190px, 240px);
+  grid-template-columns: minmax(260px, 620px) minmax(190px, 260px);
   gap: 16px;
   align-items: center;
   margin-bottom: 24px;
   padding: 18px 22px;
+  justify-content: start;
 }
 
 .recipes-search {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
   min-height: 54px;
   padding: 0 18px;
   border-radius: 999px;

@@ -1938,72 +1938,56 @@ function renderCreateOrderWorkspace() {
       <form id="orderCreateForm" class="order-create-layout">
         <div class="order-create-shell">
           <section class="order-create-main">
-            <div class="order-create-party-grid">
-              <article class="surface order-create-section order-create-seller-section">
-                <div class="section-head">
-                  <h3>Thông tin người bán</h3>
-                </div>
-                <div class="compact-grid">
-                  <label>
-                    <span>Họ và tên người bán</span>
-                    <input name="seller_name" value="${escapeHtml(draft.seller_name || "")}" placeholder="Ví dụ: Quản trị hệ thống">
-                  </label>
-                  <label>
-                    <span>Số điện thoại người bán</span>
-                    <input name="seller_phone" value="${escapeHtml(draft.seller_phone || "")}" placeholder="Ví dụ: 0909888999">
-                  </label>
-                  <label class="span-2">
-                    <span>Địa chỉ lấy hàng</span>
-                    <input name="pickup_address" value="${escapeHtml(draft.pickup_address || "")}" placeholder="Ví dụ: 123 Đường Vườn Xanh, Quận 1, TP. Hồ Chí Minh">
-                  </label>
-                </div>
-              </article>
-
-              <article class="surface order-create-section order-create-customer-section">
-                <div class="section-head">
-                  <h3>Thông tin khách hàng</h3>
-                </div>
-                <div class="compact-grid">
-                  <label>
-                    <span>Họ tên người nhận</span>
-                    <input name="customer_name" value="${escapeHtml(draft.customer_name)}" placeholder="Ví dụ: Vũ Quang Ngạn" required>
-                  </label>
-                  <label>
-                    <span>Số điện thoại</span>
-                    <input name="customer_phone" value="${escapeHtml(draft.customer_phone)}" placeholder="Ví dụ: 0912345678" required>
-                  </label>
-                  <label class="span-2">
-                    <span>Địa chỉ giao hàng</span>
-                    <input name="shipping_address" value="${escapeHtml(draft.shipping_address)}" placeholder="Số nhà, tên đường..." required>
-                  </label>
-                  <label>
-                    <span>Phường / Xã</span>
-                    <input name="ward" value="${escapeHtml(draft.ward)}" placeholder="Ví dụ: Mỹ Đình 2">
-                  </label>
-                  <label>
-                    <span>Quận / Huyện</span>
-                    <input name="district" value="${escapeHtml(draft.district)}" placeholder="Ví dụ: Nam Từ Liêm">
-                  </label>
-                  <label class="span-2">
-                    <span>Tỉnh / Thành phố</span>
-                    <input name="city" value="${escapeHtml(draft.city)}" placeholder="Ví dụ: Hà Nội" required>
-                  </label>
-                  <label class="span-2">
-                    <span>Ghi chú đơn hàng</span>
-                    <textarea name="note" rows="3" placeholder="Thông tin thêm cho shipper hoặc kho xử lý...">${escapeHtml(draft.note)}</textarea>
-                  </label>
-                </div>
-              </article>
-            </div>
-
-            <article class="surface order-create-section order-create-payment-section">
+            <article class="surface order-create-section order-create-customer-section">
               <div class="section-head">
-                <h3>Thanh toán và ưu đãi</h3>
+                <h3>Thông tin khách hàng</h3>
               </div>
               <div class="compact-grid">
                 <label>
+                  <span>Tên khách hàng</span>
+                  <input name="customer_name" value="${escapeHtml(draft.customer_name)}" placeholder="Nhập tên khách hàng" required>
+                </label>
+                <label>
+                  <span>Số điện thoại</span>
+                  <input name="customer_phone" value="${escapeHtml(draft.customer_phone)}" placeholder="0912 345 678" required>
+                </label>
+                <label class="span-2">
+                  <span>Địa chỉ giao hàng</span>
+                  <input name="shipping_address" value="${escapeHtml(draft.shipping_address)}" placeholder="Nhập đầy đủ địa chỉ giao hàng" required>
+                </label>
+                <label>
+                  <span>Phường / Xã</span>
+                  <input name="ward" value="${escapeHtml(draft.ward)}" placeholder="Phường / Xã">
+                </label>
+                <label>
+                  <span>Quận / Huyện</span>
+                  <input name="district" value="${escapeHtml(draft.district)}" placeholder="Quận / Huyện">
+                </label>
+                <label class="span-2">
+                  <span>Thành phố / Tỉnh</span>
+                  <input name="city" value="${escapeHtml(draft.city)}" placeholder="Chọn hoặc nhập thành phố" required>
+                </label>
+              </div>
+            </article>
+
+            <article class="surface order-create-section order-create-payment-section">
+              <div class="section-head">
+                <h3>Thông tin đơn hàng</h3>
+              </div>
+              <div class="compact-grid">
+                <label>
+                  <span>Ngày đặt hàng</span>
+                  <input type="text" value="${escapeHtml(formatDateTime(new Date().toISOString()))}" readonly>
+                </label>
+                <label>
                   <span>Phương thức thanh toán</span>
                   <select name="payment_method">${buildPaymentMethodOptions(draft.payment_method)}</select>
+                </label>
+                <label>
+                  <span>Phương thức giao</span>
+                  <select disabled>
+                    <option>Giao hàng tiêu chuẩn</option>
+                  </select>
                 </label>
                 <label>
                   <span>Trạng thái thanh toán</span>
@@ -2017,13 +2001,17 @@ function renderCreateOrderWorkspace() {
                   <span>Mã giảm giá</span>
                   <select name="coupon_code">${buildCouponOptions(draft.coupon_code)}</select>
                 </label>
+                <label class="span-2">
+                  <span>Ghi chú thêm / yêu cầu đặc biệt</span>
+                  <textarea name="note" rows="4" placeholder="Nhập ghi chú về đơn hàng, thời gian giao hoặc yêu cầu đặc biệt...">${escapeHtml(draft.note)}</textarea>
+                </label>
               </div>
               <p class="section-copy">${escapeHtml(couponHint)}</p>
             </article>
 
             <section class="surface order-create-products">
               <div class="section-head">
-                <h3>Danh sách sản phẩm</h3>
+                <h3>Chi tiết sản phẩm</h3>
                 <div class="order-create-actions-inline">
                   <span class="status-pill tone-neutral">${formatNumber(selectedLineItems.length)} sản phẩm</span>
                 </div>
@@ -2033,7 +2021,7 @@ function renderCreateOrderWorkspace() {
               </div>
               <button class="order-add-product-button" type="button" data-create-order-action="open-product-picker">
                 <span class="order-add-product-icon">+</span>
-                <span>Thêm sản phẩm từ kho</span>
+                <span>Thêm sản phẩm</span>
               </button>
             </section>
           </section>

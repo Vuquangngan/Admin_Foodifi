@@ -74,6 +74,18 @@ function getInitials(name) {
         .toUpperCase();
 }
 
+function isApiPathTarget(value) {
+    const text = String(value || "").trim().toLowerCase();
+    return text.startsWith("/api/") || text.startsWith("api/");
+}
+
+function formatActivityTarget(entry) {
+    const targetType = String(entry?.targetType || "KhÃ´ng rÃµ").trim();
+    const targetName = String(entry?.targetName || "").trim();
+    if (!targetName || isApiPathTarget(targetName)) return targetType;
+    return `${targetType}: ${targetName}`;
+}
+
 function createEntry({
     id,
     time,
@@ -279,6 +291,7 @@ function renderActivityRows(entries) {
         const roleLabel = ROLE_LABELS[entry.actor.role] || entry.actor.role || "Không rõ";
         const actionLabel = ACTION_LABELS[entry.action] || entry.action;
         const hasWarning = Boolean(entry.warning || entry.warningNote);
+        const targetLabel = formatActivityTarget(entry);
         const warningNote = entry.warningNote || (hasWarning ? entry.detail : "Không có ghi chú cảnh báo cho thao tác này.");
         const statusLabel = entry.status === "failed" ? "Thất bại" : entry.status === "warning" ? "Cần chú ý" : "Thành công";
 
@@ -299,7 +312,7 @@ function renderActivityRows(entries) {
             </td>
             <td><span class="activity-action-badge ${escapeHtml(entry.action)}">${escapeHtml(actionLabel)}</span></td>
             <td class="activity-target-cell">
-              <strong>${escapeHtml(entry.targetType)}: ${escapeHtml(entry.targetName)}</strong>
+              <strong>${escapeHtml(targetLabel)}</strong>
               <small>${escapeHtml(entry.detail)}</small>
             </td>
             <td><span class="activity-status ${escapeHtml(entry.status)}">● ${escapeHtml(statusLabel)}</span></td>
@@ -445,7 +458,6 @@ export function handleActivityHistoryClick(event) {
 function getActivityEntryById(entryId) {
     return buildActivityHistoryEntries().find((entry) => String(entry.id) === String(entryId)) || null;
 }
-
 function saveActivityWarningNotes() {
     localStorage.setItem(STORAGE_KEYS.activityWarningNotes, JSON.stringify(state.activityWarningNotes || {}));
 }
@@ -458,7 +470,7 @@ export function openActivityWarningModal(entryId) {
     elements.activityWarningForm.elements.entry_id.value = String(entry.id);
     elements.activityWarningForm.elements.note.value = entry.warningNote || "";
     if (elements.activityWarningTarget) {
-        elements.activityWarningTarget.textContent = `${entry.targetType}: ${entry.targetName}`;
+        elements.activityWarningTarget.textContent = formatActivityTarget(entry);
     }
     elements.activityWarningModal.classList.remove("hidden");
     elements.activityWarningForm.elements.note.focus();
@@ -508,8 +520,7 @@ function escapeExcelCell(value) {
     return escapeHtml(value).replace(/\n/g, "<br>");
 }
 
-export function exportActivityHistoryExcel() {
-    const entries = getFilteredActivityEntries();
+        <td>${escapeExcelCell(formatActivityTarget(entry))}</td>
     if (!entries.length) {
         showToast("Không có dữ liệu để xuất Excel.", true);
         return;
@@ -521,8 +532,7 @@ export function exportActivityHistoryExcel() {
         <td>${escapeExcelCell(entry.actor.name || "")}</td>
         <td>${escapeExcelCell(ROLE_LABELS[entry.actor.role] || entry.actor.role || "")}</td>
         <td>${escapeExcelCell(ACTION_LABELS[entry.action] || entry.action)}</td>
-        <td>${escapeExcelCell(`${entry.targetType}: ${entry.targetName}`)}</td>
-        <td>${escapeExcelCell(entry.detail)}</td>
+        <td>${escapeExcelCell(formatActivityTarget(entry))}</td>
         <td>${escapeExcelCell(entry.status === "failed" ? "Thất bại" : entry.status === "warning" ? "Cần chú ý" : "Thành công")}</td>
         <td>${entry.warning ? "Có" : "Không"}</td>
       </tr>

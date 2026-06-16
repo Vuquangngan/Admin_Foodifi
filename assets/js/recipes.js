@@ -437,7 +437,7 @@ function renderRecipeListWorkspace() {
                   </div>
                 </td>
               </tr>
-            `).join("") || '<tr><td colspan="6">Chưa có công thức phù hợp.</td></tr>'}
+            `).join("") || '<tr><td colspan="5">Chưa có công thức phù hợp.</td></tr>'}
           </tbody>
         </table>
       </div>
@@ -483,6 +483,8 @@ function renderRecipeCategoryWorkspace() {
             <strong>${escapeHtml(popular?.name || "Chưa có")}</strong>
           </article>
         `;
+        elements.recipeCategorySummary.classList.add("hidden");
+        elements.recipeCategorySummary.innerHTML = "";
     }
 
     elements.recipesContent.innerHTML = `
@@ -494,7 +496,6 @@ function renderRecipeCategoryWorkspace() {
               <th>Tên danh mục</th>
               <th>Mô tả</th>
               <th>Số công thức</th>
-              <th>Trạng thái</th>
               <th>Thao tác</th>
             </tr>
           </thead>
@@ -508,7 +509,6 @@ function renderRecipeCategoryWorkspace() {
                 </td>
                 <td>${escapeHtml(category.description || "Chưa có mô tả")}</td>
                 <td><span class="recipe-category-count">${Number(category.recipe_count || getRecipeCountByCategory(category))}</span></td>
-                <td><span class="recipe-status ${category.is_active === false ? "draft" : "published"}">${category.is_active === false ? "Tạm ẩn" : "Đang hoạt động"}</span></td>
                 <td>
                   <div class="recipe-actions">
                     <button type="button" data-recipe-action="edit-category" data-id="${escapeHtml(category.id)}">Sửa</button>
@@ -516,7 +516,7 @@ function renderRecipeCategoryWorkspace() {
                   </div>
                 </td>
               </tr>
-            `).join("") || '<tr><td colspan="6">Chưa có danh mục phù hợp.</td></tr>'}
+            `).join("") || '<tr><td colspan="5">Chưa có danh mục phù hợp.</td></tr>'}
           </tbody>
         </table>
       </div>

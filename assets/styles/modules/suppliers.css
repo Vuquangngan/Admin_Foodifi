@@ -132,8 +132,16 @@
 }
 
 .suppliers-table-wrap {
-  overflow: auto;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
   border-radius: 20px;
+  scrollbar-gutter: stable;
+}
+
+.suppliers-table {
+  min-width: 1380px;
 }
 
 .suppliers-table th,
@@ -155,6 +163,26 @@
 .suppliers-table th:nth-child(3),
 .suppliers-table td:nth-child(3) {
   min-width: 150px;
+}
+
+.suppliers-table th:nth-child(4),
+.suppliers-table td:nth-child(4) {
+  min-width: 230px;
+}
+
+.suppliers-table th:nth-child(5),
+.suppliers-table td:nth-child(5) {
+  min-width: 170px;
+}
+
+.suppliers-table th:nth-child(6),
+.suppliers-table td:nth-child(6) {
+  min-width: 150px;
+}
+
+.suppliers-table th:nth-child(7),
+.suppliers-table td:nth-child(7) {
+  min-width: 220px;
 }
 
 .suppliers-table th:last-child,

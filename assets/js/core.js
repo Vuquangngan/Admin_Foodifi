@@ -455,6 +455,7 @@ export const state = {
     branchShipmentDraft: null,
     branchShipmentProductPickerOpen: false,
     branchShipmentProductPickerKeyword: "",
+    branchShipmentProductPickerSelected: [],
     voucherWorkspace: "list",
     userAdminPage: 1,
     customerAdminPage: 1,

@@ -242,62 +242,35 @@
 }
 
 #orderCreateCard .order-create-layout {
-  gap: 14px;
+  gap: 16px;
 }
 
 #orderCreateCard .order-create-shell {
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.15fr) minmax(260px, 300px);
-  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
+  gap: 18px;
   align-items: start;
 }
 
 #orderCreateCard .order-create-main {
   min-width: 0;
-  display: contents;
-}
-
-#orderCreateCard .order-create-party-grid {
-  display: contents;
-}
-
-#orderCreateCard .order-create-seller-section {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-#orderCreateCard .order-create-customer-section {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-}
-
-#orderCreateCard .order-create-payment-section {
-  grid-column: 1;
-  grid-row: 2;
-}
-
-#orderCreateCard .order-create-products {
-  grid-column: 1 / -1;
-  grid-row: 3;
+  display: grid;
+  gap: 18px;
 }
 
 #orderCreateCard .order-create-section,
 #orderCreateCard .order-create-products,
 #orderCreateCard .order-create-summary {
-  border-radius: 12px;
-  padding: 18px;
+  border-radius: 18px;
+  padding: 22px;
   min-width: 0;
 }
 
 #orderCreateCard .order-create-section {
-  gap: 14px;
+  gap: 16px;
 }
 
 #orderCreateCard .order-create-section .compact-grid {
-  gap: 12px 14px;
-}
-
-#orderCreateCard .order-create-seller-section .compact-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
 }
 
 #orderCreateCard .order-create-customer-section .compact-grid,
@@ -321,8 +294,6 @@
 #orderCreateCard .order-create-summary {
   position: sticky;
   top: 18px;
-  grid-column: 3;
-  grid-row: 1;
 }
 
 #orderCreateCard .order-create-summary-grid {
@@ -345,22 +316,19 @@
     grid-template-columns: 1fr;
   }
 
-  #orderCreateCard .order-create-main,
-  #orderCreateCard .order-create-party-grid {
-    display: grid;
-  }
-
-  #orderCreateCard .order-create-seller-section,
-  #orderCreateCard .order-create-customer-section,
-  #orderCreateCard .order-create-payment-section,
-  #orderCreateCard .order-create-products,
-  #orderCreateCard .order-create-summary {
-    grid-column: 1;
-    grid-row: auto;
-  }
-
   #orderCreateCard .order-create-summary {
     position: static;
+  }
+}
+
+@media (max-width: 900px) {
+  #orderCreateCard .order-create-customer-section .compact-grid,
+  #orderCreateCard .order-create-payment-section .compact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #orderCreateCard .order-create-section .span-2 {
+    grid-column: auto;
   }
 }
 

@@ -384,6 +384,52 @@ async function addShipmentDraftProduct(productId = "") {
     draft.items = [...draft.items, nextItem];
 }
 
+function getBranchShipmentPickerSelectedIds() {
+    return Array.isArray(state.branchShipmentProductPickerSelected)
+        ? state.branchShipmentProductPickerSelected.map((id) => String(id))
+        : [];
+}
+
+function clearBranchShipmentPickerSelection() {
+    state.branchShipmentProductPickerSelected = [];
+}
+
+function toggleBranchShipmentPickerSelection(productId) {
+    const nextId = String(productId || "").trim();
+    if (!nextId) return;
+    const selectedIds = getBranchShipmentPickerSelectedIds();
+    state.branchShipmentProductPickerSelected = selectedIds.includes(nextId)
+        ? selectedIds.filter((id) => id !== nextId)
+        : [...selectedIds, nextId];
+}
+
+async function addSelectedShipmentDraftProducts() {
+    await ensureShipmentProductsReady();
+    const selectedIds = getBranchShipmentPickerSelectedIds();
+    if (!selectedIds.length) {
+        showToast("Vui lòng chọn ít nhất một sản phẩm.", true);
+        return false;
+    }
+
+    const draft = ensureBranchShipmentDraft();
+    const existingIds = new Set((draft.items || []).map((item) => String(item.product_id)));
+    const nextItems = selectedIds
+        .filter((productId) => !existingIds.has(String(productId)))
+        .map((productId) => buildShipmentDraftItem(productId))
+        .filter(Boolean);
+
+    if (!nextItems.length) {
+        showToast("Các sản phẩm đã chọn đã có trong đơn gửi hàng.", true);
+        return false;
+    }
+
+    draft.items = [...draft.items, ...nextItems];
+    clearBranchShipmentPickerSelection();
+    state.branchShipmentProductPickerKeyword = "";
+    state.branchShipmentProductPickerOpen = false;
+    return true;
+}
+
 function getAvailableShipmentProducts() {
     const draft = ensureBranchShipmentDraft();
     const keyword = String(state.branchShipmentProductPickerKeyword || "").trim().toLowerCase();
@@ -400,13 +446,14 @@ function getAvailableShipmentProducts() {
 function renderBranchShipmentProductPicker() {
     if (!state.branchShipmentProductPickerOpen) return "";
     const products = getAvailableShipmentProducts();
+    const selectedIds = getBranchShipmentPickerSelectedIds();
     return `
       <div class="branch-shipment-picker-backdrop" data-branch-shipment-picker-backdrop>
         <div class="branch-shipment-picker">
           <header>
             <div>
               <span>Chọn sản phẩm trong kho</span>
-              <strong>${formatNumber(products.length)} sản phẩm khả dụng</strong>
+              <strong>${formatNumber(products.length)} sản phẩm khả dụng${selectedIds.length ? ` • Đã chọn ${formatNumber(selectedIds.length)}` : ""}</strong>
             </div>
             <button type="button" data-branch-shipment-draft-action="close-product-picker" aria-label="Đóng chọn sản phẩm">×</button>
           </header>
@@ -416,17 +463,21 @@ function renderBranchShipmentProductPicker() {
           </label>
           <div class="branch-shipment-picker-list">
             ${products.map((product) => `
-              <article class="branch-shipment-picker-item">
+              <article class="branch-shipment-picker-item ${selectedIds.includes(String(product.id)) ? "selected" : ""}">
                 <img src="${escapeHtml(resolveMediaUrl(product.thumbnail_url, defaultProductThumb()))}" alt="">
                 <div>
                   <strong>${escapeHtml(product.name || "Sản phẩm")}</strong>
                   <span>SKU: ${escapeHtml(product.sku || "Chưa có")}</span>
                   <small>Kho tổng còn ${formatNumber(product.stock_quantity || 0)} ${escapeHtml(getProductUnit(product))}</small>
                 </div>
-                <button type="button" data-branch-shipment-draft-action="choose-product" data-product-id="${escapeHtml(String(product.id))}">Chọn</button>
+                <button type="button" data-branch-shipment-draft-action="toggle-product-selection" data-product-id="${escapeHtml(String(product.id))}">${selectedIds.includes(String(product.id)) ? "Đã chọn" : "Chọn"}</button>
               </article>
             `).join("") || '<p class="branch-import-empty">Không còn sản phẩm phù hợp để chọn.</p>'}
           </div>
+          <footer class="branch-shipment-picker-footer">
+            <button type="button" class="ghost-button" data-branch-shipment-draft-action="close-product-picker">Hủy</button>
+            <button type="button" class="primary-button" data-branch-shipment-draft-action="confirm-selected-products">Thêm ${formatNumber(selectedIds.length || 0)} sản phẩm</button>
+          </footer>
         </div>
       </div>
     `;
@@ -449,6 +500,26 @@ function updateShipmentDraftQuantity(index, quantity) {
     draft.items = draft.items.map((item, itemIndex) => (
         itemIndex === index ? { ...item, quantity: Math.max(1, Number(quantity || 1)) } : item
     ));
+}
+
+function syncBranchShipmentDraftSummary() {
+    const draft = ensureBranchShipmentDraft();
+    const summaryItems = elements.branchesContent?.querySelectorAll(".branch-shipment-create-summary strong") || [];
+    if (summaryItems[0]) summaryItems[0].textContent = formatNumber(draft.items.length);
+    if (summaryItems[1]) summaryItems[1].textContent = formatNumber(getShipmentDraftTotal());
+}
+
+function syncBranchShipmentDraftQuantityRow(index) {
+    const draft = ensureBranchShipmentDraft();
+    const item = draft.items?.[index];
+    if (!item) return;
+
+    const input = elements.branchesContent?.querySelector(`[data-branch-shipment-draft-quantity="${index}"]`);
+    if (input) {
+        input.value = String(Math.max(1, Number(item.quantity || 1)));
+    }
+
+    syncBranchShipmentDraftSummary();
 }
 
 function removeShipmentDraftProduct(index) {
@@ -1530,6 +1601,8 @@ export async function handleBranchImportClick(event) {
             state.branchShipmentDraft = null;
             ensureBranchShipmentDraft();
             state.branchShipmentCreateOpen = true;
+            clearBranchShipmentPickerSelection();
+            state.branchShipmentProductPickerKeyword = "";
             renderBranches();
             return true;
         }
@@ -1539,6 +1612,7 @@ export async function handleBranchImportClick(event) {
             state.branchShipmentDraft = null;
             state.branchShipmentProductPickerOpen = false;
             state.branchShipmentProductPickerKeyword = "";
+            clearBranchShipmentPickerSelection();
             renderBranches();
             return true;
         }
@@ -1546,6 +1620,8 @@ export async function handleBranchImportClick(event) {
         if (action === "add-product") {
             await ensureShipmentProductsReady();
             state.branchShipmentProductPickerOpen = true;
+            clearBranchShipmentPickerSelection();
+            state.branchShipmentProductPickerKeyword = "";
             renderBranches();
             return true;
         }
@@ -1553,15 +1629,22 @@ export async function handleBranchImportClick(event) {
         if (action === "close-product-picker") {
             state.branchShipmentProductPickerOpen = false;
             state.branchShipmentProductPickerKeyword = "";
+            clearBranchShipmentPickerSelection();
             renderBranches();
             return true;
         }
 
-        if (action === "choose-product") {
-            await addShipmentDraftProduct(draftButton.dataset.productId || "");
-            state.branchShipmentProductPickerOpen = false;
-            state.branchShipmentProductPickerKeyword = "";
+        if (action === "toggle-product-selection") {
+            toggleBranchShipmentPickerSelection(draftButton.dataset.productId || "");
             renderBranches();
+            return true;
+        }
+
+        if (action === "confirm-selected-products") {
+            const added = await addSelectedShipmentDraftProducts();
+            if (added) {
+                renderBranches();
+            }
             return true;
         }
 
@@ -1575,7 +1658,7 @@ export async function handleBranchImportClick(event) {
             const draft = ensureBranchShipmentDraft();
             const current = Number(draft.items[index]?.quantity || 1);
             updateShipmentDraftQuantity(index, current + (action === "increase-quantity" ? 1 : -1));
-            renderBranches();
+            syncBranchShipmentDraftQuantityRow(index);
             return true;
         }
 
