@@ -93,14 +93,14 @@ export function updateSessionUi() {
     elements.adminQuickbar?.classList.toggle("hidden", !isLoggedIn);
     elements.adminPageHeader?.classList.toggle("hidden", !isLoggedIn);
     elements.appShell.classList.toggle("auth-screen", !isLoggedIn);
-    const displayName = state.user?.username || state.user?.full_name || state.user?.name || "Qu?n lý vu?n";
-    elements.sessionName.textContent = isLoggedIn ? "Qu?n lý vu?n" : "-";
+    const displayName = state.user?.username || state.user?.full_name || state.user?.name || "Quản lý vườn";
+    elements.sessionName.textContent = isLoggedIn ? displayName : "-";
     elements.sessionMeta.textContent = isLoggedIn ? state.user.email : "-";
     if (elements.adminQuickName) {
         elements.adminQuickName.textContent = isLoggedIn ? displayName : "-";
     }
     if (elements.adminQuickRole) {
-        elements.adminQuickRole.textContent = state.user?.role === "admin" ? "Qu?n tr? viên" : "Nhân viên";
+        elements.adminQuickRole.textContent = state.user?.role === "admin" ? "Quản trị viên" : "Nhân viên";
     }
     if (elements.adminQuickAvatar && isLoggedIn) {
         const fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='20' fill='%23e2f5e9'/%3E%3Ccircle cx='20' cy='16' r='6' fill='%230d7f42'/%3E%3Cpath d='M9 34c3-8 8-12 11-12s8 4 11 12' fill='%230d7f42'/%3E%3C/svg%3E";
@@ -109,7 +109,7 @@ export function updateSessionUi() {
     if (!isLoggedIn) {
         elements.adminAccountDropdown?.classList.add("hidden");
         elements.adminAccountTrigger?.setAttribute("aria-expanded", "false");
-        setAdminPageTitle("Ðang nh?p h? th?ng");
+        setAdminPageTitle("Đăng nhập hệ thống");
     }
 }
 
@@ -118,7 +118,7 @@ export function toggleSidebarSection(sectionKey) {
     if (!section) return;
 
     if (!section.items?.length && section.staticLink) {
-        showToast("S?p có.");
+        showToast("Sắp có.");
         return;
     }
 
@@ -136,7 +136,7 @@ export function selectSidebarItem(itemKey) {
 
     if (item.staticLink) {
         renderSidebarMenu();
-        showToast("S?p có.");
+        showToast("Sắp có.");
         return;
     }
 
@@ -291,7 +291,7 @@ export function jumpToView(view) {
 export function setAuthMode(mode) {
     const wantsRegister = mode === "register";
     if (wantsRegister) {
-        showToast("B?n không có quy?n này", true);
+        showToast("Bạn không có quyền này", true);
     }
 
     state.authMode = "login";
@@ -306,11 +306,11 @@ export function setAuthMode(mode) {
     elements.forgotPasswordButton.classList.toggle("hidden", isRegister);
     elements.usernameInput.required = isRegister;
     elements.confirmPasswordInput.required = isRegister;
-    elements.authTitle.textContent = isRegister ? "T?o tài kho?n qu?n tr?" : "Ðang nh?p h? th?ng";
+    elements.authTitle.textContent = isRegister ? "Tạo tài khoản quản trị" : "Đăng nhập hệ thống";
     elements.authSubtitle.textContent = "";
     elements.authSubtitle.classList.add("hidden");
     elements.authSubtitle.classList.remove("auth-error-message");
-    elements.authSubmitButton.textContent = isRegister ? "Ðang ký" : "Ðang nh?p";
+    elements.authSubmitButton.textContent = isRegister ? "Đăng ký" : "Đăng nhập";
     elements.authFooterText.textContent = "";
     elements.authFooterText.classList.add("hidden");
     elements.passwordInput.value = "";
@@ -328,11 +328,11 @@ export async function login(email, password) {
     });
 
     if (!payload?.token || !payload?.user) {
-        throw new Error("Ph?n h?i dang nh?p không h?p l?.");
+        throw new Error("Phản hồi đăng nhập không hợp lệ.");
     }
 
     if (!["admin", "staff"].includes(payload.user.role)) {
-        throw new Error("Tài kho?n này không có quy?n truy c?p admin.");
+        throw new Error("Tài khoản này không có quyền truy cập admin.");
     }
 
     state.token = payload.token;
@@ -341,9 +341,9 @@ export async function login(email, password) {
     recordActivityLog({
         id: `login-${Date.now()}`,
         action: "login",
-        targetType: "H? th?ng",
+        targetType: "Hệ thống",
         targetName: "Web Admin",
-        detail: "Ðang nh?p web admin thành công",
+        detail: "Đăng nhập web admin thành công",
         status: "success"
     });
     saveSession();
@@ -385,7 +385,7 @@ export function logout(showMessage = true) {
     saveSession();
     updateSessionUi();
     setActivePanel("login");
-    if (showMessage) showToast("Ðã dang xu?t.");
+    if (showMessage) showToast("Đã đăng xuất.");
 }
 
 

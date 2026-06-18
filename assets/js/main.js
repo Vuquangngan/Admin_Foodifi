@@ -239,7 +239,7 @@ function bindGlobalEvents() {
         const originalText = submitter?.textContent || "";
         if (submitter) {
             submitter.disabled = true;
-            submitter.textContent = "Ðang x? lý...";
+            submitter.textContent = "Đang xử lý...";
         }
 
         try {
@@ -248,20 +248,20 @@ function bindGlobalEvents() {
             state.apiBase = normalizeApiBase(formData.apiBase || state.apiBase || "http://localhost:3000");
 
             if (!state.apiBase) {
-                throw new Error("Vui lòng nh?p API base URL.");
+                throw new Error("Vui lòng nhập API base URL.");
             }
 
             if (state.authMode === "register") {
                 if (!String(formData.username || "").trim()) {
-                    throw new Error("Vui lòng nh?p tên hi?n th?.");
+                    throw new Error("Vui lòng nhập tên hiển thị.");
                 }
 
                 if (String(formData.password || "").length < 6) {
-                    throw new Error("M?t kh?u ph?i có ít nh?t 6 ký t?.");
+                    throw new Error("Mật khẩu phải có ít nhất 6 ký tự.");
                 }
 
                 if (String(formData.password || "") !== String(formData.confirm_password || "")) {
-                    throw new Error("M?t kh?u xác nh?n không kh?p.");
+                    throw new Error("Mật khẩu xác nhận không khớp.");
                 }
 
                 await registerAccount(
@@ -272,7 +272,7 @@ function bindGlobalEvents() {
                 setAuthMode("login");
                 elements.passwordInput.value = "";
                 elements.confirmPasswordInput.value = "";
-                showToast("Ðang ký thành công. Hãy dang nh?p d? ti?p t?c.");
+                showToast("Đăng ký thành công. Hãy đăng nhập để tiếp tục.");
                 return;
             }
 
@@ -285,12 +285,12 @@ function bindGlobalEvents() {
             selectSidebarItem("overview-home");
             const hasLoadedData = await bootstrapAdmin();
             if (!hasLoadedData) {
-                showToast("Ðang nh?p thành công, nhung m?t s? d? li?u chua t?i du?c.", true);
+                showToast("Đăng nhập thành công, nhưng một số dữ liệu chưa tải được.", true);
                 return;
             }
-            showToast("Ðang nh?p thành công.");
+            showToast("Đăng nhập thành công.");
         } catch (error) {
-            const message = error?.message || "Không dang nh?p du?c. Vui lòng th? l?i.";
+            const message = error?.message || "Không đăng nhập được. Vui lòng thử lại.";
             showAuthInlineMessage(message, true);
             showToast(message, true);
         } finally {
@@ -374,7 +374,7 @@ function bindGlobalEvents() {
     elements.forgotPasswordButton.addEventListener("click", async () => {
         const email = String(elements.emailInput?.value || "").trim();
         if (!email) {
-            showToast("Nh?p email tru?c khi yêu c?u quên m?t kh?u.", true);
+            showToast("Nhập email trước khi yêu cầu quên mật khẩu.", true);
             return;
         }
 
@@ -383,7 +383,7 @@ function bindGlobalEvents() {
                 method: "POST",
                 body: JSON.stringify({ email })
             });
-            showToast("H? th?ng dã g?i email d?t l?i m?t kh?u. Vui lòng ki?m tra h?p thu d?n c?a b?n.");
+            showToast("Hệ thống đã gửi email đặt lại mật khẩu. Vui lòng kiểm tra hộp thư đến của bạn.");
         });
     });
 
@@ -405,7 +405,7 @@ function bindGlobalEvents() {
     elements.refreshProductsButton.addEventListener("click", (event) => withLoading(event.currentTarget, async () => {
         if (state.productWorkspace === "import") {
             resetProductImportForm();
-            showToast("Ðã làm m?i form nh?p s?n ph?m.");
+            showToast("Đã làm mới form nhập sản phẩm.");
             return;
         }
 
@@ -475,7 +475,7 @@ function bindGlobalEvents() {
         const exportButton = event.target.closest("[data-export-overview]");
         if (exportButton) {
             exportOverviewReport();
-            showToast("Ðã xu?t báo cáo CSV.");
+            showToast("Đã xuất báo cáo CSV.");
             return;
         }
 
@@ -593,7 +593,7 @@ function bindGlobalEvents() {
             });
             resetProductForm();
             await Promise.all([loadProducts(), loadOverview()]);
-            showToast(isEditing ? "Ðã c?p nh?t s?n ph?m." : "Ðã t?o s?n ph?m.");
+            showToast(isEditing ? "Đã cập nhật sản phẩm." : "Đã tạo sản phẩm.");
         });
     });
 
@@ -607,7 +607,7 @@ function bindGlobalEvents() {
             const payload = isRestocking ? buildInventoryRestockPayload(raw) : buildInventoryImportPayload(raw);
 
             if (!payload.category_id || !payload.name) {
-                showToast("Vui lòng nh?p tên s?n ph?m và danh m?c.", true);
+                showToast("Vui lòng nhập tên sản phẩm và danh mục.", true);
                 return;
             }
 
@@ -621,7 +621,7 @@ function bindGlobalEvents() {
                 recordProductImportSupplier(preparedRaw, savedProduct);
                 resetProductImportForm();
                 await Promise.all([loadProducts(), loadOverview()]);
-                showToast(isRestocking ? "Ðã nh?p thêm hàng vào kho t?ng." : "Ðã luu s?n ph?m m?i.");
+                showToast(isRestocking ? "Đã nhập thêm hàng vào kho tổng." : "Đã lưu sản phẩm mới.");
             });
         }, true);
     }
@@ -637,7 +637,7 @@ function bindGlobalEvents() {
         try {
             await handleProductImportExcelFile(event.target.files?.[0]);
         } catch (error) {
-            showToast(error.message || "Không d?c du?c file Excel.", true);
+            showToast(error.message || "Không đọc được file Excel.", true);
         }
     });
 
@@ -645,11 +645,11 @@ function bindGlobalEvents() {
         const button = event.currentTarget;
         const original = button.textContent;
         button.disabled = true;
-        button.textContent = "Ðang nh?p...";
+        button.textContent = "Đang nhập...";
         try {
             await submitProductImportExcel();
         } catch (error) {
-            showToast(error.message || "Không nh?p du?c s?n ph?m t? Excel.", true);
+            showToast(error.message || "Không nhập được sản phẩm từ Excel.", true);
             button.disabled = false;
         } finally {
             button.textContent = original;
@@ -748,7 +748,7 @@ function bindGlobalEvents() {
         if (lowStockImportButton) {
             selectSidebarItem("product-import");
             prepareProductImportFromLowStock(lowStockImportButton.dataset.productId);
-            showToast("Ðã chuy?n d? li?u sang form nh?p s?n ph?m.");
+            showToast("Đã chuyển dữ liệu sang form nhập sản phẩm.");
             return;
         }
 
@@ -827,7 +827,7 @@ function bindGlobalEvents() {
             resetCategoryForm();
             closeCategoryModal();
             await Promise.all([loadCategories(), loadProducts(), loadOverview()]);
-            showToast(isEditing ? "Ðã c?p nh?t danh m?c." : "Ðã t?o danh m?c.");
+            showToast(isEditing ? "Đã cập nhật danh mục." : "Đã tạo danh mục.");
         });
     });
 
@@ -1233,10 +1233,10 @@ function bindGlobalEvents() {
         const searchInput = elements.promotionForm.elements.apply_product_search;
         if (hiddenInput) hiddenInput.value = "all";
         if (searchInput) {
-            searchInput.value = event.target.value === "categories" ? "T?t c? danh m?c" : "T?t c? s?n ph?m";
+            searchInput.value = event.target.value === "categories" ? "Tất cả danh mục" : "Tất cả sản phẩm";
             searchInput.placeholder = event.target.value === "categories"
-                ? "Nh?n d? ch?n ho?c nh?p tên danh m?c..."
-                : "Nh?n d? ch?n ho?c nh?p tên/mã s?n ph?m...";
+                ? "Nhấn để chọn hoặc nhập tên danh mục..."
+                : "Nhấn để chọn hoặc nhập tên/mã sản phẩm...";
         }
         if (elements.promotionProductsList) elements.promotionProductsList.innerHTML = "";
         handlePromotionAction("refresh-selects");
@@ -1272,7 +1272,7 @@ function bindGlobalEvents() {
         try {
             await withLoading(event.submitter, async () => submitPromotionForm(raw));
         } catch (error) {
-            showToast(error.message || "Không luu du?c chi?n d?ch khuy?n mãi.", true);
+            showToast(error.message || "Không lưu được chiến dịch khuyến mãi.", true);
         }
     });
     [elements.promotionStatusFilter, elements.promotionTypeFilter].forEach((filter) => {
@@ -1426,7 +1426,7 @@ function bindGlobalEvents() {
         try {
             await submitChatComposer();
         } catch (error) {
-            showToast(error.message || "Không th? g?i tin nh?n.", true);
+            showToast(error.message || "Không thể gửi tin nhắn.", true);
         }
     });
 
@@ -1447,7 +1447,7 @@ function bindGlobalEvents() {
         if (!select) return;
         select.disabled = true;
         handleOrderBranchSelection(select)
-            .catch((error) => showToast(error.message || "Không th? c?p nh?t chi nhánh l?y hàng.", true))
+            .catch((error) => showToast(error.message || "Không thể cập nhật chi nhánh lấy hàng.", true))
             .finally(() => {
                 select.disabled = false;
             });
@@ -1501,7 +1501,7 @@ async function initialize() {
     try {
         const restoredUser = await apiFetch("/api/users/me");
         if (!restoredUser || !["admin", "staff"].includes(restoredUser.role)) {
-            throw new Error("Phiên dang nh?p không còn quy?n truy c?p admin.");
+            throw new Error("Phiên đăng nhập không còn quyền truy cập admin.");
         }
 
         state.user = restoredUser;
@@ -1509,7 +1509,7 @@ async function initialize() {
         updateSessionUi();
         selectSidebarItem("overview-home");
         const hasLoadedData = await bootstrapAdmin();
-        showToast(hasLoadedData ? "Ðã khôi ph?c phiên dang nh?p." : "Ðã khôi ph?c phiên dang nh?p, nhung m?t s? d? li?u chua t?i du?c.", !hasLoadedData);
+        showToast(hasLoadedData ? "Đã khôi phục phiên đăng nhập." : "Đã khôi phục phiên đăng nhập, nhưng một số dữ liệu chưa tải được.", !hasLoadedData);
         return;
     } catch (error) {
         if ((error.status === 401 || error.status === 403) && state.refreshToken) {
@@ -1518,7 +1518,7 @@ async function initialize() {
                 if (refreshed) {
                     const restoredUser = await apiFetch("/api/users/me");
                     if (!restoredUser || !["admin", "staff"].includes(restoredUser.role)) {
-                        throw new Error("Phiên dang nh?p không còn quy?n truy c?p admin.");
+                        throw new Error("Phiên đăng nhập không còn quyền truy cập admin.");
                     }
 
                     state.user = restoredUser;
@@ -1526,7 +1526,7 @@ async function initialize() {
                     updateSessionUi();
                     selectSidebarItem("overview-home");
                     const hasLoadedData = await bootstrapAdmin();
-                    showToast(hasLoadedData ? "Ðã t? khôi ph?c phiên dang nh?p." : "Ðã t? khôi ph?c phiên dang nh?p, nhung m?t s? d? li?u chua t?i du?c.", !hasLoadedData);
+                    showToast(hasLoadedData ? "Đã tự khôi phục phiên đăng nhập." : "Đã tự khôi phục phiên đăng nhập, nhưng một số dữ liệu chưa tải được.", !hasLoadedData);
                     return;
                 }
             } catch (refreshError) {
@@ -1537,7 +1537,7 @@ async function initialize() {
         if (error.isNetworkError) {
             updateSessionUi();
             selectSidebarItem("overview-home");
-            showToast("Chua ki?m tra du?c phiên do backend chua ph?n h?i. T?i l?i sau vài giây n?u d? li?u chua hi?n.", true);
+            showToast("Chưa kiểm tra được phiên do backend chưa phản hồi. Tải lại sau vài giây nếu dữ liệu chưa hiện.", true);
             return;
         }
 
@@ -1545,7 +1545,7 @@ async function initialize() {
         logout(false);
         updateSessionUi();
         setActivePanel("login");
-        showToast("Phiên dang nh?p dã h?t h?n ho?c không h?p l?. Vui lòng dang nh?p l?i.", true);
+        showToast("Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.", true);
     }
 }
 
@@ -1577,7 +1577,7 @@ function bindEmergencyLoginHandler(error) {
 
         const originalText = button.textContent;
         button.disabled = true;
-        button.textContent = "Ðang x? lý...";
+        button.textContent = "Đang xử lý...";
 
         try {
             if (subtitle) {
@@ -1596,10 +1596,10 @@ function bindEmergencyLoginHandler(error) {
             renderOverview();
             selectSidebarItem("overview-home");
             await bootstrapAdmin();
-            showToast("Ðang nh?p thành công.");
+            showToast("Đăng nhập thành công.");
             window.__foodifiMainReady = true;
         } catch (submitError) {
-            renderError(submitError?.message || "Không dang nh?p du?c. Vui lòng th? l?i.");
+            renderError(submitError?.message || "Không đăng nhập được. Vui lòng thử lại.");
         } finally {
             button.disabled = false;
             button.textContent = originalText;

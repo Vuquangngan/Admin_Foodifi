@@ -1193,7 +1193,7 @@ function renderComplaintDetailView(order) {
                 </div>
                 <div class="complaint-case-side">
                   <span>Lý do khiếu nại</span>
-                  <strong>${escapeHtml(complaint.reason || "Chua ph�n lo?i")}</strong>
+                  <strong>${escapeHtml(complaint.reason || "Chưa phân loại")}</strong>
                 </div>
               </div>
 
@@ -1243,7 +1243,7 @@ function renderComplaintDetailView(order) {
               <div class="section-head">
                 <h3>Phản hồi của Admin</h3>
               </div>
-              <textarea id="complaintAdminResponse" class="complaint-response-input" rows="4" placeholder="Nh?p n?i dung ph?n h?i cho kh�ch h�ng t?i d�y...">${escapeHtml(complaint.adminResponse || "")}</textarea>
+              <textarea id="complaintAdminResponse" class="complaint-response-input" rows="4" placeholder="Nhập nội dung phản hồi cho khách hàng tại đây...">${escapeHtml(complaint.adminResponse || "")}</textarea>
               <div class="complaint-detail-actions">
                 ${order.return_status === "shipping_back" ? buildOrderActionButton({
                     action: "order-special-action",
