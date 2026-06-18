@@ -137,7 +137,7 @@ export function renderOverview() {
               <h3>Xu hướng doanh thu</h3>
               <p class="section-copy">Doanh thu 7 ngày gần nhất từ các đơn ${paidOrders.length ? "đã thanh toán" : "gần đây"}.</p>
             </div>
-            <span class="overview-dot-menu">â‹®</span>
+            <span class="overview-dot-menu">⋮</span>
           </div>
           <div class="overview-chart">
             ${trendSeries.values.map((value, index) => `
