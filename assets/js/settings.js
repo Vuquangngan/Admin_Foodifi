@@ -1,4 +1,4 @@
-import { SIDEBAR_MENU, STORAGE_KEYS, escapeHtml, showToast, state } from "./core.js";
+﻿import { SIDEBAR_MENU, STORAGE_KEYS, escapeHtml, showToast, state } from "./core.js";
 import { renderSidebarMenu } from "./auth-nav.js";
 import { renderAppIcon } from "./icons.js";
 
@@ -55,7 +55,7 @@ const LEGACY_MENU_ICON_MAP = {
     "🎟": "ticket",
     "⚙": "settings",
     "△": "chart",
-    "◇": "megaphone",
+    "â—‡": "megaphone",
     "✦": "grid"
 };
 
@@ -95,8 +95,8 @@ function normalizeMenuIcon(icon, item = {}) {
 
 function cleanMenuText(value) {
     return String(value || "")
-        .replace(/&amp;/gi, " và ")
-        .replace(/&#38;/gi, " và ")
+        .replace(/&/gi, " và ")
+        .replace(/&/gi, " và ")
         .replace(/\s*&\s*/g, " và ")
         .replace(/\s{2,}/g, " ")
         .trim();
@@ -743,7 +743,7 @@ export function renderSettings() {
             <label>
               <span>Đơn vị tiền tệ</span>
               <select name="currency">
-                ${option("VND", "VND - ₫", settings.currency)}
+                ${option("VND", "VND - â'«", settings.currency)}
                 ${option("USD", "USD - $", settings.currency)}
               </select>
             </label>
@@ -1116,3 +1116,5 @@ export function bindSettingsEvents() {
         reader.readAsDataURL(file);
     });
 }
+
+

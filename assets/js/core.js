@@ -1,4 +1,4 @@
-export const STORAGE_KEYS = {
+﻿export const STORAGE_KEYS = {
     apiBase: "shopfood_admin_api_base",
     session: "shopfood_admin_session",
     branches: "shopfood_admin_branches",
@@ -395,7 +395,7 @@ export const state = {
     chatConversations: [],
     chatMessages: [],
     chatCurrentConversationId: null,
-    chatStatusFilter: "open",
+    chatStatusFilter: "all",
     chatSearch: "",
     chatMessageDraft: "",
     chatWorkspace: "inbox",
@@ -1022,7 +1022,7 @@ export function formatDate(value) {
 
 export function escapeHtml(value) {
     return String(value ?? "")
-        .replace(/&/g, "&amp;")
+        .replace(/&/g, "&")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
@@ -1339,3 +1339,6 @@ export function recordActivityLog(entry) {
     state.activityLogs = [nextEntry, ...(state.activityLogs || [])].slice(0, 300);
     localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(state.activityLogs));
 }
+
+
+
