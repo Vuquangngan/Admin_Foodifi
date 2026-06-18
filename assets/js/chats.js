@@ -375,25 +375,30 @@ function renderChatComposer(conversation) {
 
     return `
       <form class="chat-composer-form" id="chatComposerForm">
-        <div class="chat-quick-replies">
-          ${CHAT_QUICK_REPLIES.map((reply) => `<button class="chat-quick-reply" type="button" data-chat-action="insert-quick-reply" data-reply="${escapeHtml(reply)}">⚡ ${escapeHtml(reply)}</button>`).join("")}
+        <div class="chat-composer-input-wrap">
+          <textarea name="content" rows="1" data-chat-input="draft" placeholder="Nhập nội dung tin nhắn...">${escapeHtml(state.chatMessageDraft || "")}</textarea>
         </div>
-
-        <div class="chat-composer-input-row">
+        <div class="chat-composer-toolbar">
           <div class="chat-composer-tools">
-            <button class="chat-icon-button" type="button" data-chat-action="attach-image" aria-label="Đính kèm ảnh" title="Đính kèm ảnh">
+            <button class="chat-icon-button" type="button" data-chat-action="attach-image" aria-label="Đính kèm" title="Đính kèm">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
             </button>
-            <button class="chat-icon-button" type="button" data-chat-action="open-product-picker" aria-label="Gửi sản phẩm" title="Gửi sản phẩm">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            <button class="chat-icon-button" type="button" data-chat-action="open-product-picker" aria-label="Cảm xúc" title="Cảm xúc">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </button>
+            <button class="chat-icon-button" type="button" data-chat-action="insert-quick-reply" data-reply="${escapeHtml(CHAT_QUICK_REPLIES[0] || "")}" aria-label="Phản hồi nhanh" title="Phản hồi nhanh">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             </button>
           </div>
-          <div class="chat-composer-input-wrap">
-            <textarea name="content" rows="1" data-chat-input="draft" placeholder="Nhập tin nhắn...">${escapeHtml(state.chatMessageDraft || "")}</textarea>
+          <div class="chat-send-group">
+            <button class="chat-send-button" type="submit" ${hasDraft ? "" : "disabled"}>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              <span>Gửi</span>
+            </button>
+            <button class="chat-send-dropdown" type="button" aria-label="Tuỳ chọn gửi" title="Tuỳ chọn gửi">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
           </div>
-          <button class="chat-send-button" type="submit" ${hasDraft ? "" : "disabled"} aria-label="Gửi tin nhắn" title="Gửi tin nhắn">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
         </div>
       </form>
     `;
@@ -961,22 +966,15 @@ buildChatConversationCard = function buildChatConversationCardPatched(conversati
     const unreadCount = Number(conversation.unread_count || 0);
     const customerName = repairChatText(customer?.username || "Khách hàng");
     const avatarUrl = resolveMediaUrl(customer?.avatar_url, defaultChatAvatar(customerName));
-    const previewRaw = getChatPreviewText(conversation);
-    const lastSenderId = Number(
-        conversation?.last_message?.sender_id
-        ?? conversation?.last_message_sender_id
-        ?? conversation?.lastMessageSenderId
-        ?? 0
-    );
-    const ownLast = lastSenderId && Number(state.user?.id) === lastSenderId;
-    const previewText = `${ownLast ? "Bạn: " : ""}${previewRaw}`;
+    const subject = repairChatText(conversation.subject || "");
+    const previewText = getChatPreviewText(conversation);
     const timeLabel = formatChatListTime(conversation.last_message_at || conversation.updated_at || conversation.created_at);
-    const isOnline = Boolean(customer?.is_online || customer?.online);
     const isClosed = conversation.status === "closed";
+    const statusLabel = isClosed ? "Đã xử lý" : "Đang mở";
 
     return `
       <button class="chat-conversation-card ${isActive ? "is-active" : ""} ${unreadCount > 0 ? "has-unread" : ""}" type="button" data-chat-action="select-conversation" data-id="${conversation.id}">
-        <span class="chat-conversation-avatar-wrap ${isOnline ? "is-online" : ""}">
+        <span class="chat-conversation-avatar-wrap">
           <img class="chat-conversation-avatar" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(customerName)}">
         </span>
         <div class="chat-conversation-copy">
@@ -984,11 +982,15 @@ buildChatConversationCard = function buildChatConversationCardPatched(conversati
             <strong>${escapeHtml(customerName)}</strong>
             <span class="chat-conversation-time">${escapeHtml(timeLabel)}</span>
           </div>
+          ${subject ? `<span class="chat-conversation-subject">${escapeHtml(subject)}</span>` : ""}
+          <span class="chat-conversation-preview">${escapeHtml(previewText)}</span>
           <div class="chat-conversation-bottom">
-            <span class="chat-conversation-preview">${escapeHtml(previewText)}</span>
+            <span class="chat-conversation-status ${isClosed ? "is-closed" : "is-open"}">
+              <span class="chat-status-dot"></span>${escapeHtml(statusLabel)}
+            </span>
             ${unreadCount > 0
                 ? `<span class="chat-unread-badge">${unreadCount > 99 ? "99+" : unreadCount}</span>`
-                : (isClosed ? `<span class="chat-conversation-checkmark" title="Đã xử lý">✓</span>` : "")}
+                : ""}
           </div>
         </div>
       </button>
@@ -1005,8 +1007,11 @@ buildChatMessagesMarkup = function buildChatMessagesMarkupPatched(messages) {
         `;
     }
 
+    const conversation = getActiveChatConversation();
+    const conversationSubject = repairChatText(conversation?.subject || "");
     let lastDayKey = "";
     const blocks = [];
+    let firstOutgoingShown = false;
     const GROUP_WINDOW_MS = 3 * 60 * 1000;
 
     messages.forEach((message, index) => {
@@ -1014,9 +1019,9 @@ buildChatMessagesMarkup = function buildChatMessagesMarkupPatched(messages) {
         const dayKey = Number.isNaN(date.getTime()) ? String(message.id) : date.toDateString();
         const sender = message.sender || message.nguoi_gui || {};
         const own = isOutgoingMessage(message);
-        const senderName = repairChatText(sender.username || "Khách hàng");
-        const avatarUrl = resolveMediaUrl(sender.avatar_url, defaultChatAvatar(senderName || "KH"));
-        const readState = getMessageReadStateLabel(message);
+        const senderName = repairChatText(sender.username || (own ? "Foodifi" : "Khách hàng"));
+        const avatarUrl = resolveMediaUrl(sender.avatar_url, defaultChatAvatar(senderName || (own ? "F" : "KH")));
+        const readState = isOutgoingMessage(message) ? (message?.is_read ? "read" : "sent") : "";
         const parsedMessage = parseSharedProductMessage(message.content || "");
         const attachmentUrl = message.attachment_url ? resolveMediaUrl(message.attachment_url) : "";
         const messageType = String(message.message_type || "");
@@ -1037,20 +1042,29 @@ buildChatMessagesMarkup = function buildChatMessagesMarkupPatched(messages) {
         const isLastOfGroup = !nextSameSender;
 
         if (lastDayKey !== dayKey) {
-            blocks.push(`<div class="chat-day-divider"><span>${escapeHtml(formatChatDayLabel(date))}</span></div>`);
+            const dayDate = new Intl.DateTimeFormat("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }).format(date);
+            const dayLabel = formatChatDayLabel(date);
+            const fullLabel = dayLabel.includes(",") || /\d{4}/.test(dayLabel) ? dayLabel : `${dayLabel}, ${dayDate}`;
+            blocks.push(`<div class="chat-day-divider"><span>${escapeHtml(fullLabel)}</span></div>`);
             lastDayKey = dayKey;
+            firstOutgoingShown = false;
         }
 
+        const showSubject = own && isFirstOfGroup && conversationSubject && !firstOutgoingShown;
+        if (showSubject) firstOutgoingShown = true;
+
         const bodyParts = [];
+        if (showSubject) bodyParts.push(`<strong class="chat-bubble-subject">${escapeHtml(conversationSubject)}</strong>`);
         if (parsedMessage.product) bodyParts.push(buildSharedProductCardMarkup(parsedMessage.product, own));
         if (hasImageAttachment) bodyParts.push(`<img class="chat-message-image" src="${escapeHtml(attachmentUrl)}" alt="Ảnh đính kèm">`);
         if (parsedMessage.text) bodyParts.push(`<p>${escapeHtml(repairChatText(parsedMessage.text))}</p>`);
         if (attachmentUrl && !hasImageAttachment) bodyParts.push(`<a class="chat-message-attachment" href="${escapeHtml(attachmentUrl)}" target="_blank" rel="noreferrer">Mở tệp đính kèm</a>`);
 
         const timeText = escapeHtml(formatChatClock(message.created_at || message.ngay_tao));
-        const metaInside = isLastOfGroup
-            ? `<span class="chat-bubble-time">${timeText}${readState ? ` · ${escapeHtml(readState)}` : ""}</span>`
+        const checkMark = own
+            ? `<span class="chat-bubble-check ${readState === "read" ? "is-read" : ""}">${readState === "read" ? "✓✓" : "✓✓"}</span>`
             : "";
+        const metaInside = `<span class="chat-bubble-meta">${timeText}${checkMark ? ` ${checkMark}` : ""}</span>`;
 
         const groupClasses = [
             own ? "is-outgoing" : "is-incoming",
@@ -1059,13 +1073,21 @@ buildChatMessagesMarkup = function buildChatMessagesMarkupPatched(messages) {
             !isFirstOfGroup && !isLastOfGroup ? "is-middle" : ""
         ].join(" ");
 
+        const avatarMarkup = isLastOfGroup
+            ? `<div class="chat-message-avatar-block">
+                 <img class="chat-message-avatar" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(senderName)}">
+                 ${own ? `<span class="chat-message-avatar-label">${escapeHtml(senderName)}</span>` : ""}
+               </div>`
+            : `<div class="chat-message-avatar-slot"></div>`;
+
         blocks.push(`
           <div class="chat-message-row ${groupClasses}">
-            ${own ? "" : `<div class="chat-message-avatar-slot">${isLastOfGroup ? `<img class="chat-message-avatar" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(senderName)}">` : ""}</div>`}
-            <article class="chat-message-bubble ${groupClasses}" title="${escapeHtml(formatChatClock(message.created_at || message.ngay_tao))}">
+            ${own ? "" : avatarMarkup}
+            <article class="chat-message-bubble ${groupClasses}">
               ${bodyParts.join("")}
               ${metaInside}
             </article>
+            ${own ? avatarMarkup : ""}
           </div>
         `);
     });
@@ -1090,10 +1112,10 @@ renderChatDetail = function renderChatDetailPatched() {
     const assignedStaffName = repairChatText(assignedStaff?.username || "");
     const avatarUrl = resolveMediaUrl(customer?.avatar_url, defaultChatAvatar(customerName));
 
-    const isOnline = Boolean(getConversationCustomer(conversation)?.is_online || getConversationCustomer(conversation)?.online);
-    const statusLine = conversation.status === "open"
-        ? (isOnline ? "Đang hoạt động" : (assignedStaffName ? `Phụ trách: ${assignedStaffName}` : "Hội thoại đang mở"))
-        : "Hội thoại đã xử lý";
+    const isOnline = Boolean(getConversationCustomer(conversation)?.is_online || getConversationCustomer(conversation)?.online) || conversation.status === "open";
+    const statusLine = conversation.status === "closed"
+        ? "Đã xử lý"
+        : (isOnline ? "Online" : (assignedStaffName ? `Phụ trách: ${assignedStaffName}` : "Offline"));
 
     return `
       <section class="chat-detail-shell">
@@ -1108,16 +1130,8 @@ renderChatDetail = function renderChatDetailPatched() {
             </div>
           </div>
           <div class="chat-detail-actions">
-            <button class="chat-header-icon" type="button" title="Gọi điện" aria-label="Gọi điện" disabled>
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            </button>
-            <button class="chat-header-icon" type="button" title="Email khách hàng" aria-label="Email" disabled>
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            </button>
-            <button class="chat-header-icon ${conversation.status === "open" ? "" : "is-active"}" type="button" data-chat-action="${conversation.status === "open" ? "resolve-conversation" : "reopen-conversation"}" title="${conversation.status === "open" ? "Đánh dấu đã xử lý" : "Mở lại hội thoại"}" aria-label="${conversation.status === "open" ? "Đánh dấu đã xử lý" : "Mở lại hội thoại"}">
-              ${conversation.status === "open"
-                ? `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
-                : `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 10 9 10"/></svg>`}
+            <button class="chat-header-icon" type="button" data-chat-action="${conversation.status === "open" ? "resolve-conversation" : "reopen-conversation"}" title="${conversation.status === "open" ? "Đánh dấu đã xử lý" : "Mở lại hội thoại"}" aria-label="Tuỳ chọn khác">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
             </button>
           </div>
         </header>
@@ -1182,27 +1196,26 @@ renderChats = function renderChatsPatched() {
     const currentFilter = state.chatStatusFilter || "all";
 
     elements.chatsContent.innerHTML = `
-      <section class="chat-workspace chat-workspace--zalo">
+      <section class="chat-workspace chat-workspace--mock">
         <aside class="chat-sidebar">
           <div class="chat-sidebar-header">
-            <div>
-              <h2>Hội thoại</h2>
-              <p class="chat-sidebar-subtitle">${allCount} khách hàng • ${openCount} đang mở</p>
-            </div>
-            <button class="chat-sidebar-refresh" type="button" data-chat-action="refresh-conversations" title="Làm mới" aria-label="Làm mới">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3.16-6.84"/><polyline points="21 4 21 10 15 10"/></svg>
+            <h2>Danh sách hội thoại</h2>
+          </div>
+
+          <div class="chat-search-row">
+            <label class="chat-search-bar">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg>
+              <input type="search" value="${escapeHtml(state.chatSearch || "")}" data-chat-input="search" placeholder="Tìm kiếm cuộc hội thoại...">
+            </label>
+            <button class="chat-filter-button" type="button" data-chat-action="refresh-conversations" title="Lọc / làm mới" aria-label="Lọc">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
             </button>
           </div>
 
-          <label class="chat-search-bar">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.65" y2="16.65"/></svg>
-            <input type="search" value="${escapeHtml(state.chatSearch || "")}" data-chat-input="search" placeholder="Tìm khách hàng, tin nhắn...">
-          </label>
-
           <div class="chat-filter-tabs">
-            <button class="chat-filter-tab ${currentFilter === "all" ? "is-active" : ""}" type="button" data-chat-action="set-status-filter" data-status="all">Tất cả <span>${allCount}</span></button>
-            <button class="chat-filter-tab ${currentFilter === "open" ? "is-active" : ""}" type="button" data-chat-action="set-status-filter" data-status="open">Đang mở <span>${openCount}</span></button>
-            <button class="chat-filter-tab ${currentFilter === "closed" ? "is-active" : ""}" type="button" data-chat-action="set-status-filter" data-status="closed">Đã xử lý <span>${closedCount}</span></button>
+            <button class="chat-filter-tab ${currentFilter === "all" ? "is-active" : ""}" type="button" data-chat-action="set-status-filter" data-status="all">Tất cả (${allCount})</button>
+            <button class="chat-filter-tab ${currentFilter === "open" ? "is-active" : ""}" type="button" data-chat-action="set-status-filter" data-status="open">Đang mở (${openCount})</button>
+            <button class="chat-filter-tab ${currentFilter === "closed" ? "is-active" : ""}" type="button" data-chat-action="set-status-filter" data-status="closed">Đã xử lý (${closedCount})</button>
           </div>
 
           <div class="chat-conversation-list">
