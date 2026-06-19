@@ -55,8 +55,12 @@ function getRecipeIngredientPickerFiltered() {
     });
 }
 
+function getProductSaleUnit(product = {}) {
+    return product?.sale_unit || product?.unit || product?.stock_unit || "đơn vị";
+}
+
 function renderRecipeIngredientPickerCard(product) {
-    const unit = product.sale_unit || product.stock_unit || product.unit || "đơn vị";
+    const unit = getProductSaleUnit(product);
     const price = Number(product.current_price || product.sale_price || product.price || 0);
     const stock = Number(product.stock_quantity || product.so_luong_ton || 0);
     const category = product.category_name || product.danh_muc_ten || "Sản phẩm";
@@ -484,7 +488,7 @@ function updateIngredientRowProduct(row, productId = "", productName = "", produ
 
     const product = getProductById(productId);
     const resolvedName = productName || product?.name || "";
-    const resolvedUnit = productUnit || product?.sale_unit || product?.stock_unit || product?.unit || "";
+    const resolvedUnit = productUnit || getProductSaleUnit(product);
     const resolvedImage = getIngredientImageUrl({ product_id: productId });
     const trigger = row.querySelector(".recipe-ingredient-trigger");
     const label = trigger?.querySelector("[data-recipe-ingredient-label]") || trigger?.querySelector("span:first-child");
@@ -500,11 +504,13 @@ function updateIngredientRowProduct(row, productId = "", productName = "", produ
     if (label) label.textContent = resolvedName || "Chọn nguyên liệu...";
     if (nameInput) nameInput.value = resolvedName;
     if (idInput) idInput.value = productId || "";
-    if (unitInput && resolvedUnit && !unitInput.value) unitInput.value = resolvedUnit;
+    if (unitInput && resolvedUnit) unitInput.value = resolvedUnit;
 }
 
 function renderIngredientRow(item = {}) {
     const productName = getIngredientDisplayName(item);
+    const product = getProductById(item.product_id);
+    const unit = product ? getProductSaleUnit(product) : (item.unit || "gram");
     const rowId = `row${Date.now()}${Math.floor(Math.random() * 1000)}`;
     return `
       <div class="recipe-repeat-row recipe-ingredient-row" data-recipe-ingredient-row data-recipe-ingredient-row-id="${rowId}">
@@ -523,7 +529,7 @@ function renderIngredientRow(item = {}) {
         </label>
         <label>
           <span>Đơn vị</span>
-          <input data-recipe-ingredient="unit" value="${escapeHtml(item.unit || "gram")}" list="productUnitOptions">
+          <input data-recipe-ingredient="unit" value="${escapeHtml(unit)}" list="productUnitOptions" readonly>
         </label>
         <button type="button" data-recipe-action="remove-ingredient" aria-label="Xóa nguyên liệu">${renderAppIcon("trash")}</button>
       </div>
@@ -1015,7 +1021,7 @@ export function handleRecipeAction(event) {
             const productId = button.dataset.productId || "";
             const product = getProductById(productId);
             const productName = button.dataset.productName || product?.name || "";
-            const productUnit = button.dataset.productUnit || product?.sale_unit || product?.stock_unit || product?.unit || "";
+            const productUnit = button.dataset.productUnit || getProductSaleUnit(product);
             updateIngredientRowProduct(row, productId, productName, productUnit);
             const trigger = row.querySelector(".recipe-ingredient-trigger");
             if (trigger) {
@@ -1028,7 +1034,7 @@ export function handleRecipeAction(event) {
             const unitInput = row.querySelector("[data-recipe-ingredient='unit']");
             if (nameInput) nameInput.value = productName;
             if (idInput) idInput.value = productId;
-            if (unitInput && productUnit && !unitInput.value) unitInput.value = productUnit;
+            if (unitInput && productUnit) unitInput.value = productUnit;
             updateIngredientRowProduct(row, productId, productName, productUnit);
         }
         recipeIngredientPickerState.open = false;
