@@ -222,14 +222,12 @@ function bindGlobalEvents() {
     let isAuthSubmitting = false;
 
     function showAuthInlineMessage(message, isError = true) {
-        if (!elements.authSubtitle) {
-            showToast(message, isError);
-            return;
+        if (elements.authSubtitle) {
+            elements.authSubtitle.textContent = "";
+            elements.authSubtitle.classList.add("hidden");
+            elements.authSubtitle.classList.remove("auth-error-message");
         }
-
-        elements.authSubtitle.textContent = message || "";
-        elements.authSubtitle.classList.toggle("hidden", !message);
-        elements.authSubtitle.classList.toggle("auth-error-message", isError);
+        if (message) showToast(message, isError);
     }
 
     async function submitAuthForm(submitter = null) {
@@ -1563,14 +1561,12 @@ function bindEmergencyLoginHandler(error) {
     if (!form || !button) return;
 
     const renderError = (message) => {
-        if (!subtitle) {
-            showToast(message, true);
-            return;
+        if (subtitle) {
+            subtitle.textContent = "";
+            subtitle.classList.add("hidden");
+            subtitle.classList.remove("auth-error-message");
         }
-
-        subtitle.textContent = message;
-        subtitle.classList.remove("hidden");
-        subtitle.classList.add("auth-error-message");
+        if (message) showToast(message, true);
     };
 
     form.addEventListener("submit", async (event) => {
