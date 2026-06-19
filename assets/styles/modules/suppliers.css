@@ -141,48 +141,49 @@
 }
 
 .suppliers-table {
-  min-width: 1200px;
+  width: 100%;
+  table-layout: fixed;
+  min-width: 1080px;
 }
 
 .suppliers-table th,
 .suppliers-table td {
-  padding: 18px 16px;
+  padding: 14px 12px;
   border-bottom: 1px solid rgba(17, 95, 54, 0.16);
   border-right: 1px solid rgba(17, 95, 54, 0.14);
   vertical-align: top;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .suppliers-table th:first-child,
 .suppliers-table td:first-child {
-  min-width: 280px;
-  width: 24%;
+  width: 22%;
 }
 
 .suppliers-table th:nth-child(2),
-.suppliers-table td:nth-child(2),
+.suppliers-table td:nth-child(2) {
+  width: 13%;
+}
+
 .suppliers-table th:nth-child(3),
 .suppliers-table td:nth-child(3) {
-  min-width: 150px;
+  width: 19%;
 }
 
 .suppliers-table th:nth-child(4),
 .suppliers-table td:nth-child(4) {
-  min-width: 150px;
+  width: 17%;
 }
 
 .suppliers-table th:nth-child(5),
 .suppliers-table td:nth-child(5) {
-  min-width: 170px;
+  width: 12%;
 }
 
 .suppliers-table th:nth-child(6),
 .suppliers-table td:nth-child(6) {
-  min-width: 150px;
-}
-
-.suppliers-table th:nth-child(7),
-.suppliers-table td:nth-child(7) {
-  min-width: 170px;
+  width: 17%;
 }
 
 .suppliers-table th:last-child,

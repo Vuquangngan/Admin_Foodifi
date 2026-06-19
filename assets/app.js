@@ -1,4 +1,4 @@
-const ADMIN_ASSET_VERSION = "20260619-recipe-picker";
+const ADMIN_ASSET_VERSION = "20260619-suppliers-cols";
 
 const { loadPartials } = await import(`./js/partials-loader.js?v=${ADMIN_ASSET_VERSION}`);
 

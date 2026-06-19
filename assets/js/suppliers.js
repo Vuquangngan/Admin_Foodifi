@@ -749,7 +749,6 @@ function renderSupplierTable() {
               <th>Người liên hệ</th>
               <th>Liên hệ</th>
               <th>Địa chỉ</th>
-              <th>Số lượng sản phẩm</th>
               <th>Trạng thái</th>
               <th>Thao tác</th>
             </tr>
@@ -777,7 +776,6 @@ function renderSupplierTable() {
                       </div>
                     </td>
                     <td>${escapeHtml(supplier.address || "-")}</td>
-                    <td><span class="categories-count-pill">${formatNumber(productCount)}</span></td>
                     <td>${statusPill(supplier.status, statusLabel)}</td>
                     <td>
                       <div class="categories-actions">
@@ -788,7 +786,7 @@ function renderSupplierTable() {
                     </td>
                   </tr>
                 `;
-            }).join("") || '<tr><td colspan="7">Chưa có nhà cung cấp phù hợp.</td></tr>'}
+            }).join("") || '<tr><td colspan="6">Chưa có nhà cung cấp phù hợp.</td></tr>'}
           </tbody>
         </table>
       </div>

@@ -800,7 +800,9 @@
 .recipe-ingredient-picker-modal {
   width: min(960px, 96vw);
   max-height: 92vh;
+  padding: 0;
   background: #fff;
+  border: 1px solid #e6ede4;
   border-radius: 18px;
   display: flex;
   flex-direction: column;
