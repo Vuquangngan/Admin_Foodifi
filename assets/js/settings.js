@@ -416,8 +416,29 @@ export function getVisibleSidebarMenu() {
             })
         }));
 
-    return [...baseSections, ...customSections]
+    const merged = [...baseSections, ...customSections]
         .sort((left, right) => Number(left.position || 999) - Number(right.position || 999));
+
+    const role = String(state.user?.role || state.user?.vai_tro_ma || "").toLowerCase().trim();
+    const isAdmin = role === "admin" || role === "quan_tri" || role === "quan_tri_vien";
+    console.log("%c[ROLE DEBUG]", "background:#0e8a47;color:#fff;padding:2px 6px;border-radius:4px", "role =", JSON.stringify(role), "| isAdmin =", isAdmin, "| user =", state.user);
+    if (state.user && !isAdmin) {
+        const STAFF_ALLOWED_SECTIONS = new Set(["recipes", "shifts", "orders", "vouchers"]);
+        return merged.filter((section) => STAFF_ALLOWED_SECTIONS.has(String(section.key)));
+    }
+
+    return merged;
+}
+
+export function getDefaultSidebarItemKey() {
+    const role = String(state.user?.role || state.user?.vai_tro_ma || "").toLowerCase().trim();
+    const isAdmin = role === "admin" || role === "quan_tri" || role === "quan_tri_vien";
+    if (state.user && !isAdmin) {
+        const sections = getVisibleSidebarMenu();
+        const firstSection = sections[0];
+        return firstSection?.items?.[0]?.key || "recipes-list";
+    }
+    return "overview-home";
 }
 
 function saveMenuItems(items) {

@@ -167,7 +167,7 @@ import {
     handleActivityHistoryClick,
     submitActivityWarningForm
 } from "./activity-history.js";
-import { bindSettingsEvents } from "./settings.js";
+import { bindSettingsEvents, getDefaultSidebarItemKey } from "./settings.js";
 import {
     bootstrapAdmin,
     loadCategories,
@@ -281,7 +281,7 @@ function bindGlobalEvents() {
             setActivePanel("overview");
             renderSidebarMenu();
             renderOverview();
-            selectSidebarItem("overview-home");
+            selectSidebarItem(getDefaultSidebarItemKey());
             const hasLoadedData = await bootstrapAdmin();
             if (!hasLoadedData) {
                 showToast("Đăng nhập thành công, nhưng một số dữ liệu chưa tải được.", true);
@@ -1503,7 +1503,7 @@ async function initialize() {
         state.user = restoredUser;
         saveSession();
         updateSessionUi();
-        selectSidebarItem("overview-home");
+        selectSidebarItem(getDefaultSidebarItemKey());
         const hasLoadedData = await bootstrapAdmin();
         showToast(hasLoadedData ? "Đã khôi phục phiên đăng nhập." : "Đã khôi phục phiên đăng nhập, nhưng một số dữ liệu chưa tải được.", !hasLoadedData);
         return;
@@ -1520,7 +1520,7 @@ async function initialize() {
                     state.user = restoredUser;
                     saveSession();
                     updateSessionUi();
-                    selectSidebarItem("overview-home");
+                    selectSidebarItem(getDefaultSidebarItemKey());
                     const hasLoadedData = await bootstrapAdmin();
                     showToast(hasLoadedData ? "Đã tự khôi phục phiên đăng nhập." : "Đã tự khôi phục phiên đăng nhập, nhưng một số dữ liệu chưa tải được.", !hasLoadedData);
                     return;
@@ -1532,7 +1532,7 @@ async function initialize() {
 
         if (error.isNetworkError) {
             updateSessionUi();
-            selectSidebarItem("overview-home");
+            selectSidebarItem(getDefaultSidebarItemKey());
             showToast("Chưa kiểm tra được phiên do backend chưa phản hồi. Tải lại sau vài giây nếu dữ liệu chưa hiện.", true);
             return;
         }
@@ -1588,7 +1588,7 @@ function bindEmergencyLoginHandler(error) {
             renderSidebarMenu();
             setActivePanel("overview");
             renderOverview();
-            selectSidebarItem("overview-home");
+            selectSidebarItem(getDefaultSidebarItemKey());
             await bootstrapAdmin();
             showToast("Đăng nhập thành công.");
             window.__foodifiMainReady = true;
