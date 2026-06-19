@@ -1,11 +1,14 @@
-      <section class="panel hidden" id="profilePanel">
-        <div class="profile-page">
-          <div class="profile-page-head">
+      <section class="panel hidden" id="profilePanel"></section>
+
+      <div class="modal-backdrop hidden" id="profileModal">
+        <div class="modal-card profile-modal-card">
+          <div class="profile-modal-header">
             <div>
               <p class="eyebrow">Tài khoản cá nhân</p>
-              <h2>Thông Tin Cá Nhân</h2>
+              <h2>Thông tin cá nhân</h2>
             </div>
+            <button class="user-modal-close" id="closeProfileModalButton" type="button" aria-label="Đóng popup">×</button>
           </div>
-          <div id="profileContent"></div>
+          <div class="profile-modal-body" id="profileContent"></div>
         </div>
-      </section>
+      </div>

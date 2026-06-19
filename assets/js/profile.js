@@ -300,6 +300,7 @@ async function submitProfileForm(form, submitter) {
 
         profileAvatarFile = null;
         renderProfile();
+        elements.profileModal?.classList.add("hidden");
         showToast("Đã cập nhật thông tin cá nhân.");
     } finally {
         if (submitButton) {
@@ -310,6 +311,22 @@ async function submitProfileForm(form, submitter) {
 }
 
 export function bindProfileEvents() {
+    elements.closeProfileModalButton?.addEventListener("click", () => {
+        elements.profileModal?.classList.add("hidden");
+    });
+
+    elements.profileModal?.addEventListener("click", (event) => {
+        if (event.target === elements.profileModal) {
+            elements.profileModal.classList.add("hidden");
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && elements.profileModal && !elements.profileModal.classList.contains("hidden")) {
+            elements.profileModal.classList.add("hidden");
+        }
+    });
+
     document.addEventListener("click", (event) => {
         const button = event.target.closest("[data-profile-action]");
         if (!button) return;
@@ -329,7 +346,7 @@ export function bindProfileEvents() {
 
         if (action === "reset") {
             profileAvatarFile = null;
-            renderProfile();
+            elements.profileModal?.classList.add("hidden");
         }
     });
 

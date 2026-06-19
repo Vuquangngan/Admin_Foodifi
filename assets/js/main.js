@@ -334,13 +334,8 @@ function bindGlobalEvents() {
             elements.adminAccountDropdown?.classList.add("hidden");
             elements.adminAccountTrigger?.setAttribute("aria-expanded", "false");
             if (accountAction.dataset.adminAccountAction === "profile") {
-                state.sidebarSection = "";
-                state.sidebarItem = "";
-                renderSidebarMenu();
-                deactivateChatsPanel();
-                setAdminPageTitle("Thông tin cá nhân");
-                setActivePanel("profile");
                 renderProfile();
+                elements.profileModal?.classList.remove("hidden");
                 return;
             }
             if (accountAction.dataset.adminAccountAction === "logout") {

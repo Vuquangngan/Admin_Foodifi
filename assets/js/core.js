@@ -749,6 +749,8 @@ export const elements = {
     closeActivityWarningButton: document.querySelector("#closeActivityWarningButton"),
     clearActivityWarningButton: document.querySelector("#clearActivityWarningButton"),
     profileContent: document.querySelector("#profileContent"),
+    profileModal: document.querySelector("#profileModal"),
+    closeProfileModalButton: document.querySelector("#closeProfileModalButton"),
     panels: {
         login: document.querySelector("#loginPanel"),
         overview: document.querySelector("#overviewPanel"),
