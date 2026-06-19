@@ -797,8 +797,10 @@
   z-index: 250;
 }
 
+.modal-card.recipe-ingredient-picker-modal,
 .recipe-ingredient-picker-modal {
   width: min(960px, 96vw);
+  max-width: min(960px, 96vw);
   max-height: 92vh;
   padding: 0;
   background: #fff;
