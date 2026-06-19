@@ -421,10 +421,43 @@ export function getVisibleSidebarMenu() {
 
     const role = String(state.user?.role || state.user?.vai_tro_ma || "").toLowerCase().trim();
     const isAdmin = role === "admin" || role === "quan_tri" || role === "quan_tri_vien";
-    console.log("%c[ROLE DEBUG]", "background:#0e8a47;color:#fff;padding:2px 6px;border-radius:4px", "role =", JSON.stringify(role), "| isAdmin =", isAdmin, "| user =", state.user);
     if (state.user && !isAdmin) {
-        const STAFF_ALLOWED_SECTIONS = new Set(["recipes", "shifts", "orders", "vouchers"]);
-        return merged.filter((section) => STAFF_ALLOWED_SECTIONS.has(String(section.key)));
+        const STAFF_ALLOWED_ITEMS = {
+            recipes: null,
+            shifts: null,
+            orders: null,
+            vouchers: null,
+            branches: new Set(["branches-shipments", "branches-import-requests"]),
+            products: new Set(["branches-shipments"])
+        };
+        const staffSections = merged
+            .filter((section) => Object.prototype.hasOwnProperty.call(STAFF_ALLOWED_ITEMS, String(section.key)))
+            .map((section) => {
+                const allowedItems = STAFF_ALLOWED_ITEMS[String(section.key)];
+                if (!allowedItems) return section;
+                return {
+                    ...section,
+                    items: (section.items || []).filter((item) => allowedItems.has(String(item.key)))
+                };
+            })
+            .filter((section) => section.items && section.items.length > 0);
+
+        const productsSection = staffSections.find((s) => String(s.key) === "products");
+        const branchesSection = staffSections.find((s) => String(s.key) === "branches");
+        if (productsSection && branchesSection) {
+            const existingKeys = new Set(branchesSection.items.map((item) => String(item.key)));
+            productsSection.items.forEach((item) => {
+                if (!existingKeys.has(String(item.key))) branchesSection.items.unshift(item);
+            });
+            return staffSections.filter((s) => String(s.key) !== "products");
+        }
+        if (productsSection && !branchesSection) {
+            productsSection.key = "branches";
+            productsSection.label = "Chi nhánh";
+            productsSection.icon = "store";
+        }
+
+        return staffSections;
     }
 
     return merged;
