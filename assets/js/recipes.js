@@ -5,30 +5,49 @@ const recipeIngredientPickerState = {
     open: false,
     rowId: "",
     keyword: "",
-    categoryId: "all"
+    parentCategoryId: "all",
+    childCategoryId: "all"
 };
 
 function defaultIngredientThumb() {
     return DEFAULT_RECIPE_IMAGE;
 }
 
-function getRecipeIngredientPickerCategories() {
-    const registry = new Map();
-    (Array.isArray(state.products) ? state.products : []).forEach((product) => {
-        const id = String(product.category_id || product.danh_muc_id || "uncategorized");
-        const name = product.category_name || product.danh_muc_ten || "Chưa phân loại";
-        if (!registry.has(id)) registry.set(id, { id, name, count: 0 });
-        registry.get(id).count += 1;
-    });
-    return Array.from(registry.values()).sort((a, b) => a.name.localeCompare(b.name, "vi"));
+function getCategoryByIdRecipe(id) {
+    return (Array.isArray(state.categories) ? state.categories : []).find((c) => String(c.id) === String(id)) || null;
+}
+
+function getRecipeIngredientPickerParents() {
+    const categories = Array.isArray(state.categories) ? state.categories : [];
+    return categories
+        .filter((c) => !Number(c.parent_id || 0))
+        .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "vi"));
+}
+
+function getRecipeIngredientPickerChildren(parentId) {
+    if (!parentId || parentId === "all") return [];
+    const categories = Array.isArray(state.categories) ? state.categories : [];
+    return categories
+        .filter((c) => Number(c.parent_id || 0) === Number(parentId))
+        .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "vi"));
 }
 
 function getRecipeIngredientPickerFiltered() {
     const keyword = String(recipeIngredientPickerState.keyword || "").trim().toLowerCase();
-    const categoryId = String(recipeIngredientPickerState.categoryId || "all");
+    const parentId = String(recipeIngredientPickerState.parentCategoryId || "all");
+    const childId = String(recipeIngredientPickerState.childCategoryId || "all");
+
+    let allowedCategoryIds = null;
+    if (childId !== "all") {
+        allowedCategoryIds = new Set([String(childId)]);
+    } else if (parentId !== "all") {
+        allowedCategoryIds = new Set([String(parentId)]);
+        getRecipeIngredientPickerChildren(parentId).forEach((c) => allowedCategoryIds.add(String(c.id)));
+    }
+
     return (Array.isArray(state.products) ? state.products : []).filter((product) => {
-        const pid = String(product.category_id || product.danh_muc_id || "uncategorized");
-        if (categoryId !== "all" && pid !== categoryId) return false;
+        const pid = String(product.category_id || product.danh_muc_id || "");
+        if (allowedCategoryIds && !allowedCategoryIds.has(pid)) return false;
         if (!keyword) return true;
         return [product.name, product.sku, product.slug, product.category_name]
             .some((v) => String(v || "").toLowerCase().includes(keyword));
@@ -64,8 +83,11 @@ function renderRecipeIngredientPickerCard(product) {
 function renderRecipeIngredientPickerModal() {
     if (!recipeIngredientPickerState.open) return "";
     const products = getRecipeIngredientPickerFiltered();
-    const categories = getRecipeIngredientPickerCategories();
-    const currentCat = String(recipeIngredientPickerState.categoryId || "all");
+    const parents = getRecipeIngredientPickerParents();
+    const parentId = String(recipeIngredientPickerState.parentCategoryId || "all");
+    const childId = String(recipeIngredientPickerState.childCategoryId || "all");
+    const children = parentId !== "all" ? getRecipeIngredientPickerChildren(parentId) : [];
+
     return `
       <div class="modal-backdrop" data-recipe-picker-overlay>
         <div class="modal-card order-product-picker-modal">
@@ -77,9 +99,21 @@ function renderRecipeIngredientPickerModal() {
             <span class="order-product-picker-search-icon">&#128269;</span>
             <input type="search" value="${escapeHtml(recipeIngredientPickerState.keyword || "")}" data-recipe-picker-input="keyword" placeholder="Tìm kiếm tên sản phẩm, mã SKU...">
           </label>
-          <div class="order-product-picker-filter-row">
-            <button class="order-product-picker-chip ${currentCat === "all" ? "is-active" : ""}" type="button" data-recipe-action="set-picker-category" data-category-id="all">Tất cả</button>
-            ${categories.map((c) => `<button class="order-product-picker-chip ${currentCat === String(c.id) ? "is-active" : ""}" type="button" data-recipe-action="set-picker-category" data-category-id="${escapeHtml(String(c.id))}">${escapeHtml(c.name)}</button>`).join("")}
+          <div class="recipe-picker-cascading">
+            <label class="recipe-picker-select-field">
+              <span>Danh mục cha</span>
+              <select data-recipe-picker-select="parent">
+                <option value="all" ${parentId === "all" ? "selected" : ""}>Tất cả danh mục</option>
+                ${parents.map((c) => `<option value="${escapeHtml(String(c.id))}" ${parentId === String(c.id) ? "selected" : ""}>${escapeHtml(c.name)}</option>`).join("")}
+              </select>
+            </label>
+            <label class="recipe-picker-select-field">
+              <span>Danh mục con</span>
+              <select data-recipe-picker-select="child" ${parentId === "all" || !children.length ? "disabled" : ""}>
+                <option value="all" ${childId === "all" ? "selected" : ""}>${parentId === "all" ? "Chọn danh mục cha trước" : (children.length ? "Tất cả danh mục con" : "Không có danh mục con")}</option>
+                ${children.map((c) => `<option value="${escapeHtml(String(c.id))}" ${childId === String(c.id) ? "selected" : ""}>${escapeHtml(c.name)}</option>`).join("")}
+              </select>
+            </label>
           </div>
           <div class="order-product-picker-grid">
             ${products.map(renderRecipeIngredientPickerCard).join("") || '<div class="surface order-product-picker-empty">Không có sản phẩm phù hợp.</div>'}
@@ -803,17 +837,13 @@ export function handleRecipeAction(event) {
         recipeIngredientPickerState.open = true;
         recipeIngredientPickerState.rowId = ensureRowId(row);
         recipeIngredientPickerState.keyword = "";
-        recipeIngredientPickerState.categoryId = "all";
+        recipeIngredientPickerState.parentCategoryId = "all";
+        recipeIngredientPickerState.childCategoryId = "all";
         mountRecipeIngredientPicker();
         return true;
     }
     if (action === "close-ingredient-picker") {
         recipeIngredientPickerState.open = false;
-        mountRecipeIngredientPicker();
-        return true;
-    }
-    if (action === "set-picker-category") {
-        recipeIngredientPickerState.categoryId = button.dataset.categoryId || "all";
         mountRecipeIngredientPicker();
         return true;
     }
@@ -992,6 +1022,18 @@ export function bindRecipeMediaEvents() {
         if (event.target.closest("#recipeIngredientPickerHost")) {
             handleRecipeIngredientSearch(event);
         }
+    });
+
+    document.addEventListener("change", (event) => {
+        const select = event.target.closest("#recipeIngredientPickerHost [data-recipe-picker-select]");
+        if (!select) return;
+        if (select.dataset.recipePickerSelect === "parent") {
+            recipeIngredientPickerState.parentCategoryId = select.value || "all";
+            recipeIngredientPickerState.childCategoryId = "all";
+        } else if (select.dataset.recipePickerSelect === "child") {
+            recipeIngredientPickerState.childCategoryId = select.value || "all";
+        }
+        mountRecipeIngredientPicker();
     });
 
     elements.recipeImageFile?.addEventListener("change", async (event) => {

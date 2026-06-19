@@ -1008,3 +1008,60 @@
   border-radius: 12px;
   background: #fafbf9;
 }
+
+/* ============ INGREDIENT PICKER CASCADING SELECTS ============ */
+.recipe-picker-cascading {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px 22px 0;
+}
+
+.recipe-picker-select-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recipe-picker-select-field > span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #5a6e62;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.recipe-picker-select-field select {
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid #d9e6cf;
+  border-radius: 12px;
+  background: #fff;
+  color: #1c2b22;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 140ms ease;
+}
+
+.recipe-picker-select-field select:hover:not(:disabled) {
+  border-color: #0e8a47;
+}
+
+.recipe-picker-select-field select:focus {
+  outline: none;
+  border-color: #0e8a47;
+  box-shadow: 0 0 0 3px rgba(14, 138, 71, 0.15);
+}
+
+.recipe-picker-select-field select:disabled {
+  background: #f3f5f1;
+  color: #9aa9a0;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .recipe-picker-cascading {
+    grid-template-columns: 1fr;
+  }
+}

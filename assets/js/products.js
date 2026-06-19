@@ -1466,7 +1466,8 @@ export function buildInventoryImportPayload(raw) {
     const expirationDate = String(raw.expiration_date || "").trim();
     const dateDetailLines = [productionDate ? `Ngày sản xuất: ${productionDate}` : "", expirationDate ? `Ngày hết hạn: ${expirationDate}` : ""].filter(Boolean);
     const detailLines = [raw.origin ? `Xuất xứ: ${String(raw.origin).trim()}` : "", supplierName ? `Nhà cung cấp: ${supplierName}` : "", raw.reorder_level ? `Ngưỡng cảnh báo hết hàng: ${String(raw.reorder_level).trim()}` : "", raw.import_cost ? `Giá nhập tham chiếu: ${formatCurrency(raw.import_cost)}` : ""].filter(Boolean);
-    return { category_id: Number(raw.category_id), name: String(raw.name || "").trim(), price: Number(raw.import_cost || 0), sale_price: null, stock_quantity: parseStockInputValue(raw.stock_quantity), stock_unit: String(raw.sale_unit || "kg").trim(), sale_unit: String(raw.sale_unit || "kg").trim(), stock_per_sale_unit: 1, thumbnail_url: normalizeProductImageUrl(raw.thumbnail_url), short_description: String(raw.short_description || "").trim(), description: detailLines.concat(dateDetailLines).join("\n"), production_date: productionDate || null, expiration_date: expirationDate || null, status: raw.status || "draft", is_published: false, is_featured: Boolean(raw.is_featured) };
+    const importCost = Number(raw.import_cost || 0);
+    return { category_id: Number(raw.category_id), name: String(raw.name || "").trim(), price: importCost, sale_price: importCost > 0 ? importCost * 2 : null, stock_quantity: parseStockInputValue(raw.stock_quantity), stock_unit: String(raw.sale_unit || "kg").trim(), sale_unit: String(raw.sale_unit || "kg").trim(), stock_per_sale_unit: 1, thumbnail_url: normalizeProductImageUrl(raw.thumbnail_url), short_description: String(raw.short_description || "").trim(), description: detailLines.concat(dateDetailLines).join("\n"), production_date: productionDate || null, expiration_date: expirationDate || null, status: raw.status || "draft", is_published: false, is_featured: Boolean(raw.is_featured) };
 }
 
 export function buildInventoryRestockPayload(raw) {
@@ -1482,11 +1483,18 @@ export function buildInventoryRestockPayload(raw) {
         .join("")
         .trim();
 
+    const nextPrice = Number(importPayload.price || product.price || 0);
+    const doubledSalePrice = nextPrice > 0 ? nextPrice * 2 : null;
+    const existingSalePrice = product.sale_price ? Number(product.sale_price) : 0;
+    const nextSalePrice = doubledSalePrice
+        ? Math.max(doubledSalePrice, existingSalePrice)
+        : (existingSalePrice || null);
+
     return {
         category_id: importPayload.category_id || Number(product.category_id || product.category?.id || 0),
         name: importPayload.name || product.name || "",
-        price: Number(importPayload.price || product.price || 0),
-        sale_price: product.sale_price ? Number(product.sale_price) : null,
+        price: nextPrice,
+        sale_price: nextSalePrice,
         stock_quantity: Number(product.stock_quantity || 0) + importQuantity,
         stock_unit: importPayload.stock_unit || product.stock_unit || product.unit || product.sale_unit || "kg",
         sale_unit: importPayload.sale_unit || product.sale_unit || product.unit || product.stock_unit || "kg",
