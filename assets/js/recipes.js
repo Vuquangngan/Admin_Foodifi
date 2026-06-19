@@ -535,18 +535,18 @@ function renderDisplayIngredientRow(item = {}, index = 0) {
     return `
       <div class="recipe-repeat-row recipe-display-ingredient-row" data-recipe-display-ingredient-row>
         <label>
-          <span>NguyÃªn liá»‡u</span>
-          <input data-recipe-display-ingredient="name" value="${escapeHtml(ingredient.name || "")}" placeholder="VÃ­ dá»¥: Báº¯p ngá»t cáº¯t khÃºc">
+          <span>Nguyên liệu</span>
+          <input data-recipe-display-ingredient="name" value="${escapeHtml(ingredient.name || "")}" placeholder="Ví dụ: Bắp ngọt cắt khúc">
         </label>
         <label>
-          <span>Sá»‘ lÆ°á»£ng</span>
+          <span>Số lượng</span>
           <input data-recipe-display-ingredient="quantity" value="${escapeHtml(formatIngredientQuantity(ingredient.quantity))}" placeholder="1">
         </label>
         <label>
-          <span>ÄÆ¡n vá»‹</span>
-          <input data-recipe-display-ingredient="unit" value="${escapeHtml(ingredient.unit || "")}" list="productUnitOptions" placeholder="kg, quáº£, muá»—ng...">
+          <span>Đơn vị</span>
+          <input data-recipe-display-ingredient="unit" value="${escapeHtml(ingredient.unit || "")}" list="productUnitOptions" placeholder="kg, quả, muỗng...">
         </label>
-        <button type="button" data-recipe-action="remove-display-ingredient" aria-label="XÃ³a nguyÃªn liá»‡u chuáº©n bá»‹">${renderAppIcon("trash")}</button>
+        <button type="button" data-recipe-action="remove-display-ingredient" aria-label="Xóa nguyên liệu chuẩn bị">${renderAppIcon("trash")}</button>
       </div>
     `;
 }
