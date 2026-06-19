@@ -782,10 +782,57 @@
 }
 
 .recipe-ingredient-trigger.has-value {
+  justify-content: flex-start;
   color: #1c2b22;
   font-weight: 600;
   background: #f3f9ee;
   border-color: #c9e0bf;
+  min-height: 58px;
+  padding: 8px 10px;
+}
+
+.recipe-ingredient-empty {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #0e8a47;
+  color: #fff;
+  font-weight: 800;
+}
+
+.recipe-ingredient-selected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.recipe-ingredient-selected img,
+.recipe-ingredient-selected-placeholder {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  overflow: hidden;
+  object-fit: cover;
+  background: #e8f4e5;
+  color: #0e8a47;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.recipe-ingredient-selected strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #1c2b22;
+  font-size: 0.94rem;
 }
 
 .recipe-ingredient-trigger-icon {

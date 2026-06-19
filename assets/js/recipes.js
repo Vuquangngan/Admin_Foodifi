@@ -422,12 +422,38 @@ function getIngredientDisplayName(item = {}) {
         || "";
 }
 
+function getIngredientImageUrl(item = {}) {
+    const product = getProductById(item.product_id);
+    const rawUrl = item.thumbnail_url
+        || item.image_url
+        || item.product_thumbnail_url
+        || item.product_image_url
+        || product?.thumbnail_url
+        || product?.image_url
+        || "";
+    return rawUrl ? resolveMediaUrl(rawUrl, defaultIngredientThumb()) : "";
+}
+
+function renderIngredientTriggerContent(productName = "", imageUrl = "") {
+    if (!productName) {
+        return `<span class="recipe-ingredient-empty">${renderAppIcon("plus") || "+"}</span>`;
+    }
+
+    return `
+      <span class="recipe-ingredient-selected">
+        ${imageUrl ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(productName)}">` : `<span class="recipe-ingredient-selected-placeholder">${renderAppIcon("package") || "SP"}</span>`}
+        <strong>${escapeHtml(productName)}</strong>
+      </span>
+    `;
+}
+
 function updateIngredientRowProduct(row, productId = "", productName = "", productUnit = "") {
     if (!row) return;
 
     const product = getProductById(productId);
     const resolvedName = productName || product?.name || "";
     const resolvedUnit = productUnit || product?.sale_unit || product?.stock_unit || product?.unit || "";
+    const resolvedImage = getIngredientImageUrl({ product_id: productId });
     const trigger = row.querySelector(".recipe-ingredient-trigger");
     const label = trigger?.querySelector("[data-recipe-ingredient-label]") || trigger?.querySelector("span:first-child");
     const nameInput = row.querySelector("[data-recipe-ingredient='name']");
@@ -437,6 +463,7 @@ function updateIngredientRowProduct(row, productId = "", productName = "", produ
     if (trigger) {
         trigger.classList.toggle("has-value", Boolean(resolvedName));
         trigger.title = resolvedName;
+        trigger.innerHTML = renderIngredientTriggerContent(resolvedName, resolvedImage);
     }
     if (label) label.textContent = resolvedName || "Chọn nguyên liệu...";
     if (nameInput) nameInput.value = resolvedName;
@@ -497,6 +524,11 @@ function renderRecipeFormLists(recipe = {}) {
     const ingredients = recipe.ingredients?.length ? recipe.ingredients : [{ ingredient_name: "", quantity: "", unit: "gram" }];
     const steps = recipe.steps?.length ? recipe.steps : [{ instruction: "" }];
     elements.recipeIngredients.innerHTML = ingredients.map(renderIngredientRow).join("");
+    elements.recipeIngredients.querySelectorAll("[data-recipe-ingredient-row]").forEach((row) => {
+        const productId = row.querySelector("[data-recipe-ingredient='product_id']")?.value || "";
+        const productName = row.querySelector("[data-recipe-ingredient='name']")?.value || "";
+        updateIngredientRowProduct(row, productId, productName);
+    });
     elements.recipeSteps.innerHTML = steps.map(renderStepRow).join("");
 }
 
@@ -909,6 +941,7 @@ export function handleRecipeAction(event) {
             if (nameInput) nameInput.value = productName;
             if (idInput) idInput.value = productId;
             if (unitInput && productUnit && !unitInput.value) unitInput.value = productUnit;
+            updateIngredientRowProduct(row, productId, productName, productUnit);
         }
         recipeIngredientPickerState.open = false;
         mountRecipeIngredientPicker();
