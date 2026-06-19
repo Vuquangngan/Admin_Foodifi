@@ -72,6 +72,7 @@ export function renderSidebarMenu() {
 
 export function setActivePanel(view) {
     Object.entries(elements.panels).forEach(([key, panel]) => {
+        if (!panel) return;
         panel.classList.toggle("active", key === view);
         panel.classList.toggle("hidden", key !== view);
     });
