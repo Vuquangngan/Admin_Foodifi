@@ -96,7 +96,8 @@ import {
 import {
     handleChatAction,
     handleChatInput,
-    submitChatComposer
+    submitChatComposer,
+    deactivateChatsPanel
 } from "./chats.js";
 import {
     closeBranchModal,
