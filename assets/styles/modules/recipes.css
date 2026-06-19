@@ -341,7 +341,7 @@
 }
 
 .recipe-ingredient-row {
-  grid-template-columns: minmax(220px, 1fr) 140px 150px 42px;
+  grid-template-columns: minmax(260px, 2fr) minmax(110px, 0.8fr) minmax(110px, 0.8fr) 42px;
   z-index: 1;
 }
 
@@ -755,6 +755,7 @@
   justify-content: space-between;
   gap: 8px;
   width: 100%;
+  min-width: 0;
   min-height: 42px;
   padding: 8px 14px;
   border: 1px solid #e6ede4;
@@ -765,6 +766,14 @@
   text-align: left;
   cursor: pointer;
   transition: border-color 140ms ease, background 140ms ease;
+}
+
+.recipe-ingredient-trigger > span:first-child {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .recipe-ingredient-trigger:hover {
