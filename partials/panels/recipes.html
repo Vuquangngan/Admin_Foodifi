@@ -1,25 +1,25 @@
 ﻿      <section class="panel hidden" id="recipesPanel">
         <div class="panel-head recipes-head">
           <div>
-            <p class="eyebrow">áº¨m thá»±c</p>
-            <h2 id="recipesPanelTitle">Quáº£n lÃ½ cÃ´ng thá»©c náº¥u Äƒn</h2>
+            <p class="eyebrow">Ẩm thực</p>
+            <h2 id="recipesPanelTitle">Quản lý công thức nấu ăn</h2>
           </div>
-          <button class="primary-button recipes-create-button" id="openRecipeModalButton" type="button">+ ThÃªm cÃ´ng thá»©c má»›i</button>
+          <button class="primary-button recipes-create-button" id="openRecipeModalButton" type="button">+ Thêm công thức mới</button>
         </div>
 
         <div id="recipeCategorySummary" class="recipe-category-summary hidden"></div>
 
         <article class="surface recipes-filter-card">
           <label class="recipes-search">
-            <span class="recipes-search-icon">âŒ•</span>
-            <input id="recipeSearchInput" placeholder="TÃ¬m kiáº¿m danh má»¥c...">
+            <span class="recipes-search-icon">⌕</span>
+            <input id="recipeSearchInput" placeholder="Tìm kiếm danh mục...">
           </label>
           <select id="recipeCategoryFilter" style="display:none"></select>
         </article>
 
         <article class="surface recipes-table-card">
           <div class="section-head">
-            <h3 id="recipesListTitle">Danh sÃ¡ch cÃ´ng thá»©c</h3>
+            <h3 id="recipesListTitle">Danh sách công thức</h3>
             <p id="recipesMeta" class="section-copy"></p>
           </div>
           <div id="recipesContent"></div>
@@ -29,48 +29,48 @@
           <div class="modal-card recipe-modal-card">
             <div class="recipe-modal-header">
               <div>
-                <p class="eyebrow">CÃ´ng thá»©c</p>
-                <h2 id="recipeModalTitle">ThÃªm cÃ´ng thá»©c má»›i</h2>
+                <p class="eyebrow">Công thức</p>
+                <h2 id="recipeModalTitle">Thêm công thức mới</h2>
               </div>
-              <button class="ghost-button" id="closeRecipeModalButton" type="button">ÄÃ³ng</button>
+              <button class="ghost-button" id="closeRecipeModalButton" type="button">Đóng</button>
             </div>
 
             <form id="recipeForm" class="recipe-form">
               <input type="hidden" name="id">
               <section class="recipe-form-section">
                 <div class="recipe-section-copy">
-                  <h3>ThÃ´ng tin cÆ¡ báº£n</h3>
+                  <h3>Thông tin cơ bản</h3>
                 </div>
                 <div class="surface recipe-form-card">
                   <label class="span-2">
-                    <span>TÃªn cÃ´ng thá»©c</span>
-                    <input name="title" placeholder="VÃ­ dá»¥: Phá»Ÿ bÃ² truyá»n thá»‘ng" required>
+                    <span>Tên công thức</span>
+                    <input name="title" placeholder="Ví dụ: Phở bò truyền thống" required>
                   </label>
                   <label>
-                    <span>Danh má»¥c</span>
+                    <span>Danh mục</span>
                     <select name="category"></select>
                   </label>
                   <label>
-                    <span>Thá»i gian chuáº©n bá»‹</span>
+                    <span>Thời gian chuẩn bị</span>
                     <input name="prep_time" type="number" min="1" step="1" value="30">
                   </label>
                   <label class="span-2">
-                    <span>MÃ´ táº£ ngáº¯n</span>
-                    <textarea name="description" rows="3" placeholder="MÃ´ táº£ Ä‘iá»ƒm ná»•i báº­t cá»§a mÃ³n Äƒn nÃ y..."></textarea>
+                    <span>Mô tả ngắn</span>
+                    <textarea name="description" rows="3" placeholder="Mô tả điểm nổi bật của món ăn này..."></textarea>
                   </label>
                   <label>
-                    <span>Äá»™ khÃ³</span>
+                    <span>Độ khó</span>
                     <select name="difficulty">
-                      <option value="easy">Dá»…</option>
-                      <option value="medium">Trung bÃ¬nh</option>
-                      <option value="hard">KhÃ³</option>
+                      <option value="easy">Dễ</option>
+                      <option value="medium">Trung bình</option>
+                      <option value="hard">Khó</option>
                     </select>
                   </label>
                   <label>
-                    <span>Tráº¡ng thÃ¡i</span>
+                    <span>Trạng thái</span>
                     <select name="status">
-                      <option value="published">ÄÃ£ xuáº¥t báº£n</option>
-                      <option value="draft">Báº£n nhÃ¡p</option>
+                      <option value="published">Đã xuất bản</option>
+                      <option value="draft">Bản nháp</option>
                     </select>
                   </label>
                 </div>
@@ -78,16 +78,16 @@
 
               <section class="recipe-form-section">
                 <div class="recipe-section-copy">
-                  <h3>HÃ¬nh áº£nh</h3>
+                  <h3>Hình ảnh</h3>
                 </div>
                 <div class="surface recipe-upload-card">
                   <label class="recipe-upload-zone">
                     <input id="recipeImageFile" type="file" accept="image/*" hidden>
                     <img id="recipeImagePreview" alt="">
-                    <span>+ Chá»n áº£nh bÃ¬a</span>
+                    <span>+ Chọn ảnh bìa</span>
                   </label>
                   <label class="admin-hidden-field">
-                    <span>Hoáº·c dÃ¡n link áº£nh</span>
+                    <span>Hoặc dán link ảnh</span>
                     <input id="recipeImageUrl" name="image_url" placeholder="https://...">
                   </label>
                 </div>
@@ -95,38 +95,38 @@
 
               <section class="recipe-form-section">
                 <div class="recipe-section-copy">
-                  <h3>NguyÃªn liá»‡u</h3>
-                  <p>Liá»‡t kÃª nguyÃªn liá»‡u vÃ  sá»‘ lÆ°á»£ng hiá»ƒn thá»‹ cho ngÆ°á»i dÃ¹ng xem.</p>
+                  <h3>Nguyên liệu</h3>
+                  <p>Liệt kê nguyên liệu và số lượng hiển thị cho người dùng xem.</p>
                 </div>
                 <div class="surface recipe-repeat-card">
                   <div id="recipeDisplayIngredients" class="recipe-repeat-list"></div>
-                  <button class="recipe-dashed-button" type="button" data-recipe-action="add-display-ingredient">+ ThÃªm nguyÃªn liá»‡u chuáº©n bá»‹</button>
+                  <button class="recipe-dashed-button" type="button" data-recipe-action="add-display-ingredient">+ Thêm nguyên liệu chuẩn bị</button>
                 </div>
               </section>
 
               <section class="recipe-form-section">
                 <div class="recipe-section-copy">
-                  <h3>NguyÃªn liá»‡u gáº¯n sáº£n pháº©m</h3>
+                  <h3>Nguyên liệu gắn sản phẩm</h3>
                 </div>
                 <div class="surface recipe-repeat-card">
                   <div id="recipeIngredients" class="recipe-repeat-list"></div>
-                  <button class="recipe-dashed-button" type="button" data-recipe-action="add-ingredient">+ ThÃªm nguyÃªn liá»‡u khÃ¡c</button>
+                  <button class="recipe-dashed-button" type="button" data-recipe-action="add-ingredient">+ Thêm nguyên liệu khác</button>
                 </div>
               </section>
 
               <section class="recipe-form-section">
                 <div class="recipe-section-copy">
-                  <h3>HÆ°á»›ng dáº«n thá»±c hiá»‡n</h3>
+                  <h3>Hướng dẫn thực hiện</h3>
                 </div>
                 <div class="surface recipe-repeat-card">
                   <div id="recipeSteps" class="recipe-repeat-list"></div>
-                  <button class="recipe-dashed-button" type="button" data-recipe-action="add-step">+ ThÃªm bÆ°á»›c chuáº©n bá»‹</button>
+                  <button class="recipe-dashed-button" type="button" data-recipe-action="add-step">+ Thêm bước chuẩn bị</button>
                 </div>
               </section>
 
               <div class="recipe-form-actions">
-                <button class="ghost-button" id="cancelRecipeButton" type="button">Há»§y</button>
-                <button class="primary-button" type="submit">LÆ°u cÃ´ng thá»©c</button>
+                <button class="ghost-button" id="cancelRecipeButton" type="button">Hủy</button>
+                <button class="primary-button" type="submit">Lưu công thức</button>
               </div>
             </form>
           </div>
@@ -136,10 +136,10 @@
           <div class="modal-card recipe-category-modal-card">
             <div class="recipe-modal-header">
               <div>
-                <p class="eyebrow">Danh má»¥c</p>
-                <h2 id="recipeCategoryModalTitle">ThÃªm danh má»¥c cÃ´ng thá»©c</h2>
+                <p class="eyebrow">Danh mục</p>
+                <h2 id="recipeCategoryModalTitle">Thêm danh mục công thức</h2>
               </div>
-              <button class="ghost-button" id="closeRecipeCategoryModalButton" type="button">ÄÃ³ng</button>
+              <button class="ghost-button" id="closeRecipeCategoryModalButton" type="button">Đóng</button>
             </div>
 
             <form id="recipeCategoryForm" class="recipe-category-form">
@@ -147,21 +147,21 @@
               <section class="recipe-category-form-grid">
                 <div class="recipe-category-form-main">
                   <label>
-                    <span>TÃªn danh má»¥c</span>
-                    <input name="name" placeholder="VÃ­ dá»¥: Rau cá»§ vÃ¹ng cao, MÃ³n chay..." required>
+                    <span>Tên danh mục</span>
+                    <input name="name" placeholder="Ví dụ: Rau củ vùng cao, Món chay..." required>
                   </label>
                   <label>
-                    <span>MÃ´ táº£ chi tiáº¿t</span>
-                    <textarea name="description" rows="5" placeholder="Ghi chÃº vá» nguá»“n gá»‘c, Ä‘áº·c Ä‘iá»ƒm hoáº·c tiÃªu chuáº©n cá»§a danh má»¥c nÃ y..."></textarea>
+                    <span>Mô tả chi tiết</span>
+                    <textarea name="description" rows="5" placeholder="Ghi chú về nguồn gốc, đặc điểm hoặc tiêu chuẩn của danh mục này..."></textarea>
                   </label>
                   <label class="admin-hidden-field">
-                    <span>MÃ u nháº­n diá»‡n</span>
+                    <span>Màu nhận diện</span>
                     <input name="icon" placeholder="#0d8d48">
                   </label>
                   <label class="recipe-category-toggle">
                     <div>
-                      <strong>Tráº¡ng thÃ¡i hoáº¡t Ä‘á»™ng</strong>
-                      <span>Cho phÃ©p hiá»ƒn thá»‹ danh má»¥c nÃ y khi chá»n cÃ´ng thá»©c.</span>
+                      <strong>Trạng thái hoạt động</strong>
+                      <span>Cho phép hiển thị danh mục này khi chọn công thức.</span>
                     </div>
                     <input name="is_active" type="checkbox" checked>
                   </label>
@@ -170,21 +170,21 @@
                 <div class="recipe-category-form-media">
                   <label class="recipe-category-upload">
                     <input id="recipeCategoryImageFile" type="file" accept="image/*" hidden>
-                    <span>+ Chá»n áº£nh Ä‘áº¡i diá»‡n</span>
+                    <span>+ Chọn ảnh đại diện</span>
                   </label>
                   <label class="admin-hidden-field">
-                    <span>Hoáº·c dÃ¡n link áº£nh</span>
+                    <span>Hoặc dán link ảnh</span>
                     <input id="recipeCategoryImageUrl" name="image_url" placeholder="https://...">
                   </label>
                   <div class="recipe-category-preview">
                     <img id="recipeCategoryImagePreview" alt="">
-                    <strong>Cáº£m há»©ng tá»« thiÃªn nhiÃªn</strong>
+                    <strong>Cảm hứng từ thiên nhiên</strong>
                   </div>
                 </div>
               </section>
               <div class="recipe-form-actions">
-                <button class="ghost-button" id="cancelRecipeCategoryButton" type="button">Há»§y</button>
-                <button class="primary-button" type="submit">LÆ°u danh má»¥c</button>
+                <button class="ghost-button" id="cancelRecipeCategoryButton" type="button">Hủy</button>
+                <button class="primary-button" type="submit">Lưu danh mục</button>
               </div>
             </form>
           </div>
