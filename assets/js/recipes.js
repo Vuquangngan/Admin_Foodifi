@@ -1,4 +1,5 @@
 import { apiFetch, elements, escapeHtml, formatCurrency, formatNumber, resolveMediaUrl, showToast, state } from "./core.js";
+import { loadProducts } from "./data.js";
 import { renderAppIcon } from "./icons.js";
 
 const recipeIngredientPickerState = {
@@ -331,6 +332,7 @@ async function hydrateRecipes(force = false) {
 
 async function hydrateRecipeData(force = false) {
     await Promise.all([
+        loadProducts(),
         hydrateRecipeCategories(force),
         hydrateRecipes(force)
     ]);
@@ -411,8 +413,39 @@ function getProductById(productId) {
     return (state.products || []).find((product) => String(product.id) === String(productId)) || null;
 }
 
+function getIngredientDisplayName(item = {}) {
+    const product = getProductById(item.product_id);
+    return item.product_name
+        || item.ingredient_name
+        || item.name
+        || product?.name
+        || "";
+}
+
+function updateIngredientRowProduct(row, productId = "", productName = "", productUnit = "") {
+    if (!row) return;
+
+    const product = getProductById(productId);
+    const resolvedName = productName || product?.name || "";
+    const resolvedUnit = productUnit || product?.sale_unit || product?.stock_unit || product?.unit || "";
+    const trigger = row.querySelector(".recipe-ingredient-trigger");
+    const label = trigger?.querySelector("[data-recipe-ingredient-label]") || trigger?.querySelector("span:first-child");
+    const nameInput = row.querySelector("[data-recipe-ingredient='name']");
+    const idInput = row.querySelector("[data-recipe-ingredient='product_id']");
+    const unitInput = row.querySelector("[data-recipe-ingredient='unit']");
+
+    if (trigger) {
+        trigger.classList.toggle("has-value", Boolean(resolvedName));
+        trigger.title = resolvedName;
+    }
+    if (label) label.textContent = resolvedName || "Chọn nguyên liệu...";
+    if (nameInput) nameInput.value = resolvedName;
+    if (idInput) idInput.value = productId || "";
+    if (unitInput && resolvedUnit && !unitInput.value) unitInput.value = resolvedUnit;
+}
+
 function renderIngredientRow(item = {}) {
-    const productName = item.product_name || item.ingredient_name || getProductById(item.product_id)?.name || "";
+    const productName = getIngredientDisplayName(item);
     const rowId = `row${Date.now()}${Math.floor(Math.random() * 1000)}`;
     return `
       <div class="recipe-repeat-row recipe-ingredient-row" data-recipe-ingredient-row data-recipe-ingredient-row-id="${rowId}">
@@ -480,7 +513,9 @@ function collectRecipeForm() {
     const form = elements.recipeForm;
     const ingredients = Array.from(elements.recipeIngredients.querySelectorAll("[data-recipe-ingredient-row]")).map((row, index) => {
         const productIdInput = row.querySelector("[data-recipe-ingredient='product_id']");
-        const ingredientName = row.querySelector("[data-recipe-ingredient='name']")?.value || getProductById(productIdInput?.value)?.name || "";
+        const ingredientName = row.querySelector("[data-recipe-ingredient='name']")?.value
+            || getIngredientDisplayName({ product_id: productIdInput?.value })
+            || "";
         return {
             product_id: productIdInput?.value ? Number(productIdInput.value) : null,
             ingredient_name: ingredientName.trim(),
@@ -830,6 +865,13 @@ export function handleRecipeAction(event) {
     }
     if (action === "add-ingredient") {
         elements.recipeIngredients.insertAdjacentHTML("beforeend", renderIngredientRow());
+        const row = elements.recipeIngredients.querySelector("[data-recipe-ingredient-row]:last-child");
+        recipeIngredientPickerState.open = true;
+        recipeIngredientPickerState.rowId = ensureRowId(row);
+        recipeIngredientPickerState.keyword = "";
+        recipeIngredientPickerState.parentCategoryId = "all";
+        recipeIngredientPickerState.childCategoryId = "all";
+        mountRecipeIngredientPicker();
         return true;
     }
     if (action === "open-ingredient-picker") {
@@ -851,8 +893,10 @@ export function handleRecipeAction(event) {
         const row = findIngredientRowById(recipeIngredientPickerState.rowId);
         if (row) {
             const productId = button.dataset.productId || "";
-            const productName = button.dataset.productName || "";
-            const productUnit = button.dataset.productUnit || "";
+            const product = getProductById(productId);
+            const productName = button.dataset.productName || product?.name || "";
+            const productUnit = button.dataset.productUnit || product?.sale_unit || product?.stock_unit || product?.unit || "";
+            updateIngredientRowProduct(row, productId, productName, productUnit);
             const trigger = row.querySelector(".recipe-ingredient-trigger");
             if (trigger) {
                 trigger.classList.add("has-value");
@@ -975,9 +1019,12 @@ export function handleRecipeIngredientPick(event) {
     const nameInput = row?.querySelector("[data-recipe-ingredient='name']");
     const productIdInput = row?.querySelector("[data-recipe-ingredient='product_id']");
     const suggestions = row?.querySelector(".recipe-ingredient-suggestions");
+    const productId = button.dataset.recipeIngredientProductId || "";
+    const productName = button.dataset.recipeIngredientProductName || getProductById(productId)?.name || "";
 
-    if (nameInput) nameInput.value = button.dataset.recipeIngredientProductName || "";
-    if (productIdInput) productIdInput.value = button.dataset.recipeIngredientProductId || "";
+    updateIngredientRowProduct(row, productId, productName);
+    if (nameInput) nameInput.value = productName;
+    if (productIdInput) productIdInput.value = productId;
     suggestions?.classList.add("hidden");
     suggestions.innerHTML = "";
     return true;
