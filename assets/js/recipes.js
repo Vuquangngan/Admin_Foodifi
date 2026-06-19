@@ -1,5 +1,114 @@
-import { apiFetch, elements, escapeHtml, resolveMediaUrl, showToast, state } from "./core.js";
+import { apiFetch, elements, escapeHtml, formatCurrency, formatNumber, resolveMediaUrl, showToast, state } from "./core.js";
 import { renderAppIcon } from "./icons.js";
+
+const recipeIngredientPickerState = {
+    open: false,
+    rowId: "",
+    keyword: "",
+    categoryId: "all"
+};
+
+function defaultIngredientThumb() {
+    return DEFAULT_RECIPE_IMAGE;
+}
+
+function getRecipeIngredientPickerCategories() {
+    const registry = new Map();
+    (Array.isArray(state.products) ? state.products : []).forEach((product) => {
+        const id = String(product.category_id || product.danh_muc_id || "uncategorized");
+        const name = product.category_name || product.danh_muc_ten || "Chưa phân loại";
+        if (!registry.has(id)) registry.set(id, { id, name, count: 0 });
+        registry.get(id).count += 1;
+    });
+    return Array.from(registry.values()).sort((a, b) => a.name.localeCompare(b.name, "vi"));
+}
+
+function getRecipeIngredientPickerFiltered() {
+    const keyword = String(recipeIngredientPickerState.keyword || "").trim().toLowerCase();
+    const categoryId = String(recipeIngredientPickerState.categoryId || "all");
+    return (Array.isArray(state.products) ? state.products : []).filter((product) => {
+        const pid = String(product.category_id || product.danh_muc_id || "uncategorized");
+        if (categoryId !== "all" && pid !== categoryId) return false;
+        if (!keyword) return true;
+        return [product.name, product.sku, product.slug, product.category_name]
+            .some((v) => String(v || "").toLowerCase().includes(keyword));
+    });
+}
+
+function renderRecipeIngredientPickerCard(product) {
+    const unit = product.sale_unit || product.stock_unit || product.unit || "đơn vị";
+    const price = Number(product.current_price || product.sale_price || product.price || 0);
+    const stock = Number(product.stock_quantity || product.so_luong_ton || 0);
+    const category = product.category_name || product.danh_muc_ten || "Sản phẩm";
+    const img = resolveMediaUrl(product.thumbnail_url, defaultIngredientThumb());
+    return `
+      <article class="recipe-ingredient-picker-card" data-recipe-picker-card>
+        <div class="recipe-ingredient-picker-media">
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(product.name || "")}">
+        </div>
+        <div class="recipe-ingredient-picker-copy">
+          <span class="recipe-ingredient-picker-category">${escapeHtml(category)}</span>
+          <strong>${escapeHtml(product.name || "")}</strong>
+          <span class="recipe-ingredient-picker-stock">Kho: ${formatNumber(stock)} ${escapeHtml(unit)}</span>
+          <div class="recipe-ingredient-picker-card-footer">
+            <strong class="recipe-ingredient-picker-price">${formatCurrency(price)}</strong>
+            <button class="recipe-ingredient-picker-add" type="button" data-recipe-action="pick-ingredient" data-product-id="${escapeHtml(product.id)}" data-product-name="${escapeHtml(product.name || "")}" data-product-unit="${escapeHtml(unit)}" aria-label="Chọn ${escapeHtml(product.name || "")}">+</button>
+          </div>
+        </div>
+      </article>
+    `;
+}
+
+function renderRecipeIngredientPickerModal() {
+    if (!recipeIngredientPickerState.open) return "";
+    const products = getRecipeIngredientPickerFiltered();
+    const categories = getRecipeIngredientPickerCategories();
+    const currentCat = String(recipeIngredientPickerState.categoryId || "all");
+    return `
+      <div class="modal-backdrop recipe-ingredient-picker-backdrop" data-recipe-picker-overlay>
+        <div class="modal-card recipe-ingredient-picker-modal">
+          <div class="recipe-ingredient-picker-header">
+            <h2>Chọn sản phẩm</h2>
+            <button class="recipe-ingredient-picker-close" type="button" data-recipe-action="close-ingredient-picker" aria-label="Đóng">×</button>
+          </div>
+          <label class="recipe-ingredient-picker-search">
+            <span>&#128269;</span>
+            <input type="search" value="${escapeHtml(recipeIngredientPickerState.keyword || "")}" data-recipe-picker-input="keyword" placeholder="Tìm kiếm tên sản phẩm, mã SKU...">
+          </label>
+          <div class="recipe-ingredient-picker-chips">
+            <button class="recipe-ingredient-picker-chip ${currentCat === "all" ? "is-active" : ""}" type="button" data-recipe-action="set-picker-category" data-category-id="all">Tất cả</button>
+            ${categories.map((c) => `<button class="recipe-ingredient-picker-chip ${currentCat === String(c.id) ? "is-active" : ""}" type="button" data-recipe-action="set-picker-category" data-category-id="${escapeHtml(String(c.id))}">${escapeHtml(c.name)}</button>`).join("")}
+          </div>
+          <div class="recipe-ingredient-picker-grid">
+            ${products.map(renderRecipeIngredientPickerCard).join("") || '<div class="recipe-ingredient-picker-empty">Không có sản phẩm phù hợp.</div>'}
+          </div>
+        </div>
+      </div>
+    `;
+}
+
+function mountRecipeIngredientPicker() {
+    let host = document.querySelector("#recipeIngredientPickerHost");
+    if (!host) {
+        host = document.createElement("div");
+        host.id = "recipeIngredientPickerHost";
+        document.body.appendChild(host);
+    }
+    host.innerHTML = renderRecipeIngredientPickerModal();
+}
+
+function ensureRowId(row) {
+    if (!row) return "";
+    if (!row.dataset.recipeIngredientRowId) {
+        row.dataset.recipeIngredientRowId = `r${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    }
+    return row.dataset.recipeIngredientRowId;
+}
+
+function findIngredientRowById(rowId) {
+    if (!rowId || !elements.recipeIngredients) return null;
+    return elements.recipeIngredients.querySelector(`[data-recipe-ingredient-row][data-recipe-ingredient-row-id="${rowId}"]`);
+}
 
 const DEFAULT_RECIPE_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' rx='24' fill='%23dfead9'/%3E%3Ccircle cx='48' cy='48' r='25' fill='%230d8d48' opacity='.18'/%3E%3Cpath d='M28 53c7-15 33-15 40 0' stroke='%230d8d48' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='38' cy='39' r='5' fill='%23c9683e'/%3E%3Ccircle cx='52' cy='36' r='5' fill='%23f0a514'/%3E%3Ccircle cx='59' cy='48' r='5' fill='%230d8d48'/%3E%3C/svg%3E";
 const DEFAULT_CATEGORY_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='260' viewBox='0 0 420 260'%3E%3Crect width='420' height='260' rx='30' fill='%23dfead9'/%3E%3Ccircle cx='104' cy='88' r='42' fill='%23f08b39' opacity='.7'/%3E%3Ccircle cx='176' cy='116' r='58' fill='%23128d4c' opacity='.35'/%3E%3Ccircle cx='290' cy='104' r='66' fill='%23f5ca45' opacity='.65'/%3E%3Cpath d='M70 190c92-58 188-52 282 0' stroke='%230d7f42' stroke-width='18' stroke-linecap='round' fill='none' opacity='.35'/%3E%3C/svg%3E";
@@ -268,13 +377,17 @@ function getProductById(productId) {
 
 function renderIngredientRow(item = {}) {
     const productName = item.product_name || item.ingredient_name || getProductById(item.product_id)?.name || "";
+    const rowId = `row${Date.now()}${Math.floor(Math.random() * 1000)}`;
     return `
-      <div class="recipe-repeat-row recipe-ingredient-row" data-recipe-ingredient-row>
+      <div class="recipe-repeat-row recipe-ingredient-row" data-recipe-ingredient-row data-recipe-ingredient-row-id="${rowId}">
         <label class="recipe-ingredient-picker">
           <span>Nguyên liệu</span>
-          <input data-recipe-ingredient="name" value="${escapeHtml(productName)}" placeholder="Nhập tên sản phẩm để tìm..." autocomplete="off">
+          <button class="recipe-ingredient-trigger ${productName ? "has-value" : ""}" type="button" data-recipe-action="open-ingredient-picker">
+            <span>${productName ? escapeHtml(productName) : "Chọn nguyên liệu..."}</span>
+            <span class="recipe-ingredient-trigger-icon">${renderAppIcon("plus") || "+"}</span>
+          </button>
+          <input type="hidden" data-recipe-ingredient="name" value="${escapeHtml(productName)}">
           <input type="hidden" data-recipe-ingredient="product_id" value="${escapeHtml(item.product_id || "")}">
-          <div class="recipe-ingredient-suggestions hidden"></div>
         </label>
         <label>
           <span>Số lượng</span>
@@ -683,6 +796,48 @@ export function handleRecipeAction(event) {
         elements.recipeIngredients.insertAdjacentHTML("beforeend", renderIngredientRow());
         return true;
     }
+    if (action === "open-ingredient-picker") {
+        const row = button.closest("[data-recipe-ingredient-row]");
+        recipeIngredientPickerState.open = true;
+        recipeIngredientPickerState.rowId = ensureRowId(row);
+        recipeIngredientPickerState.keyword = "";
+        recipeIngredientPickerState.categoryId = "all";
+        mountRecipeIngredientPicker();
+        return true;
+    }
+    if (action === "close-ingredient-picker") {
+        recipeIngredientPickerState.open = false;
+        mountRecipeIngredientPicker();
+        return true;
+    }
+    if (action === "set-picker-category") {
+        recipeIngredientPickerState.categoryId = button.dataset.categoryId || "all";
+        mountRecipeIngredientPicker();
+        return true;
+    }
+    if (action === "pick-ingredient") {
+        const row = findIngredientRowById(recipeIngredientPickerState.rowId);
+        if (row) {
+            const productId = button.dataset.productId || "";
+            const productName = button.dataset.productName || "";
+            const productUnit = button.dataset.productUnit || "";
+            const trigger = row.querySelector(".recipe-ingredient-trigger");
+            if (trigger) {
+                trigger.classList.add("has-value");
+                const label = trigger.querySelector("span:first-child");
+                if (label) label.textContent = productName || "Chọn nguyên liệu...";
+            }
+            const nameInput = row.querySelector("[data-recipe-ingredient='name']");
+            const idInput = row.querySelector("[data-recipe-ingredient='product_id']");
+            const unitInput = row.querySelector("[data-recipe-ingredient='unit']");
+            if (nameInput) nameInput.value = productName;
+            if (idInput) idInput.value = productId;
+            if (unitInput && productUnit && !unitInput.value) unitInput.value = productUnit;
+        }
+        recipeIngredientPickerState.open = false;
+        mountRecipeIngredientPicker();
+        return true;
+    }
     if (action === "remove-ingredient") {
         button.closest("[data-recipe-ingredient-row]")?.remove();
         if (!elements.recipeIngredients.querySelector("[data-recipe-ingredient-row]")) {
@@ -766,14 +921,18 @@ function renderIngredientSuggestions(row, keyword) {
 }
 
 export function handleRecipeIngredientSearch(event) {
-    const input = event.target.closest("[data-recipe-ingredient='name']");
-    if (!input) return false;
-
-    const row = input.closest("[data-recipe-ingredient-row]");
-    const productIdInput = row?.querySelector("[data-recipe-ingredient='product_id']");
-    if (productIdInput) productIdInput.value = "";
-    renderIngredientSuggestions(row, input.value);
-    return true;
+    const pickerInput = event.target.closest("[data-recipe-picker-input='keyword']");
+    if (pickerInput) {
+        recipeIngredientPickerState.keyword = String(pickerInput.value || "");
+        const grid = document.querySelector(".recipe-ingredient-picker-grid");
+        if (grid) {
+            const products = getRecipeIngredientPickerFiltered();
+            grid.innerHTML = products.map(renderRecipeIngredientPickerCard).join("")
+                || '<div class="recipe-ingredient-picker-empty">Không có sản phẩm phù hợp.</div>';
+        }
+        return true;
+    }
+    return false;
 }
 
 export function handleRecipeIngredientPick(event) {
@@ -814,6 +973,25 @@ export function handleRecipeFilterInput(event) {
 }
 
 export function bindRecipeMediaEvents() {
+    document.addEventListener("click", (event) => {
+        const host = event.target.closest("#recipeIngredientPickerHost");
+        if (!host) return;
+        if (event.target.closest("[data-recipe-picker-overlay]") === event.target) {
+            recipeIngredientPickerState.open = false;
+            mountRecipeIngredientPicker();
+            return;
+        }
+        if (event.target.closest("[data-recipe-action]")) {
+            handleRecipeAction(event);
+        }
+    });
+
+    document.addEventListener("input", (event) => {
+        if (event.target.closest("#recipeIngredientPickerHost")) {
+            handleRecipeIngredientSearch(event);
+        }
+    });
+
     elements.recipeImageFile?.addEventListener("change", async (event) => {
         const file = event.target.files?.[0];
         if (!file) return;
