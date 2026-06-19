@@ -131,7 +131,6 @@ export function renderProfile() {
             <p>${renderAppIcon("shield")} ${escapeHtml(roleLabel)}</p>
             <div class="profile-badges">
               <span>Hoạt động</span>
-              <span>${user.role === "admin" ? "Admin Pavilion" : "Staff Pavilion"}</span>
             </div>
           </div>
         </section>
