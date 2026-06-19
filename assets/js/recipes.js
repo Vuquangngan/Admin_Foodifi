@@ -42,17 +42,19 @@ function renderRecipeIngredientPickerCard(product) {
     const category = product.category_name || product.danh_muc_ten || "Sản phẩm";
     const img = resolveMediaUrl(product.thumbnail_url, defaultIngredientThumb());
     return `
-      <article class="recipe-ingredient-picker-card" data-recipe-picker-card>
-        <div class="recipe-ingredient-picker-media">
-          <img src="${escapeHtml(img)}" alt="${escapeHtml(product.name || "")}">
+      <article class="surface order-product-picker-card">
+        <div class="order-product-picker-media-wrap">
+          <img class="order-product-picker-media" src="${escapeHtml(img)}" alt="${escapeHtml(product.name || "")}">
         </div>
-        <div class="recipe-ingredient-picker-copy">
-          <span class="recipe-ingredient-picker-category">${escapeHtml(category)}</span>
-          <strong>${escapeHtml(product.name || "")}</strong>
-          <span class="recipe-ingredient-picker-stock">Kho: ${formatNumber(stock)} ${escapeHtml(unit)}</span>
-          <div class="recipe-ingredient-picker-card-footer">
-            <strong class="recipe-ingredient-picker-price">${formatCurrency(price)}</strong>
-            <button class="recipe-ingredient-picker-add" type="button" data-recipe-action="pick-ingredient" data-product-id="${escapeHtml(product.id)}" data-product-name="${escapeHtml(product.name || "")}" data-product-unit="${escapeHtml(unit)}" aria-label="Chọn ${escapeHtml(product.name || "")}">+</button>
+        <div class="order-product-picker-card-content">
+          <div class="order-product-picker-card-copy">
+            <span class="order-product-picker-category">${escapeHtml(category)}</span>
+            <strong>${escapeHtml(product.name || "")}</strong>
+            <span>Kho: ${formatNumber(stock)} ${escapeHtml(unit)}</span>
+          </div>
+          <div class="order-product-picker-card-footer">
+            <strong class="order-product-picker-price">${formatCurrency(price)}</strong>
+            <button class="order-product-picker-add-button" type="button" data-recipe-action="pick-ingredient" data-product-id="${escapeHtml(product.id)}" data-product-name="${escapeHtml(product.name || "")}" data-product-unit="${escapeHtml(unit)}" aria-label="Chọn ${escapeHtml(product.name || "")}">+</button>
           </div>
         </div>
       </article>
@@ -65,22 +67,22 @@ function renderRecipeIngredientPickerModal() {
     const categories = getRecipeIngredientPickerCategories();
     const currentCat = String(recipeIngredientPickerState.categoryId || "all");
     return `
-      <div class="modal-backdrop recipe-ingredient-picker-backdrop" data-recipe-picker-overlay>
-        <div class="modal-card recipe-ingredient-picker-modal">
-          <div class="recipe-ingredient-picker-header">
-            <h2>Chọn sản phẩm</h2>
-            <button class="recipe-ingredient-picker-close" type="button" data-recipe-action="close-ingredient-picker" aria-label="Đóng">×</button>
+      <div class="modal-backdrop" data-recipe-picker-overlay>
+        <div class="modal-card order-product-picker-modal">
+          <div class="order-product-picker-header">
+            <div><h2>Chọn sản phẩm</h2></div>
+            <button class="order-product-picker-close" type="button" data-recipe-action="close-ingredient-picker" aria-label="Đóng">&times;</button>
           </div>
-          <label class="recipe-ingredient-picker-search">
-            <span>&#128269;</span>
+          <label class="order-product-picker-search">
+            <span class="order-product-picker-search-icon">&#128269;</span>
             <input type="search" value="${escapeHtml(recipeIngredientPickerState.keyword || "")}" data-recipe-picker-input="keyword" placeholder="Tìm kiếm tên sản phẩm, mã SKU...">
           </label>
-          <div class="recipe-ingredient-picker-chips">
-            <button class="recipe-ingredient-picker-chip ${currentCat === "all" ? "is-active" : ""}" type="button" data-recipe-action="set-picker-category" data-category-id="all">Tất cả</button>
-            ${categories.map((c) => `<button class="recipe-ingredient-picker-chip ${currentCat === String(c.id) ? "is-active" : ""}" type="button" data-recipe-action="set-picker-category" data-category-id="${escapeHtml(String(c.id))}">${escapeHtml(c.name)}</button>`).join("")}
+          <div class="order-product-picker-filter-row">
+            <button class="order-product-picker-chip ${currentCat === "all" ? "is-active" : ""}" type="button" data-recipe-action="set-picker-category" data-category-id="all">Tất cả</button>
+            ${categories.map((c) => `<button class="order-product-picker-chip ${currentCat === String(c.id) ? "is-active" : ""}" type="button" data-recipe-action="set-picker-category" data-category-id="${escapeHtml(String(c.id))}">${escapeHtml(c.name)}</button>`).join("")}
           </div>
-          <div class="recipe-ingredient-picker-grid">
-            ${products.map(renderRecipeIngredientPickerCard).join("") || '<div class="recipe-ingredient-picker-empty">Không có sản phẩm phù hợp.</div>'}
+          <div class="order-product-picker-grid">
+            ${products.map(renderRecipeIngredientPickerCard).join("") || '<div class="surface order-product-picker-empty">Không có sản phẩm phù hợp.</div>'}
           </div>
         </div>
       </div>
@@ -924,11 +926,11 @@ export function handleRecipeIngredientSearch(event) {
     const pickerInput = event.target.closest("[data-recipe-picker-input='keyword']");
     if (pickerInput) {
         recipeIngredientPickerState.keyword = String(pickerInput.value || "");
-        const grid = document.querySelector(".recipe-ingredient-picker-grid");
+        const grid = document.querySelector("#recipeIngredientPickerHost .order-product-picker-grid");
         if (grid) {
             const products = getRecipeIngredientPickerFiltered();
             grid.innerHTML = products.map(renderRecipeIngredientPickerCard).join("")
-                || '<div class="recipe-ingredient-picker-empty">Không có sản phẩm phù hợp.</div>';
+                || '<div class="surface order-product-picker-empty">Không có sản phẩm phù hợp.</div>';
         }
         return true;
     }
