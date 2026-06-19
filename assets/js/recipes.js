@@ -261,6 +261,33 @@ function normalizeIngredient(ingredient = {}) {
     };
 }
 
+function normalizeDisplayIngredient(ingredient = {}, index = 0) {
+    if (typeof ingredient === "string") {
+        return {
+            name: ingredient.trim(),
+            quantity: "",
+            unit: "",
+            note: "",
+            sort_order: index + 1
+        };
+    }
+
+    return {
+        name: ingredient.name || ingredient.ingredient_name || ingredient.ten_nguyen_lieu || "",
+        quantity: ingredient.quantity ?? ingredient.so_luong ?? "",
+        unit: ingredient.unit || ingredient.don_vi || "",
+        note: ingredient.note || ingredient.ghi_chu || "",
+        sort_order: ingredient.sort_order || ingredient.thu_tu_hien_thi || index + 1
+    };
+}
+
+function formatIngredientQuantity(value = "") {
+    if (value === null || value === undefined || value === "") return "";
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return String(value);
+    return String(Number(numericValue.toFixed(3)));
+}
+
 function normalizeStep(step = {}, index = 0) {
     if (typeof step === "string") {
         return { step_number: index + 1, instruction: step, image_url: "" };
@@ -279,6 +306,10 @@ function normalizeRecipe(recipe = {}) {
     const categoryName = recipe.recipe_category_name || recipe.ten_danh_muc_cong_thuc || category.name || "";
     const ingredients = Array.isArray(recipe.ingredients || recipe.danh_sach_nguyen_lieu)
         ? (recipe.ingredients || recipe.danh_sach_nguyen_lieu).map(normalizeIngredient)
+        : [];
+    const displayIngredientsSource = recipe.display_ingredients || recipe.nguyen_lieu_chuan_bi || recipe.prep_ingredients;
+    const displayIngredients = Array.isArray(displayIngredientsSource)
+        ? displayIngredientsSource.map(normalizeDisplayIngredient).filter((item) => item.name)
         : [];
     const steps = Array.isArray(recipe.steps || recipe.cac_buoc_thuc_hien)
         ? (recipe.steps || recipe.cac_buoc_thuc_hien).map(normalizeStep)
@@ -301,6 +332,7 @@ function normalizeRecipe(recipe = {}) {
         status_label: recipe.status_label || recipe.trang_thai_hien_thi || recipeStatusLabel(recipe.status),
         recipe_category_name: categoryName,
         recipe_category: category,
+        display_ingredients: displayIngredients,
         ingredients,
         steps
     };
@@ -487,13 +519,34 @@ function renderIngredientRow(item = {}) {
         </label>
         <label>
           <span>Số lượng</span>
-          <input data-recipe-ingredient="quantity" value="${escapeHtml(item.quantity || "")}" placeholder="100">
+          <input data-recipe-ingredient="quantity" value="${escapeHtml(formatIngredientQuantity(item.quantity))}" placeholder="100">
         </label>
         <label>
           <span>Đơn vị</span>
           <input data-recipe-ingredient="unit" value="${escapeHtml(item.unit || "gram")}" list="productUnitOptions">
         </label>
         <button type="button" data-recipe-action="remove-ingredient" aria-label="Xóa nguyên liệu">${renderAppIcon("trash")}</button>
+      </div>
+    `;
+}
+
+function renderDisplayIngredientRow(item = {}, index = 0) {
+    const ingredient = normalizeDisplayIngredient(item, index);
+    return `
+      <div class="recipe-repeat-row recipe-display-ingredient-row" data-recipe-display-ingredient-row>
+        <label>
+          <span>NguyÃªn liá»‡u</span>
+          <input data-recipe-display-ingredient="name" value="${escapeHtml(ingredient.name || "")}" placeholder="VÃ­ dá»¥: Báº¯p ngá»t cáº¯t khÃºc">
+        </label>
+        <label>
+          <span>Sá»‘ lÆ°á»£ng</span>
+          <input data-recipe-display-ingredient="quantity" value="${escapeHtml(formatIngredientQuantity(ingredient.quantity))}" placeholder="1">
+        </label>
+        <label>
+          <span>ÄÆ¡n vá»‹</span>
+          <input data-recipe-display-ingredient="unit" value="${escapeHtml(ingredient.unit || "")}" list="productUnitOptions" placeholder="kg, quáº£, muá»—ng...">
+        </label>
+        <button type="button" data-recipe-action="remove-display-ingredient" aria-label="XÃ³a nguyÃªn liá»‡u chuáº©n bá»‹">${renderAppIcon("trash")}</button>
       </div>
     `;
 }
@@ -521,8 +574,20 @@ function renderStepRow(step = {}, index = 0) {
 }
 
 function renderRecipeFormLists(recipe = {}) {
+    const displayIngredients = recipe.display_ingredients?.length
+        ? recipe.display_ingredients
+        : (recipe.ingredients?.length
+            ? recipe.ingredients.map((ingredient) => ({
+                name: getIngredientDisplayName(ingredient),
+                quantity: ingredient.quantity,
+                unit: ingredient.unit
+            }))
+            : [{ name: "", quantity: "", unit: "" }]);
     const ingredients = recipe.ingredients?.length ? recipe.ingredients : [{ ingredient_name: "", quantity: "", unit: "gram" }];
     const steps = recipe.steps?.length ? recipe.steps : [{ instruction: "" }];
+    if (elements.recipeDisplayIngredients) {
+        elements.recipeDisplayIngredients.innerHTML = displayIngredients.map(renderDisplayIngredientRow).join("");
+    }
     elements.recipeIngredients.innerHTML = ingredients.map(renderIngredientRow).join("");
     elements.recipeIngredients.querySelectorAll("[data-recipe-ingredient-row]").forEach((row) => {
         const productId = row.querySelector("[data-recipe-ingredient='product_id']")?.value || "";
@@ -543,6 +608,14 @@ function syncRecipeCategoryControls(selected = "") {
 
 function collectRecipeForm() {
     const form = elements.recipeForm;
+    const displayIngredients = elements.recipeDisplayIngredients
+        ? Array.from(elements.recipeDisplayIngredients.querySelectorAll("[data-recipe-display-ingredient-row]")).map((row, index) => ({
+            name: row.querySelector("[data-recipe-display-ingredient='name']")?.value.trim() || "",
+            quantity: row.querySelector("[data-recipe-display-ingredient='quantity']")?.value.trim() || "",
+            unit: row.querySelector("[data-recipe-display-ingredient='unit']")?.value.trim() || "",
+            sort_order: index + 1
+        })).filter((item) => item.name)
+        : [];
     const ingredients = Array.from(elements.recipeIngredients.querySelectorAll("[data-recipe-ingredient-row]")).map((row, index) => {
         const productIdInput = row.querySelector("[data-recipe-ingredient='product_id']");
         const ingredientName = row.querySelector("[data-recipe-ingredient='name']")?.value
@@ -579,6 +652,7 @@ function collectRecipeForm() {
         difficulty: normalizeDifficulty(form.elements.difficulty.value),
         status: form.elements.status.value || "published",
         image_url: normalizeImageUrlForSave(form.elements.image_url.value, state.recipeImageDataUrl),
+        display_ingredients: displayIngredients,
         ingredients,
         steps
     };
@@ -893,6 +967,20 @@ export function handleRecipeAction(event) {
             .then(() => renderRecipes(true))
             .then(() => showToast("Đã xóa danh mục."))
             .catch((error) => showToast(error.message || "Không xóa được danh mục.", true));
+        return true;
+    }
+    if (action === "add-display-ingredient") {
+        if (elements.recipeDisplayIngredients) {
+            const index = elements.recipeDisplayIngredients.querySelectorAll("[data-recipe-display-ingredient-row]").length;
+            elements.recipeDisplayIngredients.insertAdjacentHTML("beforeend", renderDisplayIngredientRow({}, index));
+        }
+        return true;
+    }
+    if (action === "remove-display-ingredient") {
+        button.closest("[data-recipe-display-ingredient-row]")?.remove();
+        if (elements.recipeDisplayIngredients && !elements.recipeDisplayIngredients.querySelector("[data-recipe-display-ingredient-row]")) {
+            elements.recipeDisplayIngredients.insertAdjacentHTML("beforeend", renderDisplayIngredientRow({}, 0));
+        }
         return true;
     }
     if (action === "add-ingredient") {

@@ -570,6 +570,7 @@ export const elements = {
     recipeImageFile: document.querySelector("#recipeImageFile"),
     recipeImageUrl: document.querySelector("#recipeImageUrl"),
     recipeImagePreview: document.querySelector("#recipeImagePreview"),
+    recipeDisplayIngredients: document.querySelector("#recipeDisplayIngredients"),
     recipeIngredients: document.querySelector("#recipeIngredients"),
     recipeSteps: document.querySelector("#recipeSteps"),
     closeRecipeModalButton: document.querySelector("#closeRecipeModalButton"),
@@ -1341,6 +1342,5 @@ export function recordActivityLog(entry) {
     state.activityLogs = [nextEntry, ...(state.activityLogs || [])].slice(0, 300);
     localStorage.setItem(STORAGE_KEYS.activityLogs, JSON.stringify(state.activityLogs));
 }
-
 
 
