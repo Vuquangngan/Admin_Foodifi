@@ -115,7 +115,9 @@ export function renderProfile() {
 
     const user = state.user || {};
     const extra = getCurrentExtra();
-    const currentBranch = extra.branch || STORE_BRANCHES[0]?.key || "main";
+    const currentBranch = user.branch_id || extra.branch || STORE_BRANCHES[0]?.key || "main";
+    const currentBirthDate = user.birth_date || extra.birth_date || "";
+    const currentGender = user.gender || extra.gender || "male";
     const roleLabel = getRoleLabel(user.role);
     const joinedAt = user.created_at ? formatDate(user.created_at).replace(/\s+\d{1,2}:\d{2}.*$/, "") : "Chưa có";
 
@@ -152,15 +154,15 @@ export function renderProfile() {
               </label>
               <label>
                 <span>Ngày sinh</span>
-                <input name="birth_date" type="date" value="${escapeHtml(getDateInputValue(extra.birth_date))}">
+                <input name="birth_date" type="date" value="${escapeHtml(getDateInputValue(currentBirthDate))}">
               </label>
               <div class="profile-gender span-2" role="group" aria-label="Giới tính">
-                <label class="${extra.gender !== "female" ? "active" : ""}">
-                  <input type="radio" name="gender" value="male" ${extra.gender !== "female" ? "checked" : ""}>
+                <label class="${currentGender !== "female" ? "active" : ""}">
+                  <input type="radio" name="gender" value="male" ${currentGender !== "female" ? "checked" : ""}>
                   <span>Nam</span>
                 </label>
-                <label class="${extra.gender === "female" ? "active" : ""}">
-                  <input type="radio" name="gender" value="female" ${extra.gender === "female" ? "checked" : ""}>
+                <label class="${currentGender === "female" ? "active" : ""}">
+                  <input type="radio" name="gender" value="female" ${currentGender === "female" ? "checked" : ""}>
                   <span>Nữ</span>
                 </label>
               </div>
@@ -257,10 +259,17 @@ async function submitProfileForm(form, submitter) {
             avatarUrl = await uploadProfileAvatar(profileAvatarFile);
         }
 
+        const birthDateRaw = String(data.get("birth_date") || "").trim();
+        const genderRaw = String(data.get("gender") || "").trim();
+        const branchRaw = String(data.get("branch") || "").trim();
+
         const payload = {
             username,
             phone,
             avatar_url: avatarUrl,
+            birth_date: birthDateRaw || null,
+            gender: genderRaw || null,
+            branch_id: branchRaw || null,
             role: state.user.role,
             status: state.user.status || "active"
         };
