@@ -341,7 +341,7 @@
 }
 
 .recipe-ingredient-row {
-  grid-template-columns: minmax(260px, 2fr) minmax(110px, 0.8fr) minmax(110px, 0.8fr) 42px;
+  grid-template-columns: minmax(320px, 2.4fr) minmax(110px, 0.7fr) minmax(110px, 0.7fr) 42px;
   z-index: 1;
 }
 
@@ -768,7 +768,7 @@
   transition: border-color 140ms ease, background 140ms ease;
 }
 
-.recipe-ingredient-trigger > span:first-child {
+.recipe-ingredient-trigger:not(.has-value) > span:first-child {
   flex: 1;
   min-width: 0;
   overflow: hidden;
